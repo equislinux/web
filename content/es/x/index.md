@@ -75,11 +75,11 @@ Documentación relacionada en este repositorio:
   usa `@` (`/`), `@home` (`/home`, nunca se revierte), `@snapshots`
   (`/.snapshots`) y `@xstate` (`/var/lib/x`), con `/tmp` en tmpfs y un ESP de
   1 GiB para las entries de arranque.
-- **Instalación desatendida.** El parámetro `xauto=1` del kernel más un disco
-  etiquetado como `cidata` con un `x-install.json` activa la ruta de
-  autoinstalación.
+- **Instalación desatendida.** El ISO incluye una entrada de arranque
+  `autoinstall` (hotkey `a`, `xauto=1`) para un disco etiquetado `cidata` con
+  un `x-install.json`.
 - **Payload de aprovisionamiento offline.** El paquete `x-scripts`
-  (`0.1.0-19`) y la instantánea de la configuración de Hyprland viajan dentro
+  (`0.1.0-23`) y la instantánea de la configuración de Hyprland viajan dentro
   del ISO, de modo que el aprovisionamiento no depende de descargarlos
   durante la instalación.
 - **Soporte WSL.** `xbuildwsl.sh` / `xbuildwslc.sh` producen tarballs de

@@ -16,7 +16,9 @@ invocable script under `install/`. The mechanics follow Omarchy (ADR-0003 in
 | Login | `install/login.sh` | Enables base system services (NetworkManager). Starts them only when systemd is PID 1, so it is safe inside a chroot/live image. Skips when systemd is absent. |
 | Post-install | `install/post-install.sh` | Final system identity/branding. Currently a stub that logs a pending integration with the release tooling. |
 
-Each phase requires root (`x_require_root`) and is safe to run by itself.
+Each phase requires root (`x_require_root`) and is safe to run by itself. The
+system chain ends with a generation (`reason: setup`) through
+`xgen_maybe_new`, unless generations are unsupported or `X_GEN_SKIP=1`.
 
 ## User phase
 
@@ -25,6 +27,8 @@ Each phase requires root (`x_require_root`) and is safe to run by itself.
 
 1. Runs `install/user-seed.sh` (as the target user via `runuser` when running
    as root):
+   - records a `pre-setup` home generation (best effort, skipped with
+     `X_HGEN_SKIP=1`),
    - seeds the home from the skeleton (`x_seed_home`, only what is missing),
    - syncs `config/` into `~/.config` (`x_sync_config`, with backups).
 2. If `X_NODE=1`, installs the node toolchain (`tools/node.sh`, fnm).
@@ -63,6 +67,32 @@ X_HYPRLAND=0 bash install/user.sh
   differs is moved to `<file>.bak.<ts>` before the new version is copied.
   Idempotent: unchanged files are left alone and no extra backup is made.
 
+`install/helpers/xgen.sh` — generation engine (btrfs snapshot + manifest):
+
+- `xgen_new` — creates a generation (snapshot, manifest, package/service
+  captures, kernel archive).
+- `xgen_maybe_new` — hook used by `x setup` (`install/system.sh`) and
+  `x update`; no-op when generations are unsupported or `X_GEN_SKIP=1`.
+- `xgen_list`/`xgen_status`/`xgen_restore`/`xgen_verify` — inspect
+  generations, compare the live system and restore files/directories. Full
+  contract in `generations.md`.
+
+`install/helpers/xgen-home.sh` — home generations (dotfile copies, no root,
+no btrfs): `hgen_new`, `hgen_list`, `hgen_status`, `hgen_diff`, `hgen_restore`
+and `hgen_prune`, backing the `x home` commands. `user-seed.sh` records a
+`pre-setup` capture before touching dotfiles and `x update` records a
+`pre-update` one; `X_HGEN_SKIP=1` disables both.
+
+`x update` creates a pre-update safety generation, runs `pacman -Syu` with
+`X_GEN_SKIP=1` (so its own pre/post generations are not duplicated by the
+hooks) plus migrations, and records a second generation (`reason: update`).
+If pacman fails, the safety generation is kept for recovery.
+
+Pacman hooks: `etc/pacman.d/hooks/{10-x-gen-pre,20-x-gen-post}.hook` call
+`hooks/pacman-gen.sh`, a no-op without a current generation, on non-btrfs, or
+with `X_GEN_SKIP=1`. This captures any manual pacman transaction (for example
+a kernel update outside `x update`). Details in `generations.md`.
+
 ## Idempotency model
 
 - Phases and helpers are designed to be re-run safely: seeds do not clobber
@@ -88,6 +118,8 @@ See the full table in `cli.md`. The ones that matter per phase:
 - Config/seed: `X_SKEL_DIR`, `X_CONFIG_SEED`, `X_TS`.
 - Hardware: `X_HW_AUTO`, `X_HW_NVIDIA`, `X_HW_QEMU`.
 - User: `X_NODE`, `X_HYPRLAND`.
+- Generations: `X_GEN_SKIP`, `X_HGEN_SKIP` (`generations.md` has the full
+  `X_GEN_*`/`X_HGEN_*` table).
 - Global: `X_DRY_RUN`.
 
 ## Entry points

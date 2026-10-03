@@ -12,7 +12,7 @@ propia.
 
 | Fase | Script | Qué hace |
 |------|--------|----------|
-| Config | `install/config.sh` | Siembra `/etc/skel` desde `skel/` (`x_copy_tree`) y aplica el overlay de `/etc` desde `etc/`, un directorio por ruta de `/etc` (p.ej. `etc/sysctl.d/` → `/etc/sysctl.d`). Hoy `etc/` solo documenta los drop-ins previstos; aún no se publica ninguno. |
+| Config | `install/config.sh` | Siembra `/etc/skel` desde `skel/` (`x_copy_tree`) y aplica el overlay de `/etc` desde `etc/`, un directorio por ruta de `/etc` (p.ej. `etc/sysctl.d/` → `/etc/sysctl.d`). Hoy publica los hooks de pacman `etc/pacman.d/hooks/`; los demás drop-ins están documentados en su README. |
 | Hardware | `install/hardware.sh` | Detecta y ejecuta módulos autocontenidos bajo `hardware/` (`nvidia.sh`, `qemu.sh`). NVIDIA corre si `X_HW_NVIDIA=1` o se autodetecta una GPU NVIDIA (`X_HW_AUTO=1`); QEMU corre solo si `X_HW_QEMU=1`. |
 | Login | `install/login.sh` | Habilita servicios base del sistema (NetworkManager). Los arranca solo cuando systemd es PID 1, así que es seguro dentro de un chroot/imagen live. Omite si systemd no está. |
 | Post-install | `install/post-install.sh` | Identidad/branding final del sistema. Hoy es un stub que registra una integración pendiente con el tooling de release. |
@@ -66,6 +66,28 @@ X_HYPRLAND=0 bash install/user.sh
   nueva. Idempotente: los archivos sin cambios se dejan igual y no se genera
   un backup extra.
 
+`install/helpers/xgen.sh` — motor de generaciones (snapshot btrfs + manifiesto):
+
+- `xgen_new` — crea una generación (snapshot, manifiesto, capturas de
+  paquetes/servicios, archivo del kernel).
+- `xgen_maybe_new` — hook que usan `x setup` (`install/system.sh`) y
+  `x update`; no-op cuando las generaciones no están soportadas o
+  `X_GEN_SKIP=1`.
+- `xgen_list`/`xgen_status`/`xgen_restore`/`xgen_verify` — inspeccionan
+  generaciones, comparan el sistema vivo y restauran archivos o directorios.
+  El contrato completo está en `generations.md`.
+
+`install/helpers/xgen-home.sh` — generaciones de home (copias de dotfiles, sin
+root ni btrfs): `hgen_new`, `hgen_list`, `hgen_status`, `hgen_diff`,
+`hgen_restore` y `hgen_prune`, que respaldan los comandos `x home`.
+`user-seed.sh` registra una captura `pre-setup` antes de tocar dotfiles y
+`x update` registra una `pre-update`; `X_HGEN_SKIP=1` desactiva ambas.
+
+Hooks de pacman: `etc/pacman.d/hooks/{10-x-gen-pre,20-x-gen-post}.hook` llaman
+a `hooks/pacman-gen.sh`, que es no-op sin generación actual, en no-btrfs o con
+`X_GEN_SKIP=1` (lo que `x update` setea en su propio pacman para manejar él
+mismo sus generaciones pre/post). Detalles en `generations.md`.
+
 ## Modelo de idempotencia
 
 - Las fases y los helpers están diseñados para re-ejecutarse con seguridad: los
@@ -93,6 +115,7 @@ Ver la tabla completa en `cli.md`. Los que importan por fase:
 - Config/seed: `X_SKEL_DIR`, `X_CONFIG_SEED`, `X_TS`.
 - Hardware: `X_HW_AUTO`, `X_HW_NVIDIA`, `X_HW_QEMU`.
 - Usuario: `X_NODE`, `X_HYPRLAND`.
+- Generaciones: `X_GEN_SKIP` (sistema), `X_HGEN_SKIP` (home).
 - Global: `X_DRY_RUN`.
 
 ## Puntos de entrada

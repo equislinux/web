@@ -61,6 +61,7 @@ cae a prompts de texto plano en caso contrario (`ui.sh`).
 | Paso | Opciones | Valor almacenado |
 |------|----------|------------------|
 | Disco | cualquier dispositivo de bloque de tipo `disk` (de `lsblk`) | `disk` (p. ej. `/dev/sda`) |
+| Modo de instalación | Wipe the disk (delete everything) / Dualboot (use free space, keep existing OS) | `mode` (`wipe`/`dualboot`) |
 | Idioma del sistema | English, Español, Deutsch, Français | `language` + `locale` |
 | Distribución de teclado | `us`, `es`, `de`, `fr`, `uk`, `latam`, `br-abnt2` | `keyboard` |
 | Zona horaria | `UTC`, `Europe/Madrid`, `Europe/London`, `Europe/Berlin`, `America/Mexico_City`, `America/Argentina/Buenos_Aires`, `America/Los_Angeles`, `Asia/Tokyo` | `timezone` |
@@ -88,11 +89,12 @@ Reglas de validación: el hostname debe cumplir
 ni `\`.
 
 Antes de escribir la configuración, el configurador pide una confirmación
-final de que todo lo que haya en el disco seleccionado será borrado. El JSON
-resultante tiene este aspecto:
+final acorde al modo: en `wipe` avisa que se borrará todo el disco; en
+`dualboot` aclara que solo se usará el espacio libre y que las particiones
+existentes y la ESP se preservan. El JSON resultante tiene este aspecto:
 
 ```json
-{"disk":"/dev/sda","hostname":"x","username":"x","password":"secret","language":"en","locale":"en_US.UTF-8","keyboard":"us","timezone":"UTC","profile":"full","bootloader":"grub","encryption":"no","luks_password":"","hyprland":"no"}
+{"disk":"/dev/sda","mode":"wipe","hostname":"x","username":"x","password":"secret","language":"en","locale":"en_US.UTF-8","keyboard":"us","timezone":"UTC","profile":"full","bootloader":"grub","encryption":"no","luks_password":"","hyprland":"no"}
 ```
 
 El JSON se escribe en la ruta de `X_CONFIG_OUT` (por defecto
@@ -104,21 +106,27 @@ están.
 
 1. **Analizar y validar** el JSON (`disk`, `hostname`, `username`); requiere
    root y un dispositivo de bloque real.
-2. **Particionar** con GPT (`sgdisk --zap-all` primero):
-   - `grub`: partición `bios_grub` de 1 MiB, partición EFI de 512 MiB, resto =
+2. **Particionar** con GPT (`sgdisk --zap-all` primero; en modo `dualboot`
+   nunca se toca la tabla existente):
+   - `grub`: partición `bios_grub` de 1 MiB, partición EFI de 1 GiB, resto =
      raíz.
-   - `systemd-boot`: partición EFI de 512 MiB, resto = raíz.
+   - `systemd-boot`: partición EFI de 1 GiB, resto = raíz.
+
+   1 GiB deja lugar para varias generaciones de entries de arranque en el ESP.
 3. **LUKS** (si `encryption=yes`): `cryptsetup luksFormat --type luks2` sobre
    la partición raíz (passphrase de `luks_password`, con fallback a la
    password del usuario) y apertura como `/dev/mapper/xroot`.
 4. **Formatear y montar**: la partición EFI como FAT32 (`mkfs.vfat -F32`)
-   montada en `/mnt/boot`; la raíz (o el mapeo LUKS) como btrfs montada en
-   `/mnt`.
+   montada en `/mnt/boot`; la raíz (o el mapeo LUKS) como btrfs con los
+   subvolúmenes `@`, `@home`, `@snapshots` y `@xstate` montados en `/`,
+   `/home`, `/.snapshots` y `/var/lib/x`. `/tmp` se agrega al fstab como
+   tmpfs.
 5. **Conjunto de paquetes**:
    - Conjunto base: `base base-devel linux linux-firmware sudo networkmanager
-     openssh git jq x-release kitty pipewire pipewire-pulse pipewire-alsa
-     wireplumber alsa-utils sddm`, más `grub efibootmgr` para GRUB y
-     `cryptsetup` para LUKS.
+     openssh git jq x-release btrfs-progs kitty pipewire pipewire-pulse
+     pipewire-alsa wireplumber alsa-utils sddm`, más `grub efibootmgr` para
+     GRUB y `cryptsetup` para LUKS. `btrfs-progs` lo requiere el motor de
+     generaciones y se instala en todos los perfiles.
    - Perfil `full`: añade todos los paquetes del manifiesto apuntado por
      `X_PKGLIST` (por defecto `/root/x-installer/packages.x86_64`).
    - Perfil `core`: añade solo `vim zsh`.
@@ -158,13 +166,21 @@ están.
     kernel de LUKS escrita después no se sobrescriba.
 14. **Gestor de arranque**:
     - `grub`: `grub-install` para `x86_64-efi` (removable) y `i386-pc`
-      (arranque desde el disco completo) y después `grub-mkconfig`. Con LUKS,
-      `GRUB_CMDLINE_LINUX` se fija a
-      `cryptdevice=UUID=<luks-uuid>:xroot root=/dev/mapper/xroot rw`.
+      (arranque desde el disco completo) y después `grub-mkconfig`.
+      `GRUB_CMDLINE_LINUX` siempre lleva el cmdline de la raíz con
+      `rootflags=subvol=@` (más `cryptdevice=UUID=<luks-uuid>:xroot
+      root=/dev/mapper/xroot` con LUKS).
     - `systemd-boot`: `bootctl --esp-path=/boot install`, un fallback
       removable `BOOTX64.EFI` si hiciera falta y una entrada de arranque
       `X Linux` (solo UEFI) con la línea `root=` o `cryptdevice=` adecuada.
-15. **Limpieza**: al salir se desmontan los sistemas de archivos, se cierra el
+15. **Primera generación**: dentro del chroot,
+    `X_GEN_CMDLINE="$CMDROOT" X_GEN_LIVE_SUBVOL=/@
+    X_GEN_SUBVOL_PREFIX=/@snapshots x gen new --reason install --label first`
+    crea `/.snapshots/0001`, el manifiesto en `/var/lib/x/generations/0001` y
+    las entries de arranque (systemd-boot `loader/entries/x-gen-0001.conf`,
+    GRUB `custom.cfg`). Es la base para rollbacks y restores granulares; el
+    contrato completo vive en la documentación de `x-scripts`.
+16. **Limpieza**: al salir se desmontan los sistemas de archivos, se cierra el
     mapeo LUKS si está abierto y se elimina el JSON de instalación.
 
 Un mensaje indica que la instalación ha terminado; reinicia y retira el medio
@@ -236,13 +252,68 @@ Notas:
 - `X_HYPRLAND`/`X_HW_AUTO` pertenecen al payload `x-scripts`; el instalador
   las fija al llamar a `x setup`.
 
+## Live vs sistema instalado (credenciales)
+
+El medio live es deliberadamente permisivo para poder usarse sin contraseña:
+autologin de root en tty1, password de root vacío y sshd con
+`PermitRootLogin yes` + autenticación por password. **Todo eso vive solo en
+`airootfs`** (el squashfs del live).
+
+El instalador nunca copia esos archivos al destino: el sistema instalado toma
+`/etc/shadow` del paquete `shadow` (root bloqueado), crea el usuario wheel
+desde el seed y **no** habilita sshd. Mantené esa regla al agregar
+automatización post-install: nunca copies `/etc` del live al destino.
+
+## Modo dualboot
+
+`install.sh` soporta dos modos (`"mode"` en el JSON): `wipe` (default) borra
+el disco y crea un GPT nuevo; `dualboot` instala en la **región libre más
+grande**, preservando todas las particiones existentes y el bootloader de
+Windows. El configurador pregunta el modo.
+
+`dualboot` es UEFI-only en esta iteración y requiere GPT con una ESP
+existente:
+
+| Campo | Valores | Significado |
+|-------|---------|-------------|
+| `mode` | `wipe` / `dualboot` | estrategia de instalación |
+| `esp` | partición (opcional) | reusar esta ESP en vez de autodetectar la `ef00` |
+| `min_size` | GiB (default 20) | región libre mínima aceptada |
+
+Qué hace:
+
+1. Valida UEFI + GPT + ESP existente; nunca corre `sgdisk --zap-all`.
+2. Toma el bloque libre más grande (`sgdisk -F`/`-E`), verifica `min_size` y
+   crea **solo** la partición raíz ahí (`sgdisk -n 0:start:end -t 0:8300`).
+   Las entradas existentes no se tocan.
+3. Monta la ESP existente en `/mnt/boot` y nunca la formatea; btrfs +
+   `@`/`@home`/`@snapshots`/`@xstate` igual que en modo wipe.
+4. Bootloader sin tocar `EFI/Microsoft/**`:
+   - systemd-boot: `bootctl install` sobre la ESP compartida; sd-boot
+     autodetecta el Windows Boot Manager y lo lista en el menú. El fallback
+     preexistente `EFI/BOOT/BOOTX64.EFI` (posiblemente de Windows) se guarda y
+     restaura alrededor de `bootctl`.
+   - GRUB: `grub-install --target=x86_64-efi --bootloader-id=x` más
+     `os-prober` (`GRUB_DISABLE_OS_PROBER=false`) para agregar Windows.
+5. Mantiene el Windows Boot Manager primero en el orden del firmware (best
+   effort vía `efibootmgr`), crea la entry NVRAM de X con `efibootmgr` si el
+   instalador del bootloader no la escribió (habitual dentro del chroot), y
+   las generaciones de X nunca pisan archivos de Microsoft.
+
+Salvedades: no hay dualboot BIOS/MBR, y encoger una partición existente para
+hacer lugar queda fuera de alcance (el espacio libre ya tiene que existir).
+
 ## Requisitos y advertencias
 
 - La instalación requiere **acceso a red**: `pacstrap` descarga desde los
   mirrors oficiales de Arch y el repositorio `[x]`. Un mirror offline incluido
   en el ISO está pendiente (consulta la ROADMAP del workspace).
-- El disco de destino se borra por completo.
+- En modo `wipe`, el disco de destino se borra por completo; el modo
+  `dualboot` solo usa la región libre y preserva el resto.
 - `systemd-boot` es **solo UEFI**; GRUB escribe tanto la ruta BIOS (con la
   partición `bios_grub`) como la UEFI (removable), de modo que cualquiera de
   los dos modos de arranque funciona.
 - LUKS usa LUKS2 con el hook `encrypt` clásico del initramfs.
+- La matriz del instalador está validada en VM: BIOS/GRUB,
+  UEFI/systemd-boot, perfil `full`, LUKS y dualboot; el multi-kernel (una
+  entry por `pkgbase`) está cubierto a nivel de motor.

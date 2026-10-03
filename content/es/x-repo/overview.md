@@ -37,6 +37,20 @@ Coexisten dos vías de empaquetado en el ecosistema:
   listo, pero el workflow nativo automatizado está **pendiente** (ver
   `docs/build-x-native-workflow.md`).
 
+## Estado actual del repositorio
+
+- El repositorio `[x]` de pacman está **firmado** en la rama `feat/signing`:
+  paquetes, `x.db`/`x.files` y `SHA256SUMS` llevan firmas OpenPGP detached, y el
+  keyring público se publica como `trustedkeys.gpg` + `signing.pub` (ver
+  [signing.md](signing.md)).
+- `x-scripts 0.1.0-19` es el payload publicado y firmado en esa rama, y la misma
+  revisión que embebe el ISO (`x/airootfs/root/x-installer/packages/`).
+- La verificación **no se exige todavía**: el ISO sigue configurando `[x]` como
+  `Optional`, y falta embeber el keyring en el entorno live y en el destino
+  instalado.
+- La rama aún no está desplegada en Pages; el sitio publicado sigue sirviendo el
+  repositorio antiguo, sin firmar, desde `main`.
+
 ## Qué contiene este repositorio
 
 | Ruta | Propósito |

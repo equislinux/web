@@ -29,8 +29,11 @@ ecosystem, written entirely in Rust.
 | PKGBUILD compat | Seamlessly build from Arch Linux PKGBUILD files |
 | Fakeroot builds | Isolated packaging without real root privileges (unshare / fakeroot / tar-rewrite) |
 | Package signing | OpenPGP detached signatures via sequoia-openpgp (pure Rust) |
-| Linting | Automated quality checks: dependencies, permissions, paths, metadata, ELF analysis |
+| Linting | Automated quality checks: dependencies, permissions, paths, metadata, ELF analysis, `source-unpinned` recipe checks |
 | Repository tools | Create and manage ALPM-compatible package databases for `xpm` |
+| Version retention | `repo-add --keep N` and `repo-prune` keep old versions on disk and indexed |
+| Provenance | Extended `.BUILDINFO` (`x:source_commit`, `x:recipe_sha256`, `x:tool_version`) indexed in a signed `history.json` |
+| Reproducible timestamps | `SOURCE_DATE_EPOCH` drives metadata `builddate` and tar entry mtimes |
 | Source management | HTTP download with retries, SHA-256/512 verification, Git clone, local cache |
 
 Project metadata: version `0.1.0`, edition 2021, license
@@ -83,6 +86,12 @@ The repository's own `ROADMAP.md` reports:
   management, verify/info commands) as complete, with two items still open in
   Phase 9: integration tests with `xpm` and comparative benchmarks vs
   `makepkg`. Phase 10 (post-v1.0 future goals) is entirely open.
+- The **generations-alignment** branch adds version retention
+  (`repo-add --keep N`, `repo-prune`), a signed per-repo `history.json`
+  (schema 1: `version`, `filename`, `sha256`, `builddate`, optional `.sig` and
+  source provenance), extended `.BUILDINFO` provenance, the
+  `source-unpinned` lint warning and `SOURCE_DATE_EPOCH` support. Its
+  end-to-end integration with `xpm` (#56) remains pending.
 - `docs/realexample.md` records a real end-to-end run: an `xfetch` package was
   built into a `.xp` artifact with xpkg, inspected, linted, added to a local
   ALPM database and a `file://` repository layout under `x-repo`, and synced

@@ -20,6 +20,22 @@ La consecuencia honesta: la documentación del comportamiento de cara al usuario
 de lo que la distro entrega hoy, porque la distro entrega el camino pacman, no xpm. Trata las
 funciones de xpm como el camino nativo futuro salvo que el flujo *reboot* las adopte.
 
+## Lo que ya añadió la alineación con generaciones
+
+En la rama `feat/generations-alignment` aterrizó un avance autocontenido sin conectar el
+resolver:
+
+- journal de transacciones (`/var/lib/xpm/journal/*.json`) y `xpm history [--json]`;
+- hooks `pre-transaction.d`/`post-transaction.d` con el contrato de entorno `XPM_*` (runner
+  implementado; los scripts de hook llegan con `x-scripts`);
+- seguimiento de razón de instalación y filtros (`xpm query --format tsv`,
+  `--explicit`/`--deps`);
+- metadatos `reason`/`origin`/`files` en la base de datos local, y `xpm files`/`xpm info`
+  reales (estos dos habilitan `x gen restore --pkg` en sistemas xpm).
+
+Siguen pendientes del mismo diseño: el resolver conectado al CLI, `--orphans`,
+`xpm rollback --last` y `xpm diff <generación>`.
+
 ## Cuándo podría volver xpm a estar activo
 
 Razones que traerían a xpm (y a su compañero xpkg) de vuelta al alcance, según el ROADMAP del
@@ -44,12 +60,13 @@ propio roadmap del repo y del `main.rs` actual):
    pero `install` selecciona paquetes por nombre desde la base de datos sincronizada y `upgrade`
    usa comparación de versiones simple. Un camino de install/upgrade que resuelva de verdad el
    cierre de dependencias necesita llamar al solver.
-2. **Terminar los comandos stub.** `query`, `search`, `info` y `files` hoy solo parsean sus
-   argumentos.
-3. **Completar el endurecimiento de transacciones.** El roadmap del repo lista pendientes:
-   gestión de archivos de configuración `.pacnew`/`.pacsave`, ejecución de alpm-hooks más allá de
-   los scriptlets de `.INSTALL`, test end-to-end de upgrade, y tests de resolución de conflictos
-   y rollback.
+2. **Terminar los comandos stub restantes.** El avance de alineación con generaciones
+   implementó `query`, `files` e `info`; `search` sigue siendo un stub, y `query --orphans` no
+   puede funcionar hasta que la base de datos local registre el grafo inverso de dependencias.
+3. **Completar el endurecimiento y la recuperación de transacciones.** El journal de
+   transacciones y los hooks `pre/post-transaction.d` están implementados; siguen abiertos
+   `xpm rollback --last`, enlazar las entradas de `history` con ids de generación, la gestión
+   de `.pacnew`/`.pacsave`, la resolución de conflictos y los tests de rollback.
 4. **Cerrar los hitos de preparación para producción** (Fase 8 y Fase 9 del ROADMAP del repo):
    benchmarks frente a pacman, stress testing contra un repositorio completo, fuzzing, auditoría
    de manejo de errores (descargas parciales, paquetes corruptos, disco lleno) y objetivos

@@ -64,14 +64,23 @@ camino:
   (p. ej. GitHub Releases) requieren la composición de la URL de fetch en
   `xpm`.
 
+La rama de alineación con generaciones extendió este camino con retención de
+versiones (`repo-add --keep N`, `repo-prune`), un índice de procedencia
+`history.json` firmado y timestamps reproducibles (`SOURCE_DATE_EPOCH`). El
+índice de retención es lo que permitiría a `xpm` resolver
+`install <pkg>=<ver>` a una versión antigua; consumirlo desde `xpm` sigue
+pendiente. Queda una salvedad en el lado de xpkg: el helper `deploy` todavía
+no copia las versiones referenciadas por el historial.
+
 ## Ítems abiertos en este repositorio
 
 Del `ROADMAP.md` de este repositorio (la Fase 9 aún tiene dos ítems sin marcar;
 la Fase 10 está abierta):
 
 - Tests de integración con xpm - construir paquetes con xpkg e instalarlos con
-  xpm de punta a punta (#56). Bloqueado por el camino de instalación de xpm
-  descrito arriba.
+  xpm de punta a punta (#56), incluido un downgrade resuelto desde
+  `history.json`. Bloqueado por el camino de instalación de xpm descrito
+  arriba.
 - Benchmarks comparativos frente a makepkg - tiempo de build, tamaño de
   paquete, rendimiento de compresión (#57).
 - Objetivos futuros de la Fase 10 (post-v1.0): split packages desde un solo

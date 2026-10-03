@@ -9,18 +9,23 @@ currently out of scope for packaging; see the workspace ROADMAP, Phase 4.)
 `packaging/PKGBUILD` produces the Arch package (`any`, depends on `bash`):
 
 - Ships `bin`, `install`, `skel`, `etc`, `config`, `hardware`, `tools`,
-  `migrations` and `themes` to **`/usr/share/x`**.
+  `migrations`, `themes` and `hooks` to **`/usr/share/x`**.
 - Makes every `*.sh` (and the `x` dispatcher) executable under
-  `/usr/share/x/{bin,install,hardware,tools}`.
+  `/usr/share/x/{bin,install,hardware,tools,hooks}`.
+- The `/etc` overlay (including the pacman generation hooks
+  `etc/pacman.d/hooks/`) is applied by `x setup` (`install/config.sh`);
+  `hooks/pacman-gen.sh` is the wrapper those hooks call (see
+  `provisioning.md` and `generations.md`).
 - Installs `/usr/bin/x` as a symlink to `/usr/share/x/bin/x`.
 - If `packaging/.vendor/x-config` exists, its contents are merged into
   `/usr/share/x/config` (the offline desktop snapshot used by
   `tools/hyprland-install.sh`). There are **no remote `source=()` entries**: the
   snapshot is vendored in-repo and never fetched at build time.
 
-Version metadata: `pkgver=0.1.0`, `pkgrel` bumped per iteration (currently 13
-in the PKGBUILD). A leftover build artifact (`*.pkg.tar.zst`) may sit in the
-directory but is stale and git-ignored; rebuild produces the current pkgrel.
+Version metadata: `pkgver=0.1.0`, `pkgrel` bumped per iteration (currently 19
+in the PKGBUILD, so the payload is `x-scripts 0.1.0-19`). A leftover build
+artifact (`*.pkg.tar.zst`) may sit in the directory but is stale and
+git-ignored; rebuild produces the current pkgrel.
 
 To build (network-free regarding the config sources; the vendored tree must be
 present first, see below):
@@ -31,6 +36,14 @@ makepkg   # requires packaging/.vendor/x-config to be present
 ```
 
 `packaging/.gitignore` ignores `src/`, `pkg/`, `.vendor/` and built artifacts.
+
+## Payload checks
+
+The test suite guards the packaged payload: `test/package-payload.sh` (run by
+`test/validate.sh`) requires the generation engine inside the built `.pkg`,
+compares `xgen.sh` against the branch and checks that the payload embedded in
+the distro ISO is unique and identical. Bump `pkgrel` and rebuild whenever the
+payload content changes so the check stays reproducible.
 
 ## `vendor-config.sh` — the offline snapshot
 

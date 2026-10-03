@@ -50,7 +50,7 @@ const SECTIONS: SectionManifest[] = [
     id: 'scripts',
     title: { en: 'Scripts and CLI', es: 'Scripts y CLI' },
     wiki: 'scripts',
-    files: ['overview', 'provisioning', 'cli', 'hyprland', 'layout', 'packaging'],
+    files: ['overview', 'provisioning', 'generations', 'cli', 'hyprland', 'layout', 'packaging'],
   },
   {
     id: 'xpm',
@@ -68,7 +68,7 @@ const SECTIONS: SectionManifest[] = [
     id: 'x-repo',
     title: { en: 'x-repo — package repository', es: 'x-repo — repositorio de paquetes' },
     wiki: 'x-repo',
-    files: ['overview', 'repo-layout', 'publishing', 'web-portal'],
+    files: ['overview', 'repo-layout', 'publishing', 'signing', 'web-portal'],
   },
 ];
 

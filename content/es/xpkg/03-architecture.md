@@ -36,24 +36,26 @@ Dependencias de terceros destacadas: `clap` (CLI), `serde`/`serde_json`/`toml`,
 | `recipe` | Parsing XBUILD y PKGBUILD, validación, srcinfo, plantillas `new` | `recipe/{mod,types,validate,xbuild,pkgbuild}.rs` |
 | `source` | Descarga, checksums, extracción, git, caché | `source/{mod,download,checksum,extract,git,cache}.rs` |
 | `builder` | Pipeline de build + fakeroot + dirs/env/exec/log del build | `builder/{mod,dirs,env,exec,log,pipeline,types}.rs` |
-| `metadata` | Generación de `.PKGINFO`, `.BUILDINFO`, `.MTREE`, `.INSTALL` | `metadata/{mod,pkginfo,buildinfo,mtree,install}.rs` |
+| `metadata` | Generación de `.PKGINFO`, `.BUILDINFO` (con procedencia extendida), `.MTREE`, `.INSTALL` | `metadata/{mod,pkginfo,buildinfo,provenance,mtree,install}.rs` |
 | `archive` | Creación del archivo `.xp` y stripping de ELF | `archive/{mod,pack,strip}.rs` |
-| `lint` | Framework de linting + reglas (permisos, rutas, metadatos, dependencias, ELF) | `lint/{mod,rules,permissions,paths,metadata,dependency,elf,report}.rs` |
+| `lint` | Framework de linting + reglas (permisos, rutas, metadatos, dependencias, ELF, `source-unpinned`) | `lint/{mod,rules,permissions,paths,metadata,dependency,elf,source,report}.rs` |
 | `signing` | Firma/verificación OpenPGP (sequoia-openpgp) | `signing/{mod,keys,sign,verify}.rs` |
-| `repo` | Gestión de bases de datos de repositorio (leer/escribir, add/remove, inspect, deploy) | `repo/{mod,types,desc,db,inspect,deploy}.rs` |
+| `repo` | Gestión de bases de datos de repositorio (leer/escribir, add/remove, inspect, deploy) + índice de historial y retención | `repo/{mod,types,desc,db,history,retention,inspect,deploy}.rs` |
 
 ## El pipeline de build
 
 `xpkg build` orquesta, en orden:
 
-1. Parsear y validar la receta (XBUILD o PKGBUILD).
+1. Parsear y validar la receta (XBUILD o PKGBUILD) y correr el lint de receta
+   (los warnings `source-unpinned` se reportan, nunca son fatales).
 2. Aplicar las anulaciones CLI de builddir/outdir.
 3. Preparar los directorios de build aislados y el entorno.
 4. Ejecutar las fases de build: `prepare`, luego `build`, luego `check`
    (opcional) y luego `package`, ejecutando cada fase de la receta como
    scripts de shell.
 5. Hacer stripping de binarios ELF (si `strip_binaries = true`).
-6. Crear el archivo `.xp` (tar.zst por defecto).
+6. Crear el archivo `.xp` con procedencia extendida en `.BUILDINFO`
+   (`x:recipe_sha256`, `x:source_commit`, `x:tool_version`).
 7. Firmar el paquete (si `--sign` o `sign = true` en la config).
 
 ### Empaquetado sin root
@@ -89,6 +91,15 @@ package-1.0-1-x86_64.xp (tar.zst)
 La firma opcional produce un fichero de firma detached OpenPGP junto al
 archivo (`package-...-x86_64.xp.sig`).
 
+`.BUILDINFO` añade claves de procedencia extendidas después de los campos
+históricos `key = value`, ignoradas por los lectores que no las conocen:
+
+| Clave | Contenido |
+|-------|-----------|
+| `x:recipe_sha256` | SHA-256 del fichero de receta (XBUILD/PKGBUILD) usado en el build |
+| `x:source_commit` | Commit exacto de la primera fuente Git fijada con `#commit=`/`#tag=`/`#branch=` |
+| `x:tool_version` | Versión de xpkg que produjo el paquete |
+
 ## Formato de base de datos de repositorio
 
 Un repositorio es un conjunto de paquetes `.xp` más un índice de base de datos
@@ -99,6 +110,16 @@ Dentro, un directorio por paquete contiene `desc` (metadatos del paquete,
 `depends` (información de dependencias), en un formato clave-valor compatible
 con ALPM. El módulo `repo` lee/escribe esas bases de datos y puede generar un
 layout de repositorio estático para hospedaje HTTP.
+
+Junto a la base de datos, `xpkg` mantiene `history.json` (schema 1) con cada
+versión aún disponible por paquete (`version`, `filename`, `sha256`,
+`builddate`, `.sig` y procedencia `source` opcionales), firmado como
+`history.json.sig` cuando hay una clave configurada. `repo-add --keep N` y
+`repo-prune` usan el índice para la retención: las versiones antiguas listadas
+allí se podan del disco, pero la versión que expone la base de datos nunca se
+borra. El helper `deploy` todavía no copia las versiones referenciadas por el
+historial, así que los flujos de publicación deben conservar ellos mismos los
+`.xp` antiguos en el layout desplegado.
 
 ## El formato de receta XBUILD
 
@@ -149,8 +170,20 @@ Reglas de validación que aplica el parser: `name` debe cumplir las reglas de
 nombrado (inicio ASCII en minúscula, minúsculas/dígitos/guiones/bajos, máx
 128); `version` no vacío; `release` >= 1; `arch` en `x86_64`, `aarch64`,
 `i686`, `armv7h`, `any`; esquemas de URL de fuente en `http`, `https`, `ftp`,
-`file`; los arrays de checksums deben coincidir en longitud con `urls`. Los
-errores se recogen y se reportan juntos, no uno a uno.
+`file`, `git`, `git+https`, `git+http`; los arrays de checksums deben coincidir
+en longitud con `urls`. Los errores se recogen y se reportan juntos, no uno a
+uno.
+
+Las fuentes Git aceptan pines estilo makepkg (`#commit=`, `#tag=`,
+`#branch=`); el commit exacto de la primera fuente fijada se resuelve (`HEAD`
+del clon local o `git ls-remote`) y se registra como `x:source_commit`. Una
+fuente sin checksum ni commit/tag fijado dispara el warning `source-unpinned`
+al arrancar el build, pero nunca lo detiene.
+
+Cuando `SOURCE_DATE_EPOCH` tiene un timestamp Unix válido, se usa para el
+`builddate` de `.PKGINFO`/`.BUILDINFO` y para el mtime de cada entrada tar.
+Sin la variable se usa la hora actual. Es groundwork de reproducibilidad, no
+una garantía completa de reproducibilidad binaria.
 
 ### Compatibilidad PKGBUILD
 

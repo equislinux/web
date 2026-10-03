@@ -106,6 +106,46 @@ versions against the remote latest entries using the ALPM-compatible version com
 plans remove+install operations per package that changed. With no packages installed it reports
 "Nothing to do".
 
+### `history` — Transaction journal
+
+Show the recorded transactions, newest first. Every `install`, `remove` and
+`upgrade` writes a JSON entry under `<db_path>/journal/<epoch>-<pid>.json`
+(default `/var/lib/xpm/journal/`) before touching the filesystem, and
+finalizes it as `ok`/`failed` after the commit.
+
+```bash
+xpm history [OPTIONS]
+```
+
+| Flag | Description |
+|------|-------------|
+| `--json` | Emit one JSON object per transaction (machine consumption) |
+
+```bash
+xpm history                # Human summary (ISO-8601 timestamps)
+xpm history --json         # One JSON line per transaction
+```
+
+Transactions left in `running` state after a crash stay in the journal as
+evidence; full recovery is still `x gen rollback` (generation layer), not an
+xpm command.
+
+Around each transaction, xpm runs the executables in
+`/usr/lib/xpm/hooks/pre-transaction.d/` and `post-transaction.d/` in lexical
+order (override the root with `XPM_HOOKS_DIR`). The contract is a set of
+environment variables:
+
+| Variable | Meaning |
+|----------|---------|
+| `XPM_ROOT_DIR` | Target root |
+| `XPM_ACTION` | `install`, `remove` or `upgrade` |
+| `XPM_JOURNAL` | Path of the transaction journal |
+| `XPM_PKG_NAMES` / `XPM_PKG_VERSIONS` | Space-separated lists |
+
+A failing **pre** hook aborts the transaction (no changes); a failing **post**
+hook only logs a warning. The runner ships with xpm; the hook scripts
+themselves are contributed by `x-scripts` when xpm becomes the active manager.
+
 ### `query` — Query the local database
 
 Alias: `Q`. Lists installed packages from the local database.
@@ -118,13 +158,19 @@ xpm Q [FILTER] [OPTIONS]
 | Argument / Flag | Short | Description |
 |-----------------|-------|-------------|
 | `FILTER` | | Optional package name filter |
-| `--explicit` | `-e` | Only explicitly installed packages |
-| `--deps` | `-d` | Only packages installed as dependencies |
+| `--format` | | Output format: `plain` (default) or `tsv` |
+| `--explicit` | `-e` | Only packages recorded as explicitly installed |
+| `--deps` | `-d` | Only packages recorded as dependencies |
 | `--orphans` | `-t` | Orphan packages (no longer required) |
 | `--upgrades` | `-u` | Packages with available updates |
 
-Implementation note: the flags and filter are parsed, but the handler is currently a stub that
-only prints the intended filter type.
+Implementation note: implemented. `query` reads the local database (and the synced remote
+entries for `--upgrades`); `--format tsv` prints `name<TAB>version` for scripts. The
+`--explicit`/`--deps` filters use the install reason stored per package
+(`<db_path>/local/<pkg>/reason`); packages without a `reason` file, or installed before the
+feature, count as `explicit`. `--explicit` and `--deps` together are an error. `--orphans`
+still fails with a clear message because the local database does not record the reverse
+dependency graph yet.
 
 ### `search` — Search packages
 
@@ -154,7 +200,11 @@ xpm Si <PACKAGE> [OPTIONS]
 |------|-------|-------------|
 | `--local` | `-l` | Query the local database instead of the sync databases |
 
-Implementation note: currently a stub.
+Implementation note: implemented. Shows name, version, install reason and origin repository;
+when the sync database is available it adds the repository description and dependencies (the
+highest-priority repository wins). For packages that are not installed, the sync entry alone
+is shown. Legacy installs without `reason`/`origin` files default to `explicit` and `unknown`
+instead of failing.
 
 ### `files` — List package files
 
@@ -165,7 +215,9 @@ xpm files <PACKAGE>
 xpm Ql <PACKAGE>
 ```
 
-Implementation note: currently a stub.
+Implementation note: implemented. Reads `<db_path>/local/<pkg>/files`, a pacman-compatible
+manifest (`%FILES%` header, relative paths, directories with a trailing `/`) derived from the
+package's `.MTREE`; it is the same manifest consumed by `x gen restore --pkg`.
 
 ### `repo` — Repository management
 
@@ -222,6 +274,7 @@ xpm usage <command>          # help for a specific command (sync, install, remov
 xpm sync                       # refresh package databases
 xpm install <package>          # install a package
 xpm upgrade                    # upgrade installed packages (syncs first)
+xpm history                    # inspect recorded transactions
 xpm query                      # list installed packages
 xpm remove <package>           # remove a package
 ```
@@ -234,7 +287,8 @@ installation root is not `/`, xpm enables shell integration and creates command 
 ## Environment variables and exit codes
 
 `RUST_LOG` is honoured through `tracing-subscriber`'s `EnvFilter` to control log verbosity.
-`docs/CLI.md` additionally documents `XPM_CONFIG`, `XPM_CACHE_DIR`, and `NO_COLOR`.
+`docs/CLI.md` additionally documents `XPM_CONFIG`, `XPM_CACHE_DIR`, `XPM_HOOKS_DIR` (overrides
+the transaction-hook root, default `/usr/lib/xpm/hooks`), and `NO_COLOR`.
 
 `docs/CLI.md` documents an exit-code matrix (0 success, 1 general error, 2 usage error, up to 7
 database locked). Note that this matrix is documented intent rather than an enforced contract in

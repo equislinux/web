@@ -44,8 +44,9 @@ edítalo.
 | `xpkg verify <pkg>` | Verifica la integridad del paquete y su firma OpenPGP |
 | `xpkg new <name>` | Genera una plantilla XBUILD nueva |
 | `xpkg srcinfo` | Genera salida estilo `.SRCINFO` desde un XBUILD |
-| `xpkg repo-add <db> <pkg>` | Añade un paquete a una base de datos de repositorio |
+| `xpkg repo-add <db> <pkg>` | Añade un paquete a una base de datos de repositorio (soporta `--keep N`) |
 | `xpkg repo-remove <db> <name>` | Quita un paquete de una base de datos de repositorio |
+| `xpkg repo-prune <db>` | Aplica la política de retención de versiones a un repositorio existente |
 
 ### Flags globales
 
@@ -93,7 +94,9 @@ xpkg lint hello-2.12-1-x86_64.xp --strict
 ```
 
 Categorías de lint: permisos, rutas, metadatos, dependencias y análisis ELF.
-Ver [Linting Rules](../LINTING.md) para la lista completa.
+Los chequeos de receta `source-unpinned` (fuentes sin checksum usable y sin
+commit/tag Git fijado) corren al inicio de `xpkg build` y nunca detienen el
+build. Ver [Linting Rules](../LINTING.md) para la lista completa.
 
 ### info - Mostrar metadatos del paquete
 
@@ -151,7 +154,7 @@ xpkg srcinfo                     # Imprime en stdout
 xpkg srcinfo > .SRCINFO          # Escribe la salida a .SRCINFO
 ```
 
-### repo-add / repo-remove - Gestión de repositorio
+### repo-add / repo-remove / repo-prune - Gestión de repositorio
 
 Gestiona una base de datos compatible con ALPM (`myrepo.db.tar.zst` por
 defecto; también `.db.tar.gz` y `.db.tar.xz`, auto-detectados por extensión).
@@ -160,14 +163,37 @@ La base de datos se crea automáticamente en el primer add.
 ```bash
 xpkg repo-add myrepo.db.tar.zst hello-2.12-1-x86_64.xp
 xpkg repo-add myrepo.db.tar.zst hello-2.12-1-x86_64.xp --sign
+xpkg repo-add myrepo.db.tar.zst hello-2.12-2-x86_64.xp --keep 3  # retiene 3 versiones
 
 xpkg repo-remove myrepo.db.tar.zst hello
 xpkg repo-remove myrepo.db.tar.zst hello --sign
 ```
 
 Añadir un nombre de paquete ya existente reemplaza la entrada por la nueva
-versión. Ver [Repository Management](../REPOSITORY.md) para instrucciones de
-hospedaje.
+versión. `repo-add` mantiene además `history.json` (schema 1) junto a la base
+de datos, registrando cada versión aún disponible de cada paquete (`version`,
+`filename`, `sha256`, `builddate`, `.sig` y procedencia `source` opcionales).
+El índice se firma como `history.json.sig` cuando hay una clave configurada
+(o se pasa `--sign`); si no, una firma obsoleta se elimina con un aviso. Con
+`--keep N` se conservan las N versiones más nuevas por paquete (según
+`builddate`) más la versión que expone la base de datos, y se borran los
+ficheros más antiguos listados en el índice; `--keep 0` (por defecto)
+desactiva la poda.
+
+`repo-prune` aplica la misma política de retención a un repositorio existente
+y reescribe `history.json`:
+
+```bash
+xpkg repo-prune myrepo.db.tar.zst --keep 3           # conserva las últimas 3 versiones
+xpkg repo-prune myrepo.db.tar.zst --keep 3 --dry-run # previsualiza la poda
+xpkg repo-prune myrepo.db.tar.zst                    # conserva solo la versión actual
+```
+
+La versión que expone la base de datos nunca se borra, y los ficheros que no
+están listados en `history.json` no se tocan. Si falta el índice, `repo-prune`
+lo siembra desde las entradas de la base de datos cuyos ficheros existen en el
+directorio del repositorio. Ver [Repository Management](../REPOSITORY.md)
+para instrucciones de hospedaje.
 
 ## Códigos de salida
 
@@ -182,6 +208,7 @@ hospedaje.
 | Variable | Descripción |
 |----------|-------------|
 | `RUST_LOG` | Anula el filtro de nivel de log de tracing (p. ej. `RUST_LOG=debug`) |
+| `SOURCE_DATE_EPOCH` | Timestamp Unix usado para el `builddate` de metadatos y los mtimes de las entradas tar (reproducibilidad) |
 
 Durante los builds, estas variables se exponen a los scripts de build:
 
@@ -229,7 +256,12 @@ Ver `etc/xpkg.conf.example` para todas las opciones.
 2. **Compatibilidad Arch** - conservar un PKGBUILD existente y ejecutar
    `xpkg build --pkgbuild -f ./PKGBUILD`.
 3. **Publicación** - `xpkg repo-add x.db.tar.zst pkg-...-x86_64.xp` dentro del
-   directorio hospedado; opcionalmente `--sign` de la base de datos.
-4. **Configuración de firma** - exportar una clave secreta a
+   directorio hospedado; opcionalmente `--sign` de la base de datos. Añade
+   `--keep N` para retener versiones antiguas y mantener `history.json`
+   poblado, y usa `xpkg repo-prune <db> --keep N` para podar el repositorio
+   después.
+4. **Builds reproducibles** - `SOURCE_DATE_EPOCH=<epoch> xpkg build` fija el
+   `builddate` de los metadatos y los mtimes de las entradas tar.
+5. **Configuración de firma** - exportar una clave secreta a
    `~/.config/xpkg/signing.key`, fijar `sign = true` y `sign_key` en la config,
    construir con `--sign`.

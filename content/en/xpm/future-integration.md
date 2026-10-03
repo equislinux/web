@@ -19,6 +19,22 @@ The honest consequence: documentation of user-facing behaviour may drift from wh
 actually ships today, because the distro ships the pacman path, not xpm. Treat xpm features as
 the future native path unless the reboot flow adopts them.
 
+## What the generations-alignment slice already added
+
+A self-contained slice landed without wiring the resolver, on the
+`feat/generations-alignment` branch:
+
+- transaction journal (`/var/lib/xpm/journal/*.json`) and `xpm history [--json]`;
+- `pre-transaction.d`/`post-transaction.d` hooks with the `XPM_*` environment contract
+  (runner implemented; the hook scripts arrive with `x-scripts`);
+- install-reason tracking and filters (`xpm query --format tsv`,
+  `--explicit`/`--deps`);
+- `reason`/`origin`/`files` metadata in the local database, and real
+  `xpm files`/`xpm info` (these two enable `x gen restore --pkg` on xpm systems).
+
+Still pending from the same design: the resolver wired into the CLI, `--orphans`,
+`xpm rollback --last` and `xpm diff <generation>`.
+
 ## When xpm could become active again
 
 Reasons that would pull xpm (and its companion xpkg) back into scope, per the workspace ROADMAP:
@@ -42,11 +58,13 @@ own roadmap and current `main.rs`):
    level, but `install` selects packages by name from the synced database and `upgrade` uses
    plain version comparison. An install/upgrade path that truly resolves dependency closures
    needs to call the solver.
-2. **Finish the stub commands.** `query`, `search`, `info`, and `files` currently only parse
-   their arguments.
-3. **Complete transaction hardening.** The repo roadmap lists open items: `.pacnew`/`.pacsave`
-   configuration-file management, alpm-hooks execution beyond `.INSTALL` scriptlets, upgrade
-   end-to-end test, conflict resolution and rollback tests.
+2. **Finish the remaining stub commands.** The generations-alignment slice implemented
+   `query`, `files` and `info`; `search` is still a stub, and `query --orphans` cannot work
+   until the local database records the reverse dependency graph.
+3. **Complete transaction hardening and recovery.** The transaction journal and the
+   `pre/post-transaction.d` hooks are implemented; still open are `xpm rollback --last`,
+   linking `history` entries to generation ids, `.pacnew`/`.pacsave` configuration-file
+   management, conflict resolution and rollback tests.
 4. **Close production-readiness milestones** (repo ROADMAP Phase 8 and Phase 9): benchmarks vs
    pacman, stress testing against a full repository, fuzzing, error-handling audit (partial
    downloads, corrupt packages, disk full), and post-v1.0 goals (Python bindings, i18n, TUI,

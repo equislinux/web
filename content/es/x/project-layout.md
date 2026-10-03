@@ -79,11 +79,11 @@ El instalador de texto incluido en la imagen en vivo:
 |---------|-----------|
 | `installer.sh` | Punto de entrada; ejecuta el configurador y después el instalador. |
 | `configurator.sh` | Configuración interactiva (gum/prompts); escribe el plan JSON. |
-| `install.sh` | Realiza el particionado, `pacstrap`, config base, usuario, aprovisionamiento y gestor de arranque. |
+| `install.sh` | Realiza el particionado, `pacstrap`, config base, usuario, aprovisionamiento, gestor de arranque y la primera generación (`0001`). |
 | `autoinstall.sh` | Instalador desatendido (activado por `xauto=1` + disco `cidata`). |
 | `ui.sh` | Utilidades de interfaz compartidas por los demás scripts. |
 | `packages.x86_64` | Manifiesto por defecto del perfil `full`. |
-| `packages/` | Payload offline `x-scripts-*.pkg.tar.zst` incluido en la imagen en vivo. |
+| `packages/` | Payload offline `x-scripts-0.1.0-19-any.pkg.tar.zst` incluido en la imagen en vivo. |
 
 ## Archivos críticos de la build
 

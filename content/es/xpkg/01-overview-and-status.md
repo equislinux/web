@@ -29,8 +29,11 @@ ecosistema X, escrito íntegramente en Rust.
 | Compatibilidad PKGBUILD | Construye sin fricción desde ficheros PKGBUILD de Arch Linux |
 | Builds fakeroot | Empaquetado aislado sin privilegios de root reales (unshare / fakeroot / tar-rewrite) |
 | Firmado de paquetes | Firmas OpenPGP detached vía sequoia-openpgp (Rust puro) |
-| Linting | Comprobaciones de calidad: dependencias, permisos, rutas, metadatos, análisis ELF |
+| Linting | Comprobaciones de calidad: dependencias, permisos, rutas, metadatos, análisis ELF, chequeos de receta `source-unpinned` |
 | Herramientas de repo | Crear y gestionar bases de datos de paquetes compatibles con ALPM para `xpm` |
+| Retención de versiones | `repo-add --keep N` y `repo-prune` conservan versiones antiguas en disco e indexadas |
+| Procedencia | `.BUILDINFO` extendido (`x:source_commit`, `x:recipe_sha256`, `x:tool_version`) indexado en un `history.json` firmado |
+| Timestamps reproducibles | `SOURCE_DATE_EPOCH` fija el `builddate` de metadatos y los mtimes de las entradas tar |
 | Gestión de fuentes | Descarga HTTP con reintentos, verificación SHA-256/512, clonado Git, caché local |
 
 Metadatos del proyecto: versión `0.1.0`, edition 2021, licencia
@@ -86,6 +89,12 @@ El `ROADMAP.md` propio del repositorio informa de:
   quedando dos ítems abiertos en la Fase 9: tests de integración con `xpm` y
   benchmarks comparativos frente a `makepkg`. La Fase 10 (objetivos futuros
   post-v1.0) está íntegramente abierta.
+- La rama de **alineación con generaciones** añade retención de versiones
+  (`repo-add --keep N`, `repo-prune`), un `history.json` firmado por repo
+  (schema 1: `version`, `filename`, `sha256`, `builddate`, `.sig` y procedencia
+  de fuentes opcionales), procedencia extendida en `.BUILDINFO`, el warning de
+  lint `source-unpinned` y soporte de `SOURCE_DATE_EPOCH`. Su integración de
+  punta a punta con `xpm` (#56) sigue pendiente.
 - `docs/realexample.md` registra una ejecución real de punta a punta: se
   construyó un paquete `xfetch` a `.xp` con xpkg, se inspeccionó, se hizo lint,
   se añadió a una base de datos ALPM local y a un layout de repositorio

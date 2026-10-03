@@ -29,9 +29,23 @@ Summaries are the `x:summary` headers of each file (shown by `x help`).
 | `x theme list` | Lists available themes under `themes/`. |
 | `x theme set <name>` | Applies a theme palette: copies `themes/<name>/colors` to `~/.config/x/theme.conf` (backing up the previous one) and records the active theme in `~/.local/state/x/theme`. |
 | `x migrate` | Runs the user's pending idempotent migrations. |
-| `x update` | `pacman -Syu` (privileged) followed by the user's migrations. |
+| `x update` | Pre-update safety generation, `pacman -Syu` (privileged) plus the user's migrations, and a post-update generation. |
 | `x hardware` | Runs the hardware phase (detection + modules). Requires root. |
 | `x info` | Shows version, repo, user and environment info. |
+| `x gen` / `x gen list` | Lists the system generations (`*` marks the default/current one). |
+| `x gen new` | Records a generation: btrfs snapshot + manifest (`--reason`, `--label`). |
+| `x gen status [--json]` | Shows the running vs default generation, pending rollback and `/etc` drift. |
+| `x gen boot` | Regenerates the per-generation boot entries. |
+| `x gen rollback <id>` | Switches the default boot to a generation (applies on reboot; `--no-safety`). |
+| `x gen diff <a> <b>` | Package/service/migration/kernel/`/etc` differences between two generations. |
+| `x gen verify [id]` | Compares the live system against a generation (exit 1 on drift). |
+| `x gen pin <id>` | Protects a generation from pruning (`--unpin`). |
+| `x gen prune` | Removes old generations, keeping pinned/running/default (`--keep N`, `--older-than DAYS`, `--dry-run`). |
+| `x gen restore <path>` | Restores a file/directory from a generation (`--from ID`, `--dest PATH`). |
+| `x gen restore --pkg <name>` | Restores every file owned by a package (pacman or xpm db inside the snapshot). |
+| `x gen export` / `x gen import` | Packs/restores a generation bundle (`--with-data`, `--force`). |
+| `x home` / `x home list` | Lists the user's home generations (dotfiles). |
+| `x home new` / `status` / `diff` / `restore` / `prune` | Home-generation lifecycle (`x home restore <path>`, `x home prune --keep N`). |
 
 Root-only commands enforce root inside the dispatcher (see metadata below) and
 print an error if run as a non-root user.
@@ -48,6 +62,7 @@ command file:
 | `info`, `status`, `doctor` | `x-info.sh` |
 | `migrate`, `migrations` | `x-migrate.sh` |
 | `update`, `upgrade`, `up` | `x-update.sh` |
+| `gen`, `generation`, `generations` | `x-gen-list.sh` (so `x gen` lists generations) |
 
 ## Dispatch mechanics
 
@@ -110,15 +125,34 @@ There is no central registry and no registration step.
 | `X_HW_AUTO` | `1` | `0` disables hardware auto-detection in the hardware phase. |
 | `X_HW_NVIDIA` | `0` | `1` forces the NVIDIA module. |
 | `X_HW_QEMU` | `0` | `1` enables the QEMU/libvirt module. |
+| `X_GEN_BACKEND` | `auto` | `auto`, `btrfs`, `dir` (tests/degraded) or `off`. |
+| `X_GEN_STATE` / `X_GEN_DIR` / `X_GEN_CURRENT` | `/var/lib/x/...` | Generation state, manifests and current id. |
+| `X_GEN_SNAPSHOTS` | `/.snapshots` | Snapshot store (mount point). |
+| `X_GEN_SUBVOL_PREFIX` | auto | In-fs path used by mount/boot options. |
+| `X_GEN_ROOT` | `/` | Tree captured by a generation (tests use a fake root). |
+| `X_GEN_CMDLINE` | `/proc/cmdline` | Kernel cmdline recorded in the manifest. |
+| `X_GEN_BOOT` / `X_GEN_BOOT_DIR` / `X_GEN_BOOT_KEEP` | `auto` / `/boot` / `3` | Boot-entry management and retention. |
+| `X_GEN_KEEP` | `5` | Generation retention for `x gen prune`. |
+| `X_GEN_LIVE_SUBVOL` | — | `root_subvol` of the live generation (installer uses `/@`). |
+| `X_GEN_SKIP` | `0` | `1` disables the automatic generations in the setup/update hooks. |
+| `X_HGEN_STATE` / `X_HGEN_HOME` | `~/.local/share/x/home-gens` / `$HOME` | Home-generation store and captured home. |
+| `X_HGEN_INCLUDE` / `X_HGEN_EXCLUDE` | dotfiles + `.config` / `Cache CachedData GPUCache logs` | Paths captured by `x home new`; excluded names are skipped anywhere in the tree. |
+| `X_HGEN_KEEP` | `10` | Home-generation retention for `x home prune`. |
+| `X_HGEN_SKIP` | `0` | `1` disables the automatic home captures in `x setup --user` / `x update`. |
 
-Hyprland-setup specific variables (`X_HYPR_*`) are documented in
-`hyprland.md`.
+The full generation contract (manifests, boot entries, restore semantics) is
+in `generations.md`. Hyprland-setup specific variables (`X_HYPR_*`) are
+documented in `hyprland.md`.
 
 ## State
 
 - `~/.local/state/x/` — user state: `theme` (active theme) and
   `migrations/<name>` (applied-migration markers).
 - `~/.config/x/` — generated user config, e.g. `theme.conf`.
+- `~/.local/share/x/home-gens/<id>/` — home generations (manifest, `files/`,
+  `files.sha256`).
+- `/var/lib/x/` — system state: `generations/<id>/` (manifests and captures)
+  and `current` (current generation id); snapshots live in `/.snapshots/`.
 
 The env overrides above let tests and development redirect every state/output
 path away from the real home (see `test/smoke.sh`).

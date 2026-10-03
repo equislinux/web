@@ -56,6 +56,12 @@ crates plus integration tests under `tests/`). Within the reboot initiative, how
 - `xpm` is therefore **not yet the active path** in the reboot flow. It is a functioning
   tooling codebase with its own internal roadmap, waiting to be revisited when the native `.xp`
   repository or the SAT resolver is actually required.
+- Independently of the reboot scope, the `feat/generations-alignment` branch landed a
+  self-contained slice: a transaction journal plus `xpm history`, transaction hooks
+  (`pre/post-transaction.d` with the `XPM_*` contract), a machine-readable `xpm query` and
+  real `xpm files`/`xpm info` backed by `reason`/`origin`/`files` metadata in the local
+  database. The SAT resolver is still not wired into the CLI, `search` remains a stub and
+  `--orphans`/rollback are pending.
 
 The repository still publishes its own binaries as `.xp` packages in the xpm-native tree (see the
 README for the key bootstrap and signature checklist), which is separate from the pacman path
@@ -78,6 +84,10 @@ used in production today. The two layouts must not be confused: the xpm-native e
   substitution.
 - Phase 10 security execution track: detached `.db.sig` and package `.sig` verification plus
   keyring loading are implemented.
+- Generation alignment (branch `feat/generations-alignment`): transaction journal under
+  `/var/lib/xpm/journal/`, `xpm history [--json]`, `pre/post-transaction.d` hooks, `query`
+  with `--format tsv` and install-reason filters, and local-database metadata for
+  `files`/`info` are implemented.
 
 The versioning convention in the repo roadmap is:
 
@@ -95,9 +105,11 @@ The workspace `Cargo.toml` currently reports version `0.1.0`.
 
 Not every subcommand is fully wired to engine logic yet. From `crates/xpm/src/main.rs`:
 
-- `sync`, `install`, `remove`, `upgrade`, and `repo` dispatch to real transaction/download logic.
-- `query`, `search`, `info`, and `files` parse their arguments but currently print
-  "complete (stub)" messages; they do not yet query the databases.
+- `sync`, `install`, `remove`, `upgrade`, `repo`, `history`, `query`, `info` and `files`
+  dispatch to real engine logic.
+- `search` still prints a "complete (stub)" message.
+- `query --orphans` fails with a clear message: the local database does not record the
+  reverse dependency graph (which packages require each installed package) yet.
 
 See [Usage](usage.md) for the full reference and [Architecture](architecture.md) for the
 implementation details, including the note that the CLI install path currently selects packages

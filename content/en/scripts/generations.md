@@ -63,6 +63,7 @@ empty list when run unprivileged.
 | `x gen import <file> [--force]` | Imports a bundle into `$X_GEN_STATE` (`--force` replaces) |
 | `x gen plan <system.toml>` | Prints the actions to match a declarative system declaration |
 | `x gen apply <system.toml> [--dry-run]` | Applies the declaration and records a generation |
+| `x gen quota init [--limit SIZE]` / `status` | Enables btrfs quotas and shows usage / the qgroup table |
 
 ```bash
 sudo x gen new --reason manual --label "before tinkering"
@@ -245,10 +246,16 @@ name = "x-dark"
 - `apply` supports `--dry-run` and honors `X_DRY_RUN=1`; system actions need
   root/sudo.
 
-## Limits and status
+## Space limits (btrfs qgroups)
 
-- The disk-space limit via btrfs **qgroups** (`X_GEN_QGROUP`, prune by size) is
-  pending.
+`x gen quota init [--limit SIZE]` enables btrfs quotas on the snapshots
+subvolume and sets an **exclusive** limit (`btrfs qgroup limit -e`), so the
+budget only counts the snapshots' own data (`X_GEN_QGROUP` sets the default).
+`x gen quota status` shows the usage and the qgroup table. The limit is
+enforced by btrfs itself, so pair it with retention (`x gen prune --keep N`)
+and leave some headroom; the scripts never set a limit automatically.
+
+## Limits and status
 - Boot load-on-selection is not implemented: rollback is an explicit command.
 - Export bundles are checksummed but not signed or encrypted yet, and a
   failing `btrfs receive` should not degrade silently.

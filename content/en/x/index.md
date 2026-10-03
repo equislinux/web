@@ -58,13 +58,23 @@ Related documentation in this repository:
 - **Branding.** Identity applied to GRUB (`GRUB_DISTRIBUTOR="X"`), the ISO
   label/publisher, MOTD, and installed packages.
 - **Text installer.** `configurator.sh` collects options and writes a JSON
-  plan; `install.sh` partitions (GPT/btrfs), runs `pacstrap`, configures the
-  base system, provisions with `x-scripts`, and installs a bootloader.
+  plan; `install.sh` partitions (GPT/btrfs with the `@`, `@home`, `@snapshots`
+  and `@xstate` subvolumes and a 1 GiB ESP), runs `pacstrap`, configures the
+  base system, provisions with `x-scripts`, installs a bootloader and records
+  generation `0001`.
+- **Dualboot mode.** The installer can target the largest free region of a GPT
+  disk (`mode` in the JSON), reusing the existing EFI System Partition and
+  leaving the Windows bootloader (`EFI/Microsoft/**`, `EFI/BOOT/BOOTX64.EFI`)
+  untouched. UEFI only.
+- **Generations.** The btrfs layout plus the `x-scripts` engine record a
+  bootable snapshot and a manifest with the system state for every relevant
+  change: list generations, roll back to a previous one (`x gen rollback`)
+  and restore a single file or a whole package (`x gen restore`, `--pkg`).
 - **Unattended install.** Kernel cmdline `xauto=1` plus a disk labeled
   `cidata` containing `x-install.json` triggers the autoinstall path.
-- **Offline provisioning payload.** The `x-scripts` package and the Hyprland
-  config snapshot ship inside the ISO, so provisioning does not depend on
-  downloading them during install.
+- **Offline provisioning payload.** The `x-scripts` package (current payload
+  `x-scripts 0.1.0-19`) and the Hyprland config snapshot ship inside the ISO,
+  so provisioning does not depend on downloading them during install.
 - **WSL support.** `xbuildwsl.sh` / `xbuildwslc.sh` produce rootfs tarballs.
 
 ## Development model

@@ -86,10 +86,12 @@ Tanto `work/` como `out/` se recrean en cada construcción y están en
 
   `SigLevel = Optional TrustAll` es una conveniencia de desarrollo y debería
   revisarse para flujos de *release* endurecidos.
-- El *payload* de aprovisionamiento (`x-scripts`) se incluye **offline**
-  dentro del ISO en `airootfs/root/x-installer/packages/x-scripts-*.pkg.tar.zst`,
-  de modo que el instalador no necesita descargarlo de la red durante la
-  instalación.
+- El *payload* de aprovisionamiento (`x-scripts` `0.1.0-19`) se incluye
+  **offline** dentro del ISO en
+  `airootfs/root/x-installer/packages/x-scripts-0.1.0-19-any.pkg.tar.zst`, de
+  modo que el instalador no necesita descargarlo de la red durante la
+  instalación. El instalador lo usa para aprovisionar el destino y para
+  registrar la primera generación (`0001`) al final de la instalación.
 
 ## Solución de problemas
 

@@ -19,16 +19,19 @@ ADR-0001/ADR-0003 in `DECISIONS.md` at the workspace root).
 | `install/user-seed.sh` | Seeds the home from the skeleton and syncs `config/` to `~/.config`. |
 | `install/helpers/common.sh` | Bash library: log/warn/error, privilege and target-user helpers, exports `X_ROOT`. |
 | `install/helpers/sync.sh` | Idempotent tree sync: `x_copy_tree`, `x_seed_home`, `x_sync_config`. |
+| `install/helpers/xgen.sh` | System-generation engine: snapshot + manifest, list/status/diff/verify/restore/prune/export/import. |
+| `install/helpers/xgen-home.sh` | Home-generation engine: dotfile captures with `hgen_new`/`hgen_list`/`hgen_status`/`hgen_diff`/`hgen_restore`/`hgen_prune`. |
 | `install/x-base.packages` | Base package list readable by the builder (one per line); no consumer wired yet. |
 | `skel/` | `/etc/skel` seed for new users (currently a `.bashrc`). |
-| `etc/` | `/etc` drop-ins, one directory per path (`sysctl.d`, `tmpfiles.d`, `sudoers.d`, `pacman.d/hooks` documented in its README); no drop-ins shipped yet. |
+| `etc/` | `/etc` overlay, one directory per path; ships the pacman generation hooks under `etc/pacman.d/hooks/`. |
+| `hooks/` | `pacman-gen.sh`: wrapper called by the pacman hooks; no-op without a current generation, on non-btrfs, or with `X_GEN_SKIP=1`. |
 | `config/` | User dotfiles synced to `~/.config`. `config/hypr/` is only a documentation entry point + default wallpaper; the real desktop config ships offline in the package (`/usr/share/x/config/equisdots`), ADR-0005. |
 | `migrations/` | Per-user idempotent migrations (`<timestamp>-<name>.sh`), applied by `x migrate` / `x update`. |
 | `themes/` | Theme store: `themes/<name>/colors` (key=hex), applied by `x theme set`. |
 | `hardware/` | Self-contained root modules: `nvidia.sh`, `qemu.sh`. |
 | `tools/` | User-level tools: `node.sh` (fnm, gated by `X_NODE`), `hyprland-install.sh` (offline equisdots desktop deployment, gated by `X_HYPRLAND`). |
 | `packaging/` | `PKGBUILD` for `x-scripts` + `vendor-config.sh` offline snapshot generator + `.vendor/` output (git-ignored). |
-| `test/` | Local tests without root: `test/smoke.sh` (syntax + helpers + CLI + Hyprland dry-runs). |
+| `test/` | Local tests without root: `test/smoke.sh` (syntax + helpers + CLI + Hyprland dry-runs) plus the generation suites (`generations.sh`, `generations-boot.sh`, `generations-multikernel.sh`, `pacman-hooks.sh`, `generations-export.sh`, `home-gens.sh`). |
 | `docs/` | This documentation (`CLI.md`, `LAYOUT.md`, `en/`, `es/`). |
 
 ## Mechanics
@@ -42,6 +45,10 @@ ADR-0001/ADR-0003 in `DECISIONS.md` at the workspace root).
   config sync backs them up first.
 - The desktop config is installed cleanly from the offline vendored snapshot,
   not maintained here (see `hyprland.md`, ADR-0005).
+- Generations: `install/helpers/xgen.sh` snapshots the btrfs root (metadata in
+  `/var/lib/x`, snapshots in `/.snapshots`); `install/helpers/xgen-home.sh`
+  versions the dotfiles under `~/.local/share/x/home-gens` without root or
+  btrfs. The pacman hooks under `etc/pacman.d/hooks/` call `hooks/pacman-gen.sh`.
 
 ## Usage
 
@@ -68,6 +75,7 @@ bash test/smoke.sh
 - `overview.md` — role of the repo in the org and the system.
 - `cli.md` — commands, adding commands, env vars.
 - `provisioning.md` — phases, helpers, idempotency.
+- `generations.md` — snapshots, manifests, rollback, restore, export/import.
 - `hyprland.md` — the offline desktop setup tool.
 - `packaging.md` — building `x-scripts` and the vendored snapshot.
 WSL lives in its dedicated repos: xlnux/wsl and xlnux/wsl-scripts.

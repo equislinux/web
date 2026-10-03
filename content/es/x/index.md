@@ -18,6 +18,10 @@ producto de cara al usuario por sí solo. Aporta:
   vivo (no hay instalador gráfico; Calamares fue eliminado).
 - El **aprovisionamiento** del sistema instalado mediante el *payload*
   `x-scripts`, incluido de forma *offline* dentro del ISO.
+- La capa de **generaciones** sobre btrfs: cada cambio relevante registra un
+  snapshot booteable más un manifiesto; `x gen rollback` cambia el arranque
+  por defecto y `x gen restore` recupera archivos o paquetes. La primera
+  generación (`0001`) se crea al final de la instalación.
 - Utilidades para construir **tarballs de sistema de archivos importables en
   WSL**.
 
@@ -61,14 +65,23 @@ Documentación relacionada en este repositorio:
   etiqueta/editor del ISO, al MOTD y a los paquetes instalados.
 - **Instalador de texto.** `configurator.sh` recoge las opciones y escribe un
   plan JSON; `install.sh` particiona (GPT/btrfs), ejecuta `pacstrap`,
-  configura el sistema base, aprovisiona con `x-scripts` e instala un gestor
-  de arranque.
+  configura el sistema base, aprovisiona con `x-scripts`, instala un gestor
+  de arranque y registra la primera generación. Además del modo `wipe`, hay
+  **modo dualboot** (UEFI): instala en la región libre más grande sin tocar
+  las particiones existentes, la ESP ni el arranque de Windows.
+- **Generaciones sobre btrfs.** Cada cambio relevante registra un snapshot
+  booteable más un manifiesto; `x gen rollback` cambia el arranque por
+  defecto y `x gen restore` recupera archivos o paquetes. El layout instalado
+  usa `@` (`/`), `@home` (`/home`, nunca se revierte), `@snapshots`
+  (`/.snapshots`) y `@xstate` (`/var/lib/x`), con `/tmp` en tmpfs y un ESP de
+  1 GiB para las entries de arranque.
 - **Instalación desatendida.** El parámetro `xauto=1` del kernel más un disco
   etiquetado como `cidata` con un `x-install.json` activa la ruta de
   autoinstalación.
-- **Payload de aprovisionamiento offline.** El paquete `x-scripts` y la
-  instantánea de la configuración de Hyprland viajan dentro del ISO, de modo
-  que el aprovisionamiento no depende de descargarlos durante la instalación.
+- **Payload de aprovisionamiento offline.** El paquete `x-scripts`
+  (`0.1.0-19`) y la instantánea de la configuración de Hyprland viajan dentro
+  del ISO, de modo que el aprovisionamiento no depende de descargarlos
+  durante la instalación.
 - **Soporte WSL.** `xbuildwsl.sh` / `xbuildwslc.sh` producen tarballs de
   rootfs.
 

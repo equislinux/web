@@ -36,23 +36,25 @@ third-party dependencies: `clap` (CLI), `serde`/`serde_json`/`toml`,
 | `recipe` | XBUILD and PKGBUILD parsing, validation, srcinfo, `new` templates | `recipe/{mod,types,validate,xbuild,pkgbuild}.rs` |
 | `source` | Download, checksum, extraction, git, cache | `source/{mod,download,checksum,extract,git,cache}.rs` |
 | `builder` | Build pipeline + fakeroot + build dirs/env/exec/log | `builder/{mod,dirs,env,exec,log,pipeline,types}.rs` |
-| `metadata` | `.PKGINFO`, `.BUILDINFO`, `.MTREE`, `.INSTALL` generation | `metadata/{mod,pkginfo,buildinfo,mtree,install}.rs` |
+| `metadata` | `.PKGINFO`, `.BUILDINFO` (with extended provenance), `.MTREE`, `.INSTALL` generation | `metadata/{mod,pkginfo,buildinfo,provenance,mtree,install}.rs` |
 | `archive` | `.xp` archive creation and ELF stripping | `archive/{mod,pack,strip}.rs` |
-| `lint` | Linting framework + rules (permissions, paths, metadata, dependencies, ELF) | `lint/{mod,rules,permissions,paths,metadata,dependency,elf,report}.rs` |
+| `lint` | Linting framework + rules (permissions, paths, metadata, dependencies, ELF, `source-unpinned`) | `lint/{mod,rules,permissions,paths,metadata,dependency,elf,source,report}.rs` |
 | `signing` | OpenPGP signing/verification (sequoia-openpgp) | `signing/{mod,keys,sign,verify}.rs` |
-| `repo` | Repository database management (read/write, add/remove, inspect, deploy) | `repo/{mod,types,desc,db,inspect,deploy}.rs` |
+| `repo` | Repository database management (read/write, add/remove, inspect, deploy) + history index and retention | `repo/{mod,types,desc,db,history,retention,inspect,deploy}.rs` |
 
 ## The build pipeline
 
 `xpkg build` orchestrates, in order:
 
-1. Parse and validate the recipe (XBUILD or PKGBUILD).
+1. Parse and validate the recipe (XBUILD or PKGBUILD) and run the
+   recipe-level lint (`source-unpinned` warnings are reported, never fatal).
 2. Apply CLI overrides for builddir/outdir.
 3. Set up isolated build directories and environment.
 4. Run the build phases: `prepare` then `build` then `check` (optional) then
    `package`, executing each recipe phase as shell scripts.
 5. Strip ELF binaries (if `strip_binaries = true`).
-6. Create the `.xp` archive (tar.zst by default).
+6. Create the `.xp` archive with extended `.BUILDINFO` provenance
+   (`x:recipe_sha256`, `x:source_commit`, `x:tool_version`).
 7. Sign the package (if `--sign` or `sign = true` in config).
 
 ### Rootless packaging
@@ -88,6 +90,15 @@ package-1.0-1-x86_64.xp (tar.zst)
 Optional signing produces an OpenPGP detached signature file next to the
 archive (`package-...-x86_64.xp.sig`).
 
+`.BUILDINFO` appends extended provenance keys after the historical
+`key = value` fields, ignored by readers that do not know them:
+
+| Key | Content |
+|-----|---------|
+| `x:recipe_sha256` | SHA-256 of the recipe file (XBUILD/PKGBUILD) used for the build |
+| `x:source_commit` | Exact commit of the first Git source pinned with `#commit=`/`#tag=`/`#branch=` |
+| `x:tool_version` | xpkg version that produced the package |
+
 ## Repository database format
 
 A repository is a set of `.xp` packages plus a database index that `xpm` can
@@ -97,6 +108,16 @@ package holds `desc` (package metadata, `%FILENAME%`, `%NAME%`, `%VERSION%`,
 `%DESC%`, sizes, checksum, ...) and `depends` (dependency information), in an
 ALPM-compatible key-value format. The `repo` module reads/writes these
 databases and can generate a static repository layout for HTTP hosting.
+
+Next to the database, `xpkg` maintains `history.json` (schema 1) with every
+version still available per package (`version`, `filename`, `sha256`,
+`builddate`, optional `.sig` and `source` provenance), signed as
+`history.json.sig` when a signing key is configured. `repo-add --keep N` and
+`repo-prune` use the index for retention: older versions listed there are
+swept from disk, but the version exposed by the database is never deleted.
+The `deploy` helper does not copy history-referenced versions yet, so
+publishing flows must keep the old `.xp` files in the deployed layout
+themselves.
 
 ## The XBUILD recipe format
 
@@ -147,8 +168,19 @@ Validation rules applied by the parser: `name` must follow the naming rules
 (lowercase ASCII start, lowercase letters/digits/hyphens/underscores, max
 128); `version` non-empty; `release` >= 1; `arch` in `x86_64`, `aarch64`,
 `i686`, `armv7h`, `any`; source URL schemes in `http`, `https`, `ftp`,
-`file`; checksum arrays must match the `urls` length. Errors are collected
-and reported together, not one by one.
+`file`, `git`, `git+https`, `git+http`; checksum arrays must match the
+`urls` length. Errors are collected and reported together, not one by one.
+
+Git sources accept makepkg-style pins (`#commit=`, `#tag=`, `#branch=`); the
+exact commit of the first pinned source is resolved (local clone `HEAD` or
+`git ls-remote`) and recorded as `x:source_commit`. A source with neither a
+checksum nor a pinned commit/tag triggers the `source-unpinned` warning when
+the build starts, but never stops it.
+
+When `SOURCE_DATE_EPOCH` is set to a valid Unix timestamp, it is used for the
+`builddate` of `.PKGINFO`/`.BUILDINFO` and for the mtime of every tar entry.
+Without it, the current time is used. This is reproducibility groundwork, not
+a full binary-reproducibility guarantee.
 
 ### PKGBUILD compatibility
 

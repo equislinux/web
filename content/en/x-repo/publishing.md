@@ -4,7 +4,8 @@ Publishing to the `[x]` pacman repository is a **local build then commit** flow.
 GitHub Actions never builds packages; it only deploys what is committed under
 `public/` (see [web-portal.md](web-portal.md)).
 
-The full cycle: local build -> `repo-add` -> `SHA256SUMS` -> PR -> Pages deploy.
+The full cycle: local build -> `repo-add` (+ optional signing) -> `SHA256SUMS`
+-> PR -> Pages deploy.
 
 ## 1. Local build
 
@@ -72,6 +73,10 @@ The script:
    sha256sum * > SHA256SUMS
    ```
 
+   When `X_REPO_SIGN_KEY` is set, `repo-add` runs with `-s -k` instead,
+   `SHA256SUMS` is signed and the keyring is re-exported; see
+   [Signing the repository](#signing-the-repository-x_repo_sign_key).
+
 Do not edit `x.db` or `SHA256SUMS` by hand; always regenerate them with this script
 (contributing rules in `CONTRIBUTING.md` also forbid manual database edits).
 
@@ -90,6 +95,13 @@ Expected changes for a package update:
 - regenerated `x.db`, `x.db.tar.gz`, `x.files`, `x.files.tar.gz`,
 - regenerated `SHA256SUMS`,
 - the `PKGBUILD` change itself under `packages/`.
+
+For signed builds, also expect the detached signatures of the changed files:
+
+- `*.pkg.tar.zst.sig` for each (re)signed package,
+- `x.db.sig`/`x.db.tar.gz.sig` and `x.files.sig`/`x.files.tar.gz.sig`,
+- `SHA256SUMS.sig`,
+- `signing.pub` and `trustedkeys.gpg` when the keyring material changed.
 
 Commit the repository changes, for example:
 
@@ -128,3 +140,30 @@ The updated packages are now served at:
 - Keep the repository in sync with its consumers: `x-release` and `x-dev` are
   installed from this repo during the X distro install, and `x-scripts` must match
   the payload revision expected by the installer.
+
+## Signing the repository (X_REPO_SIGN_KEY)
+
+Signing is optional and driven by a single environment variable,
+`X_REPO_SIGN_KEY` (the fingerprint or key ID of the project key). The
+repository is currently signed on the `feat/signing` branch
+(`x-scripts 0.1.0-19` included), while the ISO still configures `[x]` as
+`Optional`, so verification is not enforced yet.
+
+With the variable exported, `build-packages.sh`:
+
+1. signs every package tarball — locally built ones via `makepkg --sign --key
+   "$X_REPO_SIGN_KEY"`, the imported `x-scripts` one via `gpg --detach-sign` —
+   producing a detached `*.pkg.tar.zst.sig` per package;
+2. runs `repo-add -s -k "$X_REPO_SIGN_KEY"`, so `x.db`/`x.files` are signed,
+   and mirrors `x.db.sig`/`x.files.sig` from the `.tar.gz` signatures;
+3. signs `SHA256SUMS`, producing `SHA256SUMS.sig`;
+4. exports the public keyring as `trustedkeys.gpg` and `signing.pub` into
+   `public/repo/x86_64/`.
+
+Without `X_REPO_SIGN_KEY` the script keeps publishing the repository
+**unsigned** and prints a warning. Commit the regenerated signature files and
+keyring next to the database and tarballs.
+
+The complete procedure (key setup, consumer `SigLevel`/`pacman-key`
+configuration, pending ISO integration and key rotation) is in
+[signing.md](signing.md).

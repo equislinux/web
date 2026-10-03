@@ -49,11 +49,11 @@ Only these two are built by `build-packages.sh` from their `PKGBUILD` today.
 repo `xlnux/scripts` under `scripts/packaging/` and packages the whole provisioning
 payload (phases, CLI `x`, configs). The resulting tarball is built there and **imported**
 into this repo, committed under `public/repo/x86_64/` (currently
-`x-scripts-0.1.0-13-any.pkg.tar.zst`).
+`x-scripts-0.1.0-19-any.pkg.tar.zst`).
 
 - There is no `packages/x-scripts/` source directory here.
 - The published artifact and the `PKGBUILD` in `scripts/packaging/` are aligned at
-  `0.1.0-13` (the equisdots desktop snapshot). `build-packages.sh` imports the
+  `0.1.0-19` (the multi-kernel payload revision). `build-packages.sh` imports the
   sibling build automatically; re-run it when republishing the payload.
 
 ### Prebuilt artifacts, no sources
@@ -71,10 +71,14 @@ This directory is the pacman-facing repository. Files present:
 | File | Role |
 |---|---|
 | `x.db`, `x.db.tar.gz` | Package database (`x.db` is the uncompressed copy of `x.db.tar.gz`). |
+| `x.db.sig`, `x.db.tar.gz.sig` | Detached OpenPGP signature over the package database (signed builds). |
 | `x.files`, `x.files.tar.gz` | File-list database for `pacman -F`. |
-| `*.pkg.tar.zst` | The packages: `x-release-1.0-8`, `x-dev-1.0-2`, `x-scripts-0.1.0-13`, `xpm-0.1.0-3`. |
+| `x.files.sig`, `x.files.tar.gz.sig` | Detached signature over the file-list database (signed builds). |
+| `*.pkg.tar.zst` | The packages: `x-release-1.0-8`, `x-dev-1.0-2`, `x-scripts-0.1.0-19`, `xpm-0.1.0-3`. |
+| `*.pkg.tar.zst.sig` | Detached OpenPGP signature next to each package (signed builds). |
 | `SHA256SUMS` | Checksums over every file in the directory. |
-| `signing.pub`, `trustedkeys.gpg` | Signing/trust material consumed by the native endpoint. |
+| `SHA256SUMS.sig` | Detached signature over `SHA256SUMS` (signed builds). |
+| `signing.pub`, `trustedkeys.gpg` | Public project key and the GPG keyring consumers import to verify the repository (`signing.pub` is the armored key; `trustedkeys.gpg` is the binary keyring). |
 
 Clients configure the repository in `pacman.conf` as:
 
@@ -103,8 +107,14 @@ sha256sum * > SHA256SUMS
   so entries for packages that no longer exist are dropped too.
 - `x.db`/`x.files` are plain copies of the `.tar.gz` files so pacman can read them
   directly.
-- No signing flag is passed today, so the database is regenerated unsigned.
-- `SHA256SUMS` is regenerated from every file in the directory.
+- By default the database is regenerated unsigned. When `X_REPO_SIGN_KEY` is
+  exported, `build-packages.sh` calls `repo-add -s -k`, signs `SHA256SUMS`, and
+  (re-)exports `trustedkeys.gpg` + `signing.pub`; the signed state lives on the
+  `feat/signing` branch today (see [signing.md](signing.md)).
+- `SHA256SUMS` is regenerated from every file in the directory and signed as
+  `SHA256SUMS.sig` when signing is enabled.
+- Per-package signatures (`*.pkg.tar.zst.sig`) come from `makepkg --sign` and are
+  kept next to their tarball.
 
 ## public/x/x86_64/ — native .xp endpoint
 

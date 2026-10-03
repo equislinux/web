@@ -24,10 +24,15 @@ out of scope for packaging (see the packaging doc and the workspace ROADMAP).
 ## What this repo provides
 
 - `install/` — phase orchestrators for system (root) and user provisioning,
-  with idempotent sync helpers.
-- `bin/` — the `x` CLI (dispatcher + subcommands by naming convention).
+  with idempotent sync helpers and the generation engines
+  (`helpers/xgen.sh` for system snapshots, `helpers/xgen-home.sh` for
+  dotfile generations).
+- `bin/` — the `x` CLI (dispatcher + subcommands by naming convention),
+  including `x gen` and `x home`.
 - `skel/`, `etc/`, `config/` — dotfile seeds for `/etc/skel`, `/etc`
-  drop-ins and user configs.
+  drop-ins (including the pacman generation hooks) and user configs.
+- `hooks/` — `pacman-gen.sh`, the wrapper called by the pacman pre/post
+  generation hooks.
 - `hardware/`, `tools/` — optional modules (NVIDIA, QEMU/libvirt, node) and
   the Hyprland desktop setup tool.
 - `migrations/`, `themes/` — per-user migrations and palette themes.
@@ -46,9 +51,13 @@ into a provisioned x machine:
    services).
 2. The user phase seeds the home, syncs dotfiles and provisions the desktop
    (Hyprland stack) **offline** from a vendored config snapshot.
-3. `x` is the day-to-day CLI for themes, migrations and updates.
+3. `x` is the day-to-day CLI for themes, migrations, updates and generations.
+4. `x gen` versions the system as bootable btrfs snapshots plus manifests and
+   `x home` versions the dotfiles with plain copies, with rollback, diff,
+   verify, prune, export/import and granular restore. See `generations.md`.
 
-See `cli.md`, `provisioning.md`, `hyprland.md` and `packaging.md`.
+See `cli.md`, `provisioning.md`, `generations.md`, `hyprland.md` and
+`packaging.md`.
 
 ## Configuration sources
 

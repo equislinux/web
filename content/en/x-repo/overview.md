@@ -35,6 +35,20 @@ Two packaging paths coexist in the ecosystem:
   ready but the automated native workflow is **pending** (see
   `docs/build-x-native-workflow.md`).
 
+## Current repository state
+
+- The `[x]` pacman repository is **signed** on the `feat/signing` branch:
+  packages, `x.db`/`x.files` and `SHA256SUMS` carry detached OpenPGP
+  signatures, and the public keyring is published as `trustedkeys.gpg` +
+  `signing.pub` (see [signing.md](signing.md)).
+- `x-scripts 0.1.0-19` is the payload published and signed on that branch, and
+  the same revision the ISO embeds (`x/airootfs/root/x-installer/packages/`).
+- Verification is **not enforced yet**: the ISO still configures `[x]` as
+  `Optional`, and embedding the keyring in the live environment and in the
+  installed target is pending.
+- The branch is not deployed to Pages yet; the published site still serves the
+  older, unsigned repository from `main`.
+
 ## What lives in this repository
 
 | Path | Purpose |

@@ -58,13 +58,21 @@ that current `xpm sync` understands (see below).
   with artifacts hosted elsewhere (e.g. GitHub Releases) require the fetch-URL
   composition in `xpm`.
 
+The generations-alignment branch extended this path with version retention
+(`repo-add --keep N`, `repo-prune`), a signed `history.json` provenance index
+and reproducible timestamps (`SOURCE_DATE_EPOCH`). The retention index is what
+would let `xpm` resolve `install <pkg>=<ver>` to an old version; consuming it
+from `xpm` is still pending. One caveat remains on the xpkg side: the `deploy`
+helper does not copy history-referenced versions yet.
+
 ## Open items in this repository
 
 From this repository's `ROADMAP.md` (Phase 9 still has two unchecked items,
 Phase 10 is open):
 
 - Integration tests with xpm - build packages with xpkg and install with xpm
-  end to end (#56). Blocked on the xpm install path described above.
+  end to end (#56), including a downgrade resolved from `history.json`.
+  Blocked on the xpm install path described above.
 - Comparative benchmarks vs makepkg - build time, package size, compression
   performance (#57).
 - Phase 10 future goals (post-v1.0): split packages from one XBUILD,

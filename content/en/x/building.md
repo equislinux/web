@@ -83,9 +83,12 @@ the `build-*.log` files.
 
   `SigLevel = Optional TrustAll` is a development convenience and should be
   revisited for hardened release workflows.
-- The provisioning payload (`x-scripts`) is shipped **offline** inside the ISO
-  at `airootfs/root/x-installer/packages/x-scripts-*.pkg.tar.zst`, so the
+- The provisioning payload (`x-scripts`, current version `0.1.0-19`) is
+  shipped **offline** inside the ISO at
+  `airootfs/root/x-installer/packages/x-scripts-*.pkg.tar.zst`, so the
   installer does not need to fetch it from the network during installation.
+  The installer uses it to provision the target and to record generation
+  `0001` at the end of the installation.
 
 ## Troubleshooting
 

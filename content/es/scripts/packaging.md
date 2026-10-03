@@ -10,9 +10,13 @@ workspace, Fase 4.)
 `packaging/PKGBUILD` produce el paquete Arch (`any`, depende de `bash`):
 
 - Instala `bin`, `install`, `skel`, `etc`, `config`, `hardware`, `tools`,
-  `migrations` y `themes` en **`/usr/share/x`**.
+  `migrations`, `themes` y `hooks` en **`/usr/share/x`**.
 - Hace ejecutables todos los `*.sh` (y el dispatcher `x`) bajo
-  `/usr/share/x/{bin,install,hardware,tools}`.
+  `/usr/share/x/{bin,install,hardware,tools,hooks}`.
+- El overlay de `/etc` (incluidos los hooks de pacman
+  `etc/pacman.d/hooks/`) lo aplica `x setup` (`install/config.sh`);
+  `hooks/pacman-gen.sh` es el wrapper que llaman esos hooks (ver
+  `provisioning.md` y `generations.md`).
 - Instala `/usr/bin/x` como symlink a `/usr/share/x/bin/x`.
 - Si existe `packaging/.vendor/x-config`, sus contenidos se fusionan en
   `/usr/share/x/config` (el snapshot offline del escritorio que usa
@@ -20,9 +24,10 @@ workspace, Fase 4.)
   snapshot se vende en el repo y nunca se descarga en el build.
 
 Metadatos de versión: `pkgver=0.1.0`, `pkgrel` se sube por iteración
-(actualmente 13 en el PKGBUILD). Puede quedar un artefacto de build antiguo
-(`*.pkg.tar.zst`) en el directorio, pero es stale y está git-ignored; al
-reconstruir se produce el pkgrel actual.
+(actualmente 19 en el PKGBUILD; el payload vigente es **`x-scripts
+0.1.0-19`**). Puede quedar un artefacto de build antiguo (`*.pkg.tar.zst`) en
+el directorio, pero es stale y está git-ignored; al reconstruir se produce el
+pkgrel actual.
 
 Para construir (sin red para las fuentes de config; el árbol vendido debe
 existir primero, ver abajo):
@@ -34,6 +39,20 @@ makepkg   # requiere packaging/.vendor/x-config presente
 
 `packaging/.gitignore` ignora `src/`, `pkg/`, `.vendor/` y los artefactos
 construidos.
+
+## Aserción del payload en tests
+
+`test/package-payload.sh` (que corre dentro de `test/validate.sh`) compara el
+paquete construido contra la rama y contra la copia embebida en la distro:
+
+- exige que el `.pkg` contenga el motor de generaciones
+  (`install/helpers/xgen.sh`, `install/helpers/xgen-home.sh`), los comandos
+  `bin/x-gen-new.sh`, `bin/x-gen-boot.sh`, `bin/x-home-new.sh` y los hooks
+  (`hooks/pacman-gen.sh`, `etc/pacman.d/hooks/{10-x-gen-pre,20-x-gen-post}.hook`);
+- compara `xgen.sh`/`xgen-home.sh` del paquete con los de la rama;
+- exige exactamente un payload embebido en
+  `../x/airootfs/root/x-installer/packages/`, con el nombre
+  `x-scripts-0.1.0-19-any.pkg.tar.zst` y byte a byte idéntico al construido.
 
 ## `vendor-config.sh` — el snapshot offline
 

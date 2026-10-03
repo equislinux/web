@@ -28,6 +28,10 @@ xpm/
 │           ├── signing.rs      # verificación de firmas OpenPGP separadas
 │           ├── hooks.rs        # trait Hook + hooks integrados de transacción
 │           ├── transaction.rs  # motor de transacciones (plan/prepare/commit)
+│           ├── journal.rs      # journal persistente de transacciones (history)
+│           ├── txhooks.rs      # runner de hooks pre/post-transaction.d
+│           ├── install_reason.rs # metadatos de razón de instalación (explicit/dep)
+│           ├── local_db.rs     # metadatos de la DB local (version/files/origin)
 │           ├── package/        # lectores y parsers de .xp / .pkg.tar.zst
 │           │   ├── reader.rs, pkginfo.rs, buildinfo.rs, mtree.rs,
 │           │   ├── types.rs, validate.rs
@@ -137,8 +141,8 @@ SHA-256, tamaños y tipos de archivo.
   un paquete y descargan desde el primer mirror alcanzable.
 
 Las bases de datos de sync caen bajo `<db_path>/sync/` (p.ej. `/var/lib/xpm/sync/<repo>.db`). La
-base de datos local de paquetes instalados vive bajo `<db_path>/local/<pkg>/` y guarda al menos
-un archivo `version` y un manifest `files`.
+base de datos local de paquetes instalados vive bajo `<db_path>/local/<pkg>/` y guarda las
+entradas `version`, `files`, `reason` y `origin` (estas dos últimas cuando se conocen).
 
 ## Firma
 
@@ -181,6 +185,27 @@ plan/prepare/commit:
 
 Los scriptlets se ejecutan vía `bash` con las variables `XPM_ROOT_DIR`, `XPM_PKG_NAME` y
 `XPM_PKG_VERSION` exportadas.
+
+## Journal de transacciones, history y metadatos locales
+
+Cada transacción se persiste como JSON **antes** de tocar el sistema de ficheros y se finaliza
+tras el commit:
+
+- `<db_path>/journal/<epoch>-<pid>.json` (por defecto `/var/lib/xpm/journal/`), con `schema`,
+  `id`, `action`, `root_dir`, `started`/`finished` en epoch, `result`
+  (`running`/`ok`/`failed`), la lista de paquetes con versiones `from`/`to` y un `error`
+  opcional. `xpm history [--json]` lo lee (el resumen humano muestra timestamps ISO-8601).
+- `txhooks.rs` ejecuta los ejecutables de `pre-transaction.d/` y `post-transaction.d/`
+  (raíz por defecto `/usr/lib/xpm/hooks`, anulable con `XPM_HOOKS_DIR`) en orden léxico con
+  `XPM_ROOT_DIR`, `XPM_ACTION`, `XPM_JOURNAL`, `XPM_PKG_NAMES` y `XPM_PKG_VERSIONS`. Un fallo
+  en un hook pre aborta la transacción; un fallo en un hook post solo avisa.
+- `install_reason.rs` y `local_db.rs` persisten los metadatos que leen `query`, `files` e
+  `info`: `<db_path>/local/<pkg>/reason` (`explicit`/`dep`), `origin` (repositorio de origen)
+  y `files` (manifest `%FILES%` compatible con pacman, derivado del `.MTREE` del paquete).
+  Los ficheros ausentes usan `explicit`, `unknown` y lista vacía por defecto en vez de fallar.
+
+xpm en sí sigue sin saber de snapshots ni generaciones: los hooks de `x gen` que aportará
+`x-scripts` consumen este journal cuando xpm sea el gestor activo.
 
 ## Configuración
 
@@ -237,7 +262,7 @@ mirrors se prueban en orden hasta que uno responde.
 | Área | Crates |
 |------|--------|
 | CLI | `clap` 4 |
-| Serialización | `serde` 1, `toml` 0.8 |
+| Serialización | `serde` 1, `serde_json` 1, `toml` 0.8 |
 | Errores | `anyhow` 1, `thiserror` 2 |
 | Resolución | `resolvo` 0.10, `itertools` 0.14 |
 | Archivos/compresión | `tar` 0.4, `zstd` 0.13, `flate2` 1, `xz2` 0.1 |

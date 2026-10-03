@@ -56,6 +56,12 @@ ambas crates más tests de integración bajo `tests/`). Sin embargo, dentro de l
 - Por tanto, `xpm` **no es todavía el camino activo** en el flujo *reboot*. Es una base de
   código de tooling funcional con su propio roadmap interno, a la espera de retomarse cuando el
   repositorio `.xp` nativo o el resolver SAT se necesiten de verdad.
+- Al margen del alcance del reboot, la rama `feat/generations-alignment` aterrizó un avance
+  autocontenido: journal de transacciones más `xpm history`, hooks de transacción
+  (`pre/post-transaction.d` con el contrato `XPM_*`), `xpm query` legible por máquina y
+  `xpm files`/`xpm info` reales respaldados por metadatos `reason`/`origin`/`files` en la base
+  de datos local. El resolver SAT sigue sin conectarse al CLI, `search` sigue siendo un stub y
+  `--orphans`/rollback están pendientes.
 
 El repo sigue publicando sus propios binarios como paquetes `.xp` en el árbol nativo de xpm
 (ver el README para el bootstrap de claves y el checklist de firmas), que es independiente del
@@ -78,6 +84,10 @@ xpm es `https://xlnux.github.io/x-repo/x/$arch`, no el endpoint pacman bajo `/re
   variables de URL.
 - Track de ejecución de seguridad (Fase 10): implementadas la verificación de `.db.sig` y
   `.sig` de paquetes y la carga de keyrings.
+- Alineación con generaciones (rama `feat/generations-alignment`): journal de transacciones
+  bajo `/var/lib/xpm/journal/`, `xpm history [--json]`, hooks `pre/post-transaction.d`,
+  `query` con `--format tsv` y filtros por razón de instalación, y metadatos de la base de
+  datos local para `files`/`info`.
 
 La convención de versionado del roadmap del repo es:
 
@@ -96,10 +106,11 @@ El `Cargo.toml` del workspace reporta actualmente la versión `0.1.0`.
 No todos los subcomandos están conectados del todo con la lógica del motor. De
 `crates/xpm/src/main.rs`:
 
-- `sync`, `install`, `remove`, `upgrade` y `repo` despachan a lógica real de transacción y
-  descarga.
-- `query`, `search`, `info` y `files` parsean sus argumentos pero hoy imprimen mensajes de
-  "complete (stub)"; todavía no consultan las bases de datos.
+- `sync`, `install`, `remove`, `upgrade`, `repo`, `history`, `query`, `info` y `files`
+  despachan a lógica real del motor.
+- `search` sigue imprimiendo un mensaje "complete (stub)".
+- `query --orphans` falla con un mensaje claro: la base de datos local aún no registra el
+  grafo inverso de dependencias (qué paquetes requiere cada paquete instalado).
 
 Ver [Uso](usage.md) para la referencia completa y [Arquitectura](architecture.md) para los
 detalles de implementación, incluida la nota de que el camino de instalación del CLI selecciona

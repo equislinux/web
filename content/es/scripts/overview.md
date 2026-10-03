@@ -25,16 +25,20 @@ de packaging y el ROADMAP del workspace).
 ## Qué aporta este repo
 
 - `install/` — orquestadores de fase para aprovisionamiento de sistema (root) y
-  usuario, con helpers de sync idempotentes.
-- `bin/` — la CLI `x` (dispatcher + subcomandos por convención de nombres).
-- `skel/`, `etc/`, `config/` — semillas de dotfiles para `/etc/skel`, drop-ins
-  de `/etc` y configs de usuario.
+  usuario, con helpers de sync idempotentes y los motores de generaciones
+  (`helpers/xgen.sh` y `helpers/xgen-home.sh`).
+- `bin/` — la CLI `x` (dispatcher + subcomandos por convención de nombres,
+  incluidos `x-gen-*.sh` y `x-home-*.sh`).
+- `skel/`, `etc/`, `config/` — semillas de dotfiles para `/etc/skel`,
+  drop-ins de `/etc` (incluidos los hooks de pacman de generaciones en
+  `etc/pacman.d/hooks/`) y configs de usuario.
 - `hardware/`, `tools/` — módulos opcionales (NVIDIA, QEMU/libvirt, node) y el
   tool de setup del escritorio Hyprland.
+- `hooks/` — `pacman-gen.sh`, el wrapper que llaman los hooks de pacman
+  pre/post para registrar generaciones alrededor de cada transacción.
 - `migrations/`, `themes/` — migraciones por usuario y temas por paleta.
-- `packaging/` — el PKGBUILD de `x-scripts` y el generador del snapshot de
-  config offline (`vendor-config.sh`).
-  payload).
+- `packaging/` — el PKGBUILD de `x-scripts` (instala también `hooks/`) y el
+  generador del snapshot de config offline (`vendor-config.sh`).
 - `test/` — tests locales sin root (`test/smoke.sh`).
 
 ## Rol en el sistema
@@ -48,9 +52,15 @@ es lo que convierte un Arch recién pacstrapeado en una máquina x aprovisionada
 2. La fase de usuario siembra el home, sincroniza los dotfiles y aprovisiona el
    escritorio (stack Hyprland) **offline** desde un snapshot de config
    vendido.
-3. `x` es la CLI del día a día para temas, migraciones y actualizaciones.
+3. Las **generaciones** versionan el sistema: `x setup` y `x update` registran
+   snapshots automáticos sobre btrfs, los hooks de pacman capturan
+   transacciones manuales, y `x home` versiona los dotfiles del usuario sin
+   root ni btrfs.
+4. `x` es la CLI del día a día para temas, migraciones, actualizaciones y
+   generaciones.
 
-Ver `cli.md`, `provisioning.md`, `hyprland.md` y `packaging.md`.
+Ver `cli.md`, `provisioning.md`, `generations.md`, `hyprland.md` y
+`packaging.md`.
 
 ## Fuentes de configuración
 

@@ -43,8 +43,9 @@ Configuration defaults work out of the box. To customise, copy
 | `xpkg verify <pkg>` | Verify package integrity and OpenPGP signature |
 | `xpkg new <name>` | Generate a new XBUILD template |
 | `xpkg srcinfo` | Generate `.SRCINFO`-style output from an XBUILD |
-| `xpkg repo-add <db> <pkg>` | Add a package to a repository database |
+| `xpkg repo-add <db> <pkg>` | Add a package to a repository database (supports `--keep N`) |
 | `xpkg repo-remove <db> <name>` | Remove a package from a repository database |
+| `xpkg repo-prune <db>` | Apply the version retention policy to an existing repository |
 
 ### Global flags
 
@@ -92,7 +93,10 @@ xpkg lint hello-2.12-1-x86_64.xp --strict
 ```
 
 Lint categories: permissions, paths, metadata, dependencies, and ELF
-analysis. See [Linting Rules](../LINTING.md) for the complete list.
+analysis. Recipe-level `source-unpinned` checks (sources with no usable
+checksum and no pinned Git commit/tag) run at the start of `xpkg build` and
+never stop the build. See [Linting Rules](../LINTING.md) for the complete
+list.
 
 ### info - Display Package Metadata
 
@@ -150,7 +154,7 @@ xpkg srcinfo                     # Print to stdout
 xpkg srcinfo > .SRCINFO          # Write output to .SRCINFO
 ```
 
-### repo-add / repo-remove - Repository management
+### repo-add / repo-remove / repo-prune - Repository management
 
 Manage an ALPM-compatible database (`myrepo.db.tar.zst` by default; also
 `.db.tar.gz` and `.db.tar.xz`, auto-detected from the extension). The
@@ -159,13 +163,36 @@ database is created automatically on first add.
 ```bash
 xpkg repo-add myrepo.db.tar.zst hello-2.12-1-x86_64.xp
 xpkg repo-add myrepo.db.tar.zst hello-2.12-1-x86_64.xp --sign
+xpkg repo-add myrepo.db.tar.zst hello-2.12-2-x86_64.xp --keep 3  # retain 3 versions
 
 xpkg repo-remove myrepo.db.tar.zst hello
 xpkg repo-remove myrepo.db.tar.zst hello --sign
 ```
 
 Adding an existing package name replaces the entry with the new version.
-See [Repository Management](../REPOSITORY.md) for hosting instructions.
+`repo-add` also maintains `history.json` (schema 1) next to the database,
+recording every version still available for each package (`version`,
+`filename`, `sha256`, `builddate`, optional `.sig` and `source` provenance).
+The index is signed as `history.json.sig` when a signing key is configured
+(or `--sign` is passed); otherwise a stale signature is removed with a
+warning. With `--keep N`, the N newest versions per package (by `builddate`)
+plus the version exposed by the database are preserved and older files listed
+in the index are deleted; `--keep 0` (default) disables pruning.
+
+`repo-prune` applies the same retention policy to an existing repository and
+rewrites `history.json`:
+
+```bash
+xpkg repo-prune myrepo.db.tar.zst --keep 3           # keep the last 3 versions
+xpkg repo-prune myrepo.db.tar.zst --keep 3 --dry-run # preview the sweep
+xpkg repo-prune myrepo.db.tar.zst                    # keep only the current version
+```
+
+The version exposed by the database is never deleted, and files that are not
+listed in `history.json` are never touched. If the index is missing,
+`repo-prune` seeds it from the database entries whose files exist in the
+repository directory. See [Repository Management](../REPOSITORY.md) for
+hosting instructions.
 
 ## Exit codes
 
@@ -180,6 +207,7 @@ See [Repository Management](../REPOSITORY.md) for hosting instructions.
 | Variable | Description |
 |----------|-------------|
 | `RUST_LOG` | Override tracing log level filter (e.g. `RUST_LOG=debug`) |
+| `SOURCE_DATE_EPOCH` | Unix timestamp used for metadata `builddate` and tar entry mtimes (reproducibility) |
 
 During builds, these variables are set for the build scripts:
 
@@ -227,6 +255,10 @@ See `etc/xpkg.conf.example` for every option.
 2. **Arch compatibility** - keep an existing PKGBUILD and run
    `xpkg build --pkgbuild -f ./PKGBUILD`.
 3. **Publishing** - `xpkg repo-add x.db.tar.zst pkg-...-x86_64.xp` inside the
-   hosted directory; optionally `--sign` the database.
-4. **Signing setup** - export a secret key to `~/.config/xpkg/signing.key`,
+   hosted directory; optionally `--sign` the database. Add `--keep N` to retain
+   old versions and keep `history.json` populated, and use
+   `xpkg repo-prune <db> --keep N` to sweep the repository later.
+4. **Reproducible builds** - `SOURCE_DATE_EPOCH=<epoch> xpkg build` pins the
+   metadata `builddate` and tar entry mtimes.
+5. **Signing setup** - export a secret key to `~/.config/xpkg/signing.key`,
    set `sign = true` and `sign_key` in the config, build with `--sign`.

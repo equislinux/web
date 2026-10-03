@@ -67,6 +67,8 @@ sudo" en vez de una lista vacía cuando se corren sin privilegios.
 | `x gen restore --pkg <name> [--from ID] [--dest ROOT]` | Restaura todos los archivos de un paquete (db pacman/xpm del snapshot) |
 | `x gen export <id> [--out FILE] [--with-data]` | Empaqueta una generación como bundle portable |
 | `x gen import <file> [--force]` | Importa un bundle a `$X_GEN_STATE` (`--force` reemplaza) |
+| `x gen plan <system.toml>` | Imprime las acciones para cumplir una declaración declarativa |
+| `x gen apply <system.toml> [--dry-run]` | Aplica la declaración y registra una generación |
 
 ```bash
 sudo x gen new --reason manual --label "antes de tocar"
@@ -194,12 +196,40 @@ antes de las migraciones. `X_HGEN_SKIP=1` desactiva las capturas automáticas.
   propio `pacman -Syu` para manejar él mismo sus generaciones pre/post. Toda
   transacción manual de pacman queda así capturada.
 
+## Sistema declarativo (`system.toml`)
+
+`x gen plan` imprime las acciones para reconciliar el sistema con un
+`system.toml`; `x gen apply` las ejecuta y registra una generación
+(`reason: apply`):
+
+```toml
+[system]
+hostname = "x"
+timezone = "UTC"
+locale = "en_US.UTF-8"
+
+[packages]
+explicit = ["kitty", "neovim"]
+# prune = true   # elimina los paquetes instalados fuera de la lista
+
+[services]
+enable = ["NetworkManager"]
+
+[theme]
+name = "x-dark"
+```
+
+- `[system]` hostname/timezone/locale se setean solo si difieren.
+- `[packages] explicit` instala los faltantes (`pacman -S --needed`); los
+  instalados fuera de la declaración se reportan pero **se conservan** salvo
+  `prune = true`.
+- `[services] enable` habilita las units faltantes.
+- `[theme] name` se aplica vía `x theme set` como el usuario que invoca.
+- `apply` soporta `--dry-run` y respeta `X_DRY_RUN=1`; las acciones de sistema
+  necesitan root/sudo.
+
 ## Límites y estado
 
-- **`system.toml` pendiente.** La capa declarativa estilo
-  `configuration.nix` está diseñada pero no implementada: un `system.toml`
-  reconciliado con `x gen plan`/`x gen apply` (paquetes, servicios, tema) que
-  registraría una generación con el hash del archivo.
 - **qgroups pendientes.** El límite de espacio con qgroups de btrfs
   (`X_GEN_QGROUP` / prune por tamaño) no está implementado.
 - Elegir generación desde el menú de arranque (el rollback es un comando,

@@ -69,6 +69,7 @@ sudo" en vez de una lista vacía cuando se corren sin privilegios.
 | `x gen import <file> [--force]` | Importa un bundle a `$X_GEN_STATE` (`--force` reemplaza) |
 | `x gen plan <system.toml>` | Imprime las acciones para cumplir una declaración declarativa |
 | `x gen apply <system.toml> [--dry-run]` | Aplica la declaración y registra una generación |
+| `x gen quota init [--limit SIZE]` / `status` | Habilita quotas btrfs y muestra uso / tabla de qgroups |
 
 ```bash
 sudo x gen new --reason manual --label "antes de tocar"
@@ -228,10 +229,17 @@ name = "x-dark"
 - `apply` soporta `--dry-run` y respeta `X_DRY_RUN=1`; las acciones de sistema
   necesitan root/sudo.
 
-## Límites y estado
+## Límite de espacio (qgroups de btrfs)
 
-- **qgroups pendientes.** El límite de espacio con qgroups de btrfs
-  (`X_GEN_QGROUP` / prune por tamaño) no está implementado.
+`x gen quota init [--limit SIZE]` habilita quotas btrfs en el subvolumen de
+snapshots y fija un límite **exclusivo** (`btrfs qgroup limit -e`), así el
+presupuesto solo cuenta los datos propios de los snapshots (`X_GEN_QGROUP`
+define el default). `x gen quota status` muestra el uso y la tabla de
+qgroups. El límite lo aplica btrfs, así que conviene combinarlo con retención
+(`x gen prune --keep N`) y dejar margen; los scripts nunca fijan un límite
+solos.
+
+## Límites y estado
 - Elegir generación desde el menú de arranque (el rollback es un comando,
   como `nixos-rebuild --rollback`), UKIs con Secure Boot y snapshots de home
   por btrfs siguen fuera de alcance.

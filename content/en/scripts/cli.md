@@ -44,6 +44,7 @@ Summaries are the `x:summary` headers of each file (shown by `x help`).
 | `x gen restore <path>` | Restores a file/directory from a generation (`--from ID`, `--dest PATH`). |
 | `x gen restore --pkg <name>` | Restores every file owned by a package (pacman or xpm db inside the snapshot). |
 | `x gen export` / `x gen import` | Packs/restores a generation bundle (`--with-data`, `--force`). |
+| `x gen plan` / `x gen apply` | Prints/applies a declarative `system.toml` (`--dry-run`); records a generation. |
 | `x home` / `x home list` | Lists the user's home generations (dotfiles). |
 | `x home new` / `status` / `diff` / `restore` / `prune` | Home-generation lifecycle (`x home restore <path>`, `x home prune --keep N`). |
 

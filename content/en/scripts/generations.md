@@ -61,6 +61,8 @@ empty list when run unprivileged.
 | `x gen restore --pkg <name> [--from ID] [--dest ROOT]` | Restores every file owned by a package (pacman/xpm db inside the snapshot) |
 | `x gen export <id> [--out FILE] [--with-data]` | Packs a generation into a portable bundle |
 | `x gen import <file> [--force]` | Imports a bundle into `$X_GEN_STATE` (`--force` replaces) |
+| `x gen plan <system.toml>` | Prints the actions to match a declarative system declaration |
+| `x gen apply <system.toml> [--dry-run]` | Applies the declaration and records a generation |
 
 ```bash
 sudo x gen new --reason manual --label "before tinkering"
@@ -211,10 +213,40 @@ The `X_HGEN_*` variables (`X_HGEN_STATE`, `X_HGEN_INCLUDE`, `X_HGEN_EXCLUDE`,
 is in `cli.md`. On a non-btrfs system (or WSL) `xgen_supported` is false and
 every hook is a no-op; the CLI reports that generations are unavailable.
 
+## Declarative system (`system.toml`)
+
+`x gen plan` prints the actions needed to reconcile the system with a
+`system.toml`; `x gen apply` executes them and records a generation
+(`reason: apply`):
+
+```toml
+[system]
+hostname = "x"
+timezone = "UTC"
+locale = "en_US.UTF-8"
+
+[packages]
+explicit = ["kitty", "neovim"]
+# prune = true   # removes installed packages outside the list
+
+[services]
+enable = ["NetworkManager"]
+
+[theme]
+name = "x-dark"
+```
+
+- `[system]` hostname/timezone/locale are set only when they differ.
+- `[packages] explicit` installs missing packages (`pacman -S --needed`);
+  installed packages outside the declaration are reported but **kept** unless
+  `prune = true`.
+- `[services] enable` enables missing units.
+- `[theme] name` is applied through `x theme set` as the invoking user.
+- `apply` supports `--dry-run` and honors `X_DRY_RUN=1`; system actions need
+  root/sudo.
+
 ## Limits and status
 
-- The declarative `system.toml` layer plus `x gen plan` / `x gen apply` is
-  **designed but not implemented** (the manifest would store the file hash).
 - The disk-space limit via btrfs **qgroups** (`X_GEN_QGROUP`, prune by size) is
   pending.
 - Boot load-on-selection is not implemented: rollback is an explicit command.

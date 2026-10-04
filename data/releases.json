@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "releases": [
+    {
+      "version": "2026.10.04",
+      "date": "2026-10-04",
+      "iso": {
+        "name": "x-2026.10.04-x86_64.iso",
+        "url": "https://sourceforge.net/projects/xlnux/files/iso/x-2026.10.04-x86_64.iso/download",
+        "size": 2132934656,
+        "sha256": "1f2fd580c4351beb723a9543efe39aed7b4d5c34d0370c3011e4c877ffa54d7e",
+        "sig": "https://sourceforge.net/projects/xlnux/files/iso/x-2026.10.04-x86_64.iso.sig/download",
+        "checksums": "https://sourceforge.net/projects/xlnux/files/iso/SHA256SUMS/download"
+      },
+      "wsl": {
+        "name": "x-2026.01.31.tar.zst",
+        "url": "https://github.com/xlnux/x/releases/download/x/x-2026.01.31.tar.zst"
+      }
+    }
+  ]
+}

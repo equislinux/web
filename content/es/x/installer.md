@@ -132,8 +132,11 @@ están.
    - Perfil `core`: añade solo `vim zsh`.
 6. **Esperar a la red** (comprobación de DNS contra
    `geo.mirror.pkgbuild.com`, hasta ~120 s) y ejecutar
-   `pacstrap -K /mnt <pkgs>` desde los mirrors oficiales más el repositorio
-   `[x]`.
+   `pacstrap /mnt <pkgs>` desde los mirrors oficiales más el repositorio
+   `[x]` firmado (`Required`). Antes, el instalador prepara el keyring del
+   destino (`pacman-key --gpgdir /mnt/etc/pacman.d/gnupg --init`,
+   `--populate archlinux`, agrega y firma localmente
+   `/etc/pacman.d/x-repo.pub`).
 7. **Instalar `x-scripts` offline**: el payload
    `packages/x-scripts-*.pkg.tar.zst` presente en el entorno en vivo se copia
    al destino y se instala con `pacman -U` dentro del chroot.
@@ -188,12 +191,9 @@ de instalación.
 
 ## Autoinstalación
 
-El instalador soporta la instalación desatendida desde el ISO en vivo:
-
-- La línea de comandos del kernel debe contener **`xauto=1`**.
-- Debe existir un dispositivo de almacenamiento etiquetado como **`cidata`**
-  con un archivo **`x-install.json`** (por ejemplo, un disco virtual extra en
-  QEMU).
+Instalación desatendida desde el ISO en vivo: arrancá la entrada **autoinstall**
+(hotkey `a`, `xauto=1`) con un dispositivo etiquetado **`cidata`** que contenga
+**`x-install.json`** (por ejemplo, un disco virtual extra en QEMU).
 
 `x-autoinstall.service` (habilitada en la imagen en vivo) ejecuta
 `autoinstall.sh`, que:
@@ -211,8 +211,12 @@ El JSON de una ejecución desatendida solo requiere las claves base, por
 ejemplo:
 
 ```json
-{"disk":"/dev/vda","hostname":"x-vm","username":"x","password":"secret","profile":"core","bootloader":"grub","encryption":"no","hyprland":"no"}
+{"disk":"/dev/vda","hostname":"x-vm","username":"x","password":"secret","profile":"core","bootloader":"grub","encryption":"no","hyprland":"no","kernel_params":"console=ttyS0"}
 ```
+
+`kernel_params` es opcional: parámetros extra que se añaden al cmdline del
+sistema instalado (validados contra un conjunto de caracteres seguro), por
+ejemplo `console=ttyS0` para validación headless.
 
 Consulta [Pruebas en una máquina virtual](vm-testing.md) para un ejemplo de
 disco cidata.

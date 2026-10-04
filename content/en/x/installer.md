@@ -124,8 +124,10 @@ are required; the remaining keys have sensible defaults when absent.
      `X_PKGLIST` (default `/root/x-installer/packages.x86_64`).
    - `core` profile: adds only `vim zsh`.
 6. **Wait for network** (DNS check against `geo.mirror.pkgbuild.com`, up to
-   ~120 s) and run `pacstrap -K /mnt <pkgs>` from the official mirrors plus
-   the `[x]` repository.
+   ~120 s) and run `pacstrap /mnt <pkgs>` from the official mirrors plus the
+   signed `[x]` repository (`Required`). Before that, the installer prepares
+   the target keyring (`pacman-key --gpgdir /mnt/etc/pacman.d/gnupg --init`,
+   `--populate archlinux`, add + locally sign `/etc/pacman.d/x-repo.pub`).
 7. **Install `x-scripts` offline**: the payload
    `packages/x-scripts-*.pkg.tar.zst` present in the live environment is copied
    into the target and installed with `pacman -U` inside the chroot.
@@ -181,11 +183,9 @@ installation medium.
 
 ## Autoinstall
 
-The installer supports unattended installation from the live ISO:
-
-- The kernel cmdline must contain **`xauto=1`**.
-- A storage device labeled **`cidata`** must exist and contain an
-  **`x-install.json`** file (for example an extra virtual disk in QEMU).
+Unattended installation from the live ISO: boot the **autoinstall** menu entry
+(hotkey `a`, `xauto=1`) with a storage device labeled **`cidata`** containing
+**`x-install.json`** (for example an extra virtual disk in QEMU).
 
 `x-autoinstall.service` (enabled in the live image) runs
 `autoinstall.sh`, which:
@@ -201,8 +201,12 @@ The installer supports unattended installation from the live ISO:
 The JSON for an unattended run only requires the base keys, for example:
 
 ```json
-{"disk":"/dev/vda","hostname":"x-vm","username":"x","password":"secret","profile":"core","bootloader":"grub","encryption":"no","hyprland":"no"}
+{"disk":"/dev/vda","hostname":"x-vm","username":"x","password":"secret","profile":"core","bootloader":"grub","encryption":"no","hyprland":"no","kernel_params":"console=ttyS0"}
 ```
+
+`kernel_params` is optional: extra kernel parameters appended to the installed
+system's cmdline (validated against a safe character set), e.g.
+`console=ttyS0` for headless validation.
 
 See [Testing in a VM](vm-testing.md) for an example cidata disk.
 

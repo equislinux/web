@@ -80,12 +80,14 @@ Tanto `work/` como `out/` se recrean en cada construcción y están en
 
   ```ini
   [x]
-  SigLevel = Optional TrustAll
+  SigLevel = Never
   Server = https://xlnux.github.io/x-repo/repo/x86_64
   ```
 
-  `SigLevel = Optional TrustAll` es una conveniencia de desarrollo y debería
-  revisarse para flujos de *release* endurecidos.
+  El host de build usa `Never` (puede no tener la clave del proyecto). El ISO
+  live y el destino instalado usan `SigLevel = Required`: la clave pública
+  viaja en `/etc/pacman.d/x-repo.pub` y `customize_airootfs.sh`/`install.sh`
+  la importan y firman localmente.
 - El *payload* de aprovisionamiento (`x-scripts` `0.1.0-19`) se incluye
   **offline** dentro del ISO en
   `airootfs/root/x-installer/packages/x-scripts-0.1.0-19-any.pkg.tar.zst`, de

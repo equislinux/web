@@ -70,10 +70,10 @@ Related documentation in this repository:
   bootable snapshot and a manifest with the system state for every relevant
   change: list generations, roll back to a previous one (`x gen rollback`)
   and restore a single file or a whole package (`x gen restore`, `--pkg`).
-- **Unattended install.** Kernel cmdline `xauto=1` plus a disk labeled
-  `cidata` containing `x-install.json` triggers the autoinstall path.
+- **Unattended install.** The ISO ships an `autoinstall` boot entry (hotkey
+  `a`, `xauto=1`) for a disk labeled `cidata` containing `x-install.json`.
 - **Offline provisioning payload.** The `x-scripts` package (current payload
-  `x-scripts 0.1.0-19`) and the Hyprland config snapshot ship inside the ISO,
+  `x-scripts 0.1.0-23`) and the Hyprland config snapshot ship inside the ISO,
   so provisioning does not depend on downloading them during install.
 - **WSL support.** `xbuildwsl.sh` / `xbuildwslc.sh` produce rootfs tarballs.
 

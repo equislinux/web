@@ -7,8 +7,8 @@
       "iso": {
         "name": "x-2026.10.04-x86_64.iso",
         "url": "https://sourceforge.net/projects/xlnux/files/iso/x-2026.10.04-x86_64.iso/download",
-        "size": 2132934656,
-        "sha256": "1f2fd580c4351beb723a9543efe39aed7b4d5c34d0370c3011e4c877ffa54d7e",
+        "size": 2134999040,
+        "sha256": "bc1350cc318f8c6bc9336741b24902b430a624ca7e5c68efcbbb3a0f8d6db2c6",
         "sig": "https://sourceforge.net/projects/xlnux/files/iso/x-2026.10.04-x86_64.iso.sig/download",
         "checksums": "https://sourceforge.net/projects/xlnux/files/iso/SHA256SUMS/download"
       },

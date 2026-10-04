@@ -1,20 +1,26 @@
-'use client';
-
-import { useEffect, useState } from 'react';
 import { UI, type Lang } from '@/lib/i18n';
+import releases from '@/data/releases.json';
 
 interface Asset {
   name: string;
-  browser_download_url: string;
-  size: number;
+  url: string;
+  size?: number;
+  sha256?: string;
+  sig?: string;
+  checksums?: string;
 }
 
-const RELEASES_URL = 'https://github.com/xlnux/x/releases';
-const WSL_FALLBACK =
-  'https://github.com/xlnux/x/releases/download/x/x-2026.01.31.tar.zst';
+interface Release {
+  version: string;
+  date: string;
+  iso: Asset;
+  wsl?: Pick<Asset, 'name' | 'url'>;
+}
 
-function formatSize(bytes: number): string {
-  if (!Number.isFinite(bytes) || bytes <= 0) {
+const DATA = releases as { schema: number; releases: Release[] };
+
+function formatSize(bytes?: number): string {
+  if (!bytes || !Number.isFinite(bytes) || bytes <= 0) {
     return '';
   }
   const gb = bytes / 1024 ** 3;
@@ -26,47 +32,34 @@ function formatSize(bytes: number): string {
 
 export default function Downloads({ lang }: { lang: Lang }) {
   const t = UI[lang];
-  const [assets, setAssets] = useState<Asset[]>([]);
+  const release = DATA.releases[0];
 
-  useEffect(() => {
-    let cancelled = false;
+  if (!release) {
+    return null;
+  }
 
-    fetch('https://api.github.com/repos/xlnux/x/releases?per_page=20', {
-      headers: { Accept: 'application/vnd.github+json' },
-    })
-      .then((res) =>
-        res.ok ? res.json() : Promise.reject(new Error(String(res.status)))
-      )
-      .then((releases: { assets: Asset[] }[]) => {
-        if (!cancelled) {
-          setAssets(releases.flatMap((release) => release.assets));
-        }
-      })
-      .catch(() => {
-        // keep the fallback links
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  const iso = assets.find((asset) => asset.name.toLowerCase().endsWith('.iso'));
-  const wsl = assets.find((asset) => /\.(tar\.zst|tar\.gz)$/i.test(asset.name));
+  const { iso, wsl } = release;
+  const isoMeta = [iso.name, formatSize(iso.size)].filter(Boolean).join(' · ');
 
   const items = [
     {
       key: 'iso',
       label: t.downloads.iso,
-      href: iso?.browser_download_url ?? RELEASES_URL,
-      meta: iso ? `${iso.name} · ${formatSize(iso.size)}` : t.downloads.isoDetail,
+      href: iso.url,
+      meta: isoMeta,
+      primary: true,
     },
-    {
-      key: 'wsl',
-      label: t.downloads.wsl,
-      href: wsl?.browser_download_url ?? WSL_FALLBACK,
-      meta: wsl ? `${wsl.name} · ${formatSize(wsl.size)}` : t.downloads.wslDetail,
-    },
+    ...(wsl
+      ? [
+          {
+            key: 'wsl',
+            label: t.downloads.wsl,
+            href: wsl.url,
+            meta: wsl.name,
+            primary: false,
+          },
+        ]
+      : []),
   ];
 
   return (
@@ -75,8 +68,8 @@ export default function Downloads({ lang }: { lang: Lang }) {
         {t.downloads.title}
       </p>
       <div className="mx-auto mt-5 grid max-w-2xl gap-3 sm:grid-cols-2">
-        {items.map((item, index) => {
-          const primary = index === 0;
+        {items.map((item) => {
+          const primary = item.primary;
           return (
             <a
               key={item.key}
@@ -121,6 +114,34 @@ export default function Downloads({ lang }: { lang: Lang }) {
           );
         })}
       </div>
+      {iso.sha256 && (
+        <p className="mt-4 text-center font-mono text-[10px] text-zinc-400 dark:text-zinc-600">
+          SHA-256 {iso.sha256.slice(0, 16)}…{' '}
+          {iso.checksums && (
+            <a
+              href={iso.checksums}
+              target="_blank"
+              rel="noreferrer"
+              className="underline decoration-dotted underline-offset-2 hover:text-zinc-600 dark:hover:text-zinc-400"
+            >
+              SHA256SUMS
+            </a>
+          )}
+          {iso.sig && (
+            <>
+              {' · '}
+              <a
+                href={iso.sig}
+                target="_blank"
+                rel="noreferrer"
+                className="underline decoration-dotted underline-offset-2 hover:text-zinc-600 dark:hover:text-zinc-400"
+              >
+                .sig
+              </a>
+            </>
+          )}
+        </p>
+      )}
     </section>
   );
 }

@@ -86,11 +86,13 @@ Tanto `work/` como `out/` se recrean en cada construcción y están en
 
   El host de build usa `Never` (puede no tener la clave del proyecto). El ISO
   live y el destino instalado usan `SigLevel = Required`: la clave pública
-  viaja en `/etc/pacman.d/x-repo.pub` y `customize_airootfs.sh`/`install.sh`
-  la importan y firman localmente.
-- El *payload* de aprovisionamiento (`x-scripts` `0.1.0-19`) se incluye
+  viaja en `/etc/pacman.d/x-repo.pub`; en el entorno en vivo
+  `pacman-init.service` recrea el keyring en tmpfs y `x-keyring.service`
+  importa y firma localmente la clave del proyecto, mientras que `install.sh`
+  prepara el keyring del destino de la misma forma.
+- El *payload* de aprovisionamiento (`x-scripts` `0.1.0-27`) se incluye
   **offline** dentro del ISO en
-  `airootfs/root/x-installer/packages/x-scripts-0.1.0-19-any.pkg.tar.zst`, de
+  `airootfs/root/x-installer/packages/x-scripts-0.1.0-27-any.pkg.tar.zst`, de
   modo que el instalador no necesita descargarlo de la red durante la
   instalación. El instalador lo usa para aprovisionar el destino y para
   registrar la primera generación (`0001`) al final de la instalación.

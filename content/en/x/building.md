@@ -83,9 +83,11 @@ the `build-*.log` files.
 
   The build host uses `Never` (it may not have the project key). The live ISO
   and the installed target use `SigLevel = Required`: the public key ships at
-  `/etc/pacman.d/x-repo.pub` and is imported + locally signed by
-  `customize_airootfs.sh`/`install.sh`.
-- The provisioning payload (`x-scripts`, current version `0.1.0-19`) is
+  `/etc/pacman.d/x-repo.pub`; in the live environment `pacman-init.service`
+  recreates the keyring on tmpfs and `x-keyring.service` imports and locally
+  signs the project key, while `install.sh` prepares the target keyring the
+  same way.
+- The provisioning payload (`x-scripts`, current version `0.1.0-27`) is
   shipped **offline** inside the ISO at
   `airootfs/root/x-installer/packages/x-scripts-*.pkg.tar.zst`, so the
   installer does not need to fetch it from the network during installation.

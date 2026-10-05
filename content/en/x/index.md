@@ -74,7 +74,7 @@ Related documentation in this repository:
 - **Unattended install.** The ISO ships an `autoinstall` boot entry (hotkey
   `a`, `xauto=1`) for a disk labeled `cidata` containing `x-install.json`.
 - **Offline provisioning payload.** The `x-scripts` package (current payload
-  `x-scripts 0.1.0-27`) and the Hyprland config snapshot ship inside the ISO,
+  `x-scripts 0.1.0-30`) and the Hyprland config snapshot ship inside the ISO,
   so provisioning does not depend on downloading them during install.
 - **WSL support.** The rootfs is built in the dedicated `xlnux/wsl` repository
   (release `v0.1.0`) and provisioned with `xlnux/wsl-scripts`.

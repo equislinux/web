@@ -90,9 +90,9 @@ Tanto `work/` como `out/` se recrean en cada construcción y están en
   `pacman-init.service` recrea el keyring en tmpfs y `x-keyring.service`
   importa y firma localmente la clave del proyecto, mientras que `install.sh`
   prepara el keyring del destino de la misma forma.
-- El *payload* de aprovisionamiento (`x-scripts` `0.1.0-27`) se incluye
+- El *payload* de aprovisionamiento (`x-scripts` `0.1.0-30`) se incluye
   **offline** dentro del ISO en
-  `airootfs/root/x-installer/packages/x-scripts-0.1.0-27-any.pkg.tar.zst`, de
+  `airootfs/root/x-installer/packages/x-scripts-0.1.0-30-any.pkg.tar.zst`, de
   modo que el instalador no necesita descargarlo de la red durante la
   instalación. El instalador lo usa para aprovisionar el destino y para
   registrar la primera generación (`0001`) al final de la instalación.

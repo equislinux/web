@@ -79,7 +79,7 @@ Documentación relacionada en este repositorio:
   `autoinstall` (hotkey `a`, `xauto=1`) para un disco etiquetado `cidata` con
   un `x-install.json`.
 - **Payload de aprovisionamiento offline.** El paquete `x-scripts`
-  (`0.1.0-27`) y la instantánea de la configuración de Hyprland viajan dentro
+  (`0.1.0-30`) y la instantánea de la configuración de Hyprland viajan dentro
   del ISO, de modo que el aprovisionamiento no depende de descargarlos
   durante la instalación.
 - **Soporte WSL.** El rootfs se construye en el repositorio dedicado

@@ -186,7 +186,8 @@ xpm Ss <QUERY> [OPTIONS]
 |------|-------|-------------|
 | `--local` | `-l` | Busca en la base de datos local en lugar de en las de sync |
 
-Nota de implementación: actualmente es un stub.
+Nota de implementación: implementado — busca por nombre, descripción y provides en las bases
+sync o local.
 
 ### `info` — Información de paquete
 

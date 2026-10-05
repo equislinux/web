@@ -60,8 +60,8 @@ crates plus integration tests under `tests/`). Within the reboot initiative, how
   self-contained slice: a transaction journal plus `xpm history`, transaction hooks
   (`pre/post-transaction.d` with the `XPM_*` contract), a machine-readable `xpm query` and
   real `xpm files`/`xpm info` backed by `reason`/`origin`/`files` metadata in the local
-  database. The SAT resolver is still not wired into the CLI, `search` remains a stub and
-  `--orphans`/rollback are pending.
+  database, plus `xpm search` and `query --orphans` over the recorded dependency graph. The SAT
+  resolver is still not wired into the CLI and rollback remains pending.
 
 The repository still publishes its own binaries as `.xp` packages in the xpm-native tree (see the
 README for the key bootstrap and signature checklist), which is separate from the pacman path
@@ -103,14 +103,14 @@ The workspace `Cargo.toml` currently reports version `0.1.0`.
 
 ## About the command state
 
-Not every subcommand is fully wired to engine logic yet. From `crates/xpm/src/main.rs`:
+All read subcommands are wired to engine logic. From `crates/xpm/src/main.rs`:
 
-- `sync`, `install`, `remove`, `upgrade`, `repo`, `history`, `query`, `info` and `files`
+- `sync`, `install`, `remove`, `upgrade`, `repo`, `history`, `query` (including `--orphans`,
+  which walks the dependency edges recorded at install time), `search`, `info` and `files`
   dispatch to real engine logic.
-- `search` still prints a "complete (stub)" message.
-- `query --orphans` fails with a clear message: the local database does not record the
-  reverse dependency graph (which packages require each installed package) yet.
+- Still missing: SAT resolver wiring (install selects packages by name from the synced
+  database), local `.xp` install, `pkg=ver` install, `rollback --last`, `diff <generation>`
+  and `.pacnew`/`.pacsave` handling.
 
 See [Usage](usage.md) for the full reference and [Architecture](architecture.md) for the
-implementation details, including the note that the CLI install path currently selects packages
-by name from the synced database rather than through the SAT solver.
+implementation details.

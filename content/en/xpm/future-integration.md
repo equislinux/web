@@ -58,9 +58,9 @@ own roadmap and current `main.rs`):
    level, but `install` selects packages by name from the synced database and `upgrade` uses
    plain version comparison. An install/upgrade path that truly resolves dependency closures
    needs to call the solver.
-2. **Finish the remaining stub commands.** The generations-alignment slice implemented
-   `query`, `files` and `info`; `search` is still a stub, and `query --orphans` cannot work
-   until the local database records the reverse dependency graph.
+2. **Wire the resolver and the remaining install features.** `query` (including `--orphans`),
+   `search`, `files` and `info` are implemented; still missing are SAT resolver wiring, local
+   `.xp` install, `pkg=ver` install, `rollback --last` and `diff <generation>`.
 3. **Complete transaction hardening and recovery.** The transaction journal and the
    `pre/post-transaction.d` hooks are implemented; still open are `xpm rollback --last`,
    linking `history` entries to generation ids, `.pacnew`/`.pacsave` configuration-file

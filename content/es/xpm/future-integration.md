@@ -60,9 +60,9 @@ propio roadmap del repo y del `main.rs` actual):
    pero `install` selecciona paquetes por nombre desde la base de datos sincronizada y `upgrade`
    usa comparación de versiones simple. Un camino de install/upgrade que resuelva de verdad el
    cierre de dependencias necesita llamar al solver.
-2. **Terminar los comandos stub restantes.** El avance de alineación con generaciones
-   implementó `query`, `files` e `info`; `search` sigue siendo un stub, y `query --orphans` no
-   puede funcionar hasta que la base de datos local registre el grafo inverso de dependencias.
+2. **Conectar el resolver y el resto de funciones de instalación.** `query` (incluido
+   `--orphans`), `search`, `files` e `info` están implementados; faltan el cableado del resolver
+   SAT, la instalación local de `.xp`, `pkg=ver`, `rollback --last` y `diff <generation>`.
 3. **Completar el endurecimiento y la recuperación de transacciones.** El journal de
    transacciones y los hooks `pre/post-transaction.d` están implementados; siguen abiertos
    `xpm rollback --last`, enlazar las entradas de `history` con ids de generación, la gestión

@@ -185,7 +185,8 @@ xpm Ss <QUERY> [OPTIONS]
 |------|-------|-------------|
 | `--local` | `-l` | Search in the local database instead of the sync databases |
 
-Implementation note: currently a stub.
+Implementation note: implemented — matches name, description and provides in the sync or local
+databases.
 
 ### `info` — Package information
 

@@ -60,8 +60,8 @@ ambas crates más tests de integración bajo `tests/`). Sin embargo, dentro de l
   autocontenido: journal de transacciones más `xpm history`, hooks de transacción
   (`pre/post-transaction.d` con el contrato `XPM_*`), `xpm query` legible por máquina y
   `xpm files`/`xpm info` reales respaldados por metadatos `reason`/`origin`/`files` en la base
-  de datos local. El resolver SAT sigue sin conectarse al CLI, `search` sigue siendo un stub y
-  `--orphans`/rollback están pendientes.
+  de datos local, más `xpm search` y `query --orphans` sobre el grafo de dependencias
+  registrado. El resolver SAT sigue sin conectarse al CLI y rollback sigue pendiente.
 
 El repo sigue publicando sus propios binarios como paquetes `.xp` en el árbol nativo de xpm
 (ver el README para el bootstrap de claves y el checklist de firmas), que es independiente del
@@ -103,16 +103,15 @@ El `Cargo.toml` del workspace reporta actualmente la versión `0.1.0`.
 
 ## Sobre el estado de los comandos
 
-No todos los subcomandos están conectados del todo con la lógica del motor. De
+Todos los subcomandos de lectura están conectados al motor. De
 `crates/xpm/src/main.rs`:
 
-- `sync`, `install`, `remove`, `upgrade`, `repo`, `history`, `query`, `info` y `files`
+- `sync`, `install`, `remove`, `upgrade`, `repo`, `history`, `query` (incluido `--orphans`, que
+  recorre las aristas de dependencia registradas al instalar), `search`, `info` y `files`
   despachan a lógica real del motor.
-- `search` sigue imprimiendo un mensaje "complete (stub)".
-- `query --orphans` falla con un mensaje claro: la base de datos local aún no registra el
-  grafo inverso de dependencias (qué paquetes requiere cada paquete instalado).
+- Siguen faltando: el cableado del resolver SAT (install selecciona paquetes por nombre desde la
+  base sincronizada), la instalación local de `.xp`, `pkg=ver`, `rollback --last`,
+  `diff <generation>` y la gestión de `.pacnew`/`.pacsave`.
 
 Ver [Uso](usage.md) para la referencia completa y [Arquitectura](architecture.md) para los
-detalles de implementación, incluida la nota de que el camino de instalación del CLI selecciona
-actualmente paquetes por nombre desde la base de datos sincronizada en lugar de usar el solver
-SAT.
+detalles de implementación.

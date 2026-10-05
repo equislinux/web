@@ -17,7 +17,8 @@ product on its own. It provides:
   (no graphical installer; Calamares was removed).
 - **Provisioning** of the installed system through the `x-scripts` payload,
   shipped offline inside the ISO.
-- Helpers to build **WSL-importable root filesystem tarballs**.
+- WSL is built from the dedicated `xlnux/wsl` + `xlnux/wsl-scripts`
+  repositories (rootfs release `v0.1.0`).
 
 The ISO uses the standard `mkarchiso` workflow. A custom `[x]` pacman
 repository is declared in `pacman.conf` and is used both at build time and on
@@ -39,7 +40,7 @@ renamed at some point, so older references to `x-linux` (the distro) or to an
 
 | Repository | Role |
 |------------|------|
-| `xlnux/x` | **The distro (this repo).** archiso profile, live ISO, text installer, WSL rootfs builds. |
+| `xlnux/x` | **The distro (this repo).** archiso profile, live ISO, text installer. |
 | `xlnux/scripts` | Provisioning payload and the `x` CLI (`x setup`, `x theme`, ...). Packaged as `x-scripts` and installed by the text installer. |
 | `xlnux/x-repo` | X binary package repository (hosted on GitHub Pages, `[x]` in `pacman.conf`) plus the package portal. |
 | `xlnux/xpm` | X package manager (Rust). |
@@ -48,7 +49,7 @@ renamed at some point, so older references to `x-linux` (the distro) or to an
 
 Related documentation in this repository:
 
-- [Build the ISO and WSL rootfs](building.md)
+- [Build the ISO](building.md)
 - [Text installer](installer.md)
 - [Testing in a VM](vm-testing.md)
 - [Project layout reference](project-layout.md)
@@ -73,17 +74,16 @@ Related documentation in this repository:
 - **Unattended install.** The ISO ships an `autoinstall` boot entry (hotkey
   `a`, `xauto=1`) for a disk labeled `cidata` containing `x-install.json`.
 - **Offline provisioning payload.** The `x-scripts` package (current payload
-  `x-scripts 0.1.0-23`) and the Hyprland config snapshot ship inside the ISO,
+  `x-scripts 0.1.0-27`) and the Hyprland config snapshot ship inside the ISO,
   so provisioning does not depend on downloading them during install.
-- **WSL support.** `xbuildwsl.sh` / `xbuildwslc.sh` produce rootfs tarballs.
+- **WSL support.** The rootfs is built in the dedicated `xlnux/wsl` repository
+  (release `v0.1.0`) and provisioned with `xlnux/wsl-scripts`.
 
 ## Development model
 
-- `main` is the branch described by this documentation.
-- The reboot initiative is developed on the `x/reboot` branch of each repo
-  (`origin/x/reboot`).
-- Older remote branches (`checkpoint/calamares-installer-v1`, `dev`) are
-  historical and do not reflect the current installer.
+- Development happens on `main` with short-lived PR branches.
+- Older branches (`checkpoint/calamares-installer-v1`, `x/reboot`, `dev`) are
+  historical and do not reflect the current code.
 
 ## Scope
 

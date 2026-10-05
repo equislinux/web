@@ -22,8 +22,8 @@ producto de cara al usuario por sí solo. Aporta:
   snapshot booteable más un manifiesto; `x gen rollback` cambia el arranque
   por defecto y `x gen restore` recupera archivos o paquetes. La primera
   generación (`0001`) se crea al final de la instalación.
-- Utilidades para construir **tarballs de sistema de archivos importables en
-  WSL**.
+- WSL se construye desde los repositorios dedicados `xlnux/wsl` +
+  `xlnux/wsl-scripts` (release del rootfs `v0.1.0`).
 
 El ISO usa el flujo estándar de `mkarchiso`. En `pacman.conf` se declara un
 repositorio `[x]` de pacman propio que se usa tanto en la construcción como en
@@ -45,7 +45,7 @@ los repos se renombraron en su momento, por lo que las referencias antiguas a
 
 | Repositorio | Rol |
 |-------------|-----|
-| `xlnux/x` | **La distro (este repo).** Perfil archiso, ISO en vivo, instalador de texto, construcción de rootfs para WSL. |
+| `xlnux/x` | **La distro (este repo).** Perfil archiso, ISO en vivo, instalador de texto. |
 | `xlnux/scripts` | *Payload* de aprovisionamiento y la CLI `x` (`x setup`, `x theme`, ...). Se empaqueta como `x-scripts` y lo instala el instalador de texto. |
 | `xlnux/x-repo` | Repositorio binario de paquetes de X (alojado en GitHub Pages, `[x]` en `pacman.conf`) y el portal de paquetes. |
 | `xlnux/xpm` | Gestor de paquetes de X (Rust). |
@@ -54,7 +54,7 @@ los repos se renombraron en su momento, por lo que las referencias antiguas a
 
 Documentación relacionada en este repositorio:
 
-- [Construir el ISO y el rootfs de WSL](building.md)
+- [Construir el ISO](building.md)
 - [Instalador de texto](installer.md)
 - [Pruebas en una máquina virtual](vm-testing.md)
 - [Referencia de la estructura del proyecto](project-layout.md)
@@ -79,19 +79,17 @@ Documentación relacionada en este repositorio:
   `autoinstall` (hotkey `a`, `xauto=1`) para un disco etiquetado `cidata` con
   un `x-install.json`.
 - **Payload de aprovisionamiento offline.** El paquete `x-scripts`
-  (`0.1.0-23`) y la instantánea de la configuración de Hyprland viajan dentro
+  (`0.1.0-27`) y la instantánea de la configuración de Hyprland viajan dentro
   del ISO, de modo que el aprovisionamiento no depende de descargarlos
   durante la instalación.
-- **Soporte WSL.** `xbuildwsl.sh` / `xbuildwslc.sh` producen tarballs de
-  rootfs.
+- **Soporte WSL.** El rootfs se construye en el repositorio dedicado
+  `xlnux/wsl` (release `v0.1.0`) y se aprovisiona con `xlnux/wsl-scripts`.
 
 ## Modelo de desarrollo
 
-- `main` es la rama que describe esta documentación.
-- La iniciativa *reboot* se desarrolla en la rama `x/reboot` de cada repo
-  (`origin/x/reboot`).
-- Las ramas remotas antiguas (`checkpoint/calamares-installer-v1`, `dev`) son
-  históricas y no reflejan el instalador actual.
+- El desarrollo ocurre en `main` con ramas cortas por PR.
+- Las ramas antiguas (`checkpoint/calamares-installer-v1`, `x/reboot`, `dev`)
+  son históricas y no reflejan el código actual.
 
 ## Alcance
 

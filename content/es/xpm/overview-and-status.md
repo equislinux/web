@@ -55,13 +55,14 @@ ambas crates más tests de integración bajo `tests/`). Sin embargo, dentro de l
   pacman**. El consumo en los sistemas instalados se hace con pacman, no con xpm.
 - Por tanto, `xpm` **no es todavía el camino activo** en el flujo *reboot*. Es una base de
   código de tooling funcional con su propio roadmap interno, a la espera de retomarse cuando el
-  repositorio `.xp` nativo o el resolver SAT se necesiten de verdad.
+  repositorio `.xp` nativo se necesite de verdad (el resolver SAT ya está conectado a
+  `install`).
 - Al margen del alcance del reboot, la rama `feat/generations-alignment` aterrizó un avance
   autocontenido: journal de transacciones más `xpm history`, hooks de transacción
   (`pre/post-transaction.d` con el contrato `XPM_*`), `xpm query` legible por máquina y
   `xpm files`/`xpm info` reales respaldados por metadatos `reason`/`origin`/`files` en la base
-  de datos local. El resolver SAT sigue sin conectarse al CLI, `search` sigue siendo un stub y
-  `--orphans`/rollback están pendientes.
+  de datos local, más `xpm search` y `query --orphans` sobre el grafo de dependencias
+  registrado. El resolver SAT ya está conectado a `install`; rollback sigue pendiente.
 
 El repo sigue publicando sus propios binarios como paquetes `.xp` en el árbol nativo de xpm
 (ver el README para el bootstrap de claves y el checklist de firmas), que es independiente del
@@ -103,16 +104,13 @@ El `Cargo.toml` del workspace reporta actualmente la versión `0.1.0`.
 
 ## Sobre el estado de los comandos
 
-No todos los subcomandos están conectados del todo con la lógica del motor. De
+Todos los subcomandos de lectura están conectados al motor. De
 `crates/xpm/src/main.rs`:
 
-- `sync`, `install`, `remove`, `upgrade`, `repo`, `history`, `query`, `info` y `files`
+- `sync`, `install`, `remove`, `upgrade`, `repo`, `history`, `query` (incluido `--orphans`, que
+  recorre las aristas de dependencia registradas al instalar), `search`, `info` y `files`
   despachan a lógica real del motor.
-- `search` sigue imprimiendo un mensaje "complete (stub)".
-- `query --orphans` falla con un mensaje claro: la base de datos local aún no registra el
-  grafo inverso de dependencias (qué paquetes requiere cada paquete instalado).
+- Siguen faltando: `rollback --last`, `diff <generation>` y la gestión de `.pacnew`/`.pacsave`.
 
 Ver [Uso](usage.md) para la referencia completa y [Arquitectura](architecture.md) para los
-detalles de implementación, incluida la nota de que el camino de instalación del CLI selecciona
-actualmente paquetes por nombre desde la base de datos sincronizada en lugar de usar el solver
-SAT.
+detalles de implementación.

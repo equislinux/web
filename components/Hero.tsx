@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import AsciiLogo from './AsciiLogo';
 import { GITHUB_ORG } from '@/lib/site';
 import { UI, type Lang } from '@/lib/i18n';
 
@@ -11,10 +12,19 @@ export default function Hero({ lang }: { lang: Lang }) {
         <p className="text-xs font-medium uppercase tracking-[0.2em] text-zinc-400 dark:text-zinc-500">
           X Linux
         </p>
-        <h1 className="mt-4 text-4xl font-semibold tracking-tight text-zinc-900 sm:text-5xl dark:text-zinc-50">
-          {t.hero.title}
-        </h1>
-        <p className="mx-auto mt-5 max-w-xl text-base leading-7 text-zinc-500 dark:text-zinc-400">
+
+        <div className="mt-10 flex flex-col items-center">
+          <AsciiLogo />
+          <hr className="x-rule mt-7 w-24" />
+          <h1 className="mt-6 font-mono text-4xl font-medium tracking-[0.3em] text-zinc-900 sm:text-5xl dark:text-zinc-50">
+            <span className="sr-only">X Linux</span>
+            <span aria-hidden="true" className="pl-[0.3em]">
+              Linux
+            </span>
+          </h1>
+        </div>
+
+        <p className="mx-auto mt-8 max-w-xl text-base leading-7 text-zinc-500 dark:text-zinc-400">
           {t.hero.tagline}
         </p>
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">

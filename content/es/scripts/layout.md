@@ -79,4 +79,4 @@ bash test/smoke.sh
 - `generations.md` — generaciones de sistema y de home, rollback y restore.
 - `hyprland.md` — el tool de setup de escritorio offline.
 - `packaging.md` — construir `x-scripts` y el snapshot vendido.
-WSL lives in its dedicated repos: xlnux/wsl and xlnux/wsl-scripts.
+WSL lives in its dedicated repos: equislinux/wsl and equislinux/wsl-scripts.

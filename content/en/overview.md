@@ -4,7 +4,7 @@
 repositories, with a script-driven text installer, its own branding and a
 provisioning layer.
 
-This site collects the documentation of every repository of the `xlnux`
+This site collects the documentation of every repository of the `equislinux`
 organization in English and Spanish. Use the sidebar to browse by component, or
 start with the topics below.
 
@@ -23,16 +23,16 @@ start with the topics below.
 
 | Repository | Role |
 |---|---|
-| [`xlnux/x`](https://github.com/xlnux/x) | Distribution: archiso profile, text installer, ISO build. |
-| [`xlnux/wsl`](https://github.com/xlnux/wsl) | X Linux for WSL: importable rootfs and configuration. |
-| [`xlnux/wsl-scripts`](https://github.com/xlnux/wsl-scripts) | Friendly WSL user setup. |
-| [`xlnux/scripts`](https://github.com/xlnux/scripts) | Provisioning payload and CLI (`x`). |
-| [`xlnux/xpm`](https://github.com/xlnux/xpm) | Native package manager (ALPM format). |
-| [`xlnux/xpkg`](https://github.com/xlnux/xpkg) | Native package builder (`XBUILD` recipes). |
-| [`xlnux/x-repo`](https://github.com/xlnux/x-repo) | Binary package repository (`[x]`) and package portal. |
-| [`xlnux/wiki`](https://github.com/xlnux/wiki) | Documentation sources for this site. |
-| [`xlnux/web`](https://github.com/xlnux/web) | This portal: landing and browsable docs. |
+| [`equislinux/x`](https://github.com/equislinux/x) | Distribution: archiso profile, text installer, ISO build. |
+| [`equislinux/wsl`](https://github.com/equislinux/wsl) | X Linux for WSL: importable rootfs and configuration. |
+| [`equislinux/wsl-scripts`](https://github.com/equislinux/wsl-scripts) | Friendly WSL user setup. |
+| [`equislinux/scripts`](https://github.com/equislinux/scripts) | Provisioning payload and CLI (`x`). |
+| [`equislinux/xpm`](https://github.com/equislinux/xpm) | Native package manager (ALPM format). |
+| [`equislinux/xpkg`](https://github.com/equislinux/xpkg) | Native package builder (`XBUILD` recipes). |
+| [`equislinux/x-repo`](https://github.com/equislinux/x-repo) | Binary package repository (`[x]`) and package portal. |
+| [`equislinux/wiki`](https://github.com/equislinux/wiki) | Documentation sources for this site. |
+| [`equislinux/web`](https://github.com/equislinux/web) | This portal: landing and browsable docs. |
 
-> The documentation is maintained in [`xlnux/wiki`](https://github.com/xlnux/wiki)
+> The documentation is maintained in [`equislinux/wiki`](https://github.com/equislinux/wiki)
 > and rendered here. Every page exists in English and Spanish; use the language
 > switch in the top bar.

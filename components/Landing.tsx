@@ -33,7 +33,7 @@ export default function Landing({ lang }: { lang: Lang }) {
                 {t.landing.pacmanDescription}
               </p>
               <pre className="mt-4 overflow-x-auto rounded-lg border border-zinc-200 bg-zinc-50 p-3 font-mono text-xs leading-6 text-zinc-700 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300">
-                <code>{`[x]\nServer = https://xlnux.github.io/x-repo/repo/x86_64`}</code>
+                <code>{`[x]\nServer = https://equislinux.github.io/x-repo/repo/x86_64`}</code>
               </pre>
             </article>
             <article className="rounded-xl border border-zinc-200 p-6 dark:border-zinc-800">
@@ -44,7 +44,7 @@ export default function Landing({ lang }: { lang: Lang }) {
                 {t.landing.nativeDescription}
               </p>
               <pre className="mt-4 overflow-x-auto rounded-lg border border-zinc-200 bg-zinc-50 p-3 font-mono text-xs leading-6 text-zinc-700 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300">
-                <code>{`[[repo]]\nserver = ["https://xlnux.github.io/x-repo/x/$arch"]`}</code>
+                <code>{`[[repo]]\nserver = ["https://equislinux.github.io/x-repo/x/$arch"]`}</code>
               </pre>
             </article>
           </div>

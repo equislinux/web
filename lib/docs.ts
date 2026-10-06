@@ -138,12 +138,12 @@ export function getWikiSourceUrl(
 ): string {
   const section = SECTIONS.find((candidate) => candidate.id === sectionId);
   if (!section) {
-    return 'https://github.com/xlnux/wiki';
+    return 'https://github.com/equislinux/wiki';
   }
   if (sectionId === 'web') {
-    return `https://github.com/xlnux/web/blob/main/content/${lang}/web/${file}.md`;
+    return `https://github.com/equislinux/web/blob/main/content/${lang}/web/${file}.md`;
   }
-  return `https://github.com/xlnux/wiki/blob/main/${section.wiki}/${lang}/${file}.md`;
+  return `https://github.com/equislinux/wiki/blob/main/${section.wiki}/${lang}/${file}.md`;
 }
 
 export function getStaticParams(): { lang: Lang; slug: string[] }[] {

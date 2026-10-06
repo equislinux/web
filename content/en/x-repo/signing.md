@@ -70,7 +70,7 @@ Configure pacman in `/etc/pacman.conf`:
 ```ini
 [x]
 SigLevel = Required DatabaseOptional
-Server = https://xlnux.github.io/x-repo/repo/x86_64
+Server = https://equislinux.github.io/x-repo/repo/x86_64
 ```
 
 `Required DatabaseOptional` verifies package signatures and the signed

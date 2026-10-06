@@ -1,7 +1,7 @@
 # web — portal de documentación
 
-`xlnux/web` es el portal de documentación del proyecto X Linux. Reúne la
-documentación de todos los repositorios (con origen en `xlnux/wiki`) y la presenta
+`equislinux/web` es el portal de documentación del proyecto X Linux. Reúne la
+documentación de todos los repositorios (con origen en `equislinux/wiki`) y la presenta
 con una landing y una sección de docs navegable, en inglés y español.
 
 ## Stack
@@ -22,4 +22,4 @@ con una landing y una sección de docs navegable, en inglés y español.
 
 `.github/workflows/deploy.yml` ejecuta `npm ci && npm run build` y despliega el
 export estático (`out/`) en GitHub Pages. El sitio se sirve bajo el base path `/web`
-en `https://xlnux.github.io/web/`.
+en `https://equislinux.github.io/web/`.

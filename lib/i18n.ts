@@ -78,7 +78,7 @@ export const UI: Record<Lang, UIStrings> = {
     landing: {
       reposTitle: 'Repositories',
       reposSubtitle:
-        'Every component of the X Linux project lives in the xlnux organization.',
+        'Every component of the X Linux project lives in the equislinux organization.',
       pathsTitle: 'Two packaging paths',
       pathsSubtitle:
         'X uses Arch-compatible packages for pacman and its own native format for xpm.',
@@ -130,7 +130,7 @@ export const UI: Record<Lang, UIStrings> = {
     landing: {
       reposTitle: 'Repositorios',
       reposSubtitle:
-        'Cada componente del proyecto X Linux vive en la organización xlnux.',
+        'Cada componente del proyecto X Linux vive en la organización equislinux.',
       pathsTitle: 'Dos vías de empaquetado',
       pathsSubtitle:
         'X usa paquetes compatibles con Arch para pacman y su propio formato nativo para xpm.',

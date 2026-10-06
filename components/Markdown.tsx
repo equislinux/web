@@ -25,7 +25,7 @@ function mapHref(
 
   if (noExt.startsWith('../../')) {
     return {
-      href: `https://github.com/xlnux/${section}/blob/main/${noExt.replace(
+      href: `https://github.com/equislinux/${section}/blob/main/${noExt.replace(
         /^\.\.\/\.\.\//,
         ''
       )}.md${suffix}`,
@@ -34,7 +34,7 @@ function mapHref(
   }
   if (noExt.startsWith('../')) {
     return {
-      href: `https://github.com/xlnux/${section}/blob/main/docs/${noExt.replace(
+      href: `https://github.com/equislinux/${section}/blob/main/docs/${noExt.replace(
         /^\.\.\//,
         ''
       )}.md${suffix}`,

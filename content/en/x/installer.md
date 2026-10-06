@@ -117,7 +117,7 @@ are required; the remaining keys have sensible defaults when absent.
    In `dualboot` mode the existing ESP is reused and never formatted.
 5. **Package set**:
    - Base set: `base base-devel linux linux-firmware sudo networkmanager
-     openssh git jq x-release btrfs-progs xfetch-git xtop-git kitty pipewire
+     openssh git jq x-release btrfs-progs xfetch-bin xtop-git kitty pipewire
      pipewire-pulse pipewire-alsa wireplumber alsa-utils sddm`, plus
      `grub efibootmgr` for GRUB and `cryptsetup` for LUKS. `btrfs-progs` is
      required by the generations engine; the X tools (`xfetch`, `xtop`) are

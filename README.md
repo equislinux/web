@@ -3,14 +3,14 @@
 <div align="center">
   <p><b>Documentation portal for X Linux: landing + docs, in English and Spanish.</b></p>
   <p>
-    <a href="https://xlnux.github.io/web/">Live site</a> •
-    <a href="https://github.com/xlnux/wiki">Docs sources</a> •
-    <a href="https://github.com/xlnux/x-repo">Package repository</a>
+    <a href="https://equislinux.github.io/web/">Live site</a> •
+    <a href="https://github.com/equislinux/wiki">Docs sources</a> •
+    <a href="https://github.com/equislinux/x-repo">Package repository</a>
   </p>
 </div>
 
 <p align="center">
-  <img alt="CI" src="https://img.shields.io/github/actions/workflow/status/xlnux/web/deploy.yml?branch=main&label=deploy">
+  <img alt="CI" src="https://img.shields.io/github/actions/workflow/status/equislinux/web/deploy.yml?branch=main&label=deploy">
   <img alt="Next.js" src="https://img.shields.io/badge/Next.js-16-000000?logo=nextdotjs&logoColor=white">
   <img alt="Tailwind CSS" src="https://img.shields.io/badge/Tailwind-4-38BDF8?logo=tailwindcss&logoColor=white">
   <img alt="License" src="https://img.shields.io/badge/license-GPL--3.0-blue.svg">
@@ -20,14 +20,14 @@
 
 ## What this is
 
-`xlnux/web` is the public documentation portal of the X Linux project:
+`equislinux/web` is the public documentation portal of the X Linux project:
 
 - **Landing** — hero, the repository grid, the two packaging paths (pacman `[x]`
   and native `.xp` for `xpm`) and a docs call to action.
 - **Docs** — every repository of the organization documented in a browsable
   sidebar, rendered from markdown, with a language switch (English/Spanish).
 
-The documentation sources live in [`xlnux/wiki`](https://github.com/xlnux/wiki)
+The documentation sources live in [`equislinux/wiki`](https://github.com/equislinux/wiki)
 and are copied into `content/<lang>/<section>/`. Each page links back to its
 source on GitHub.
 

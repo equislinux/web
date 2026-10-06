@@ -1,7 +1,7 @@
 # X distribution repository
 
 
-This is the documentation index for the `x` repository (`xlnux/x`), the home
+This is the documentation index for the `x` repository (`equislinux/x`), the home
 of the **X** distribution (formerly known as *X Linux* / `x-linux`). X is a
 custom Arch Linux spin focused on simplicity, clean branding, and reproducible
 builds. It ships its own package repository (`x-repo`) so X-specific packages
@@ -17,7 +17,7 @@ product on its own. It provides:
   (no graphical installer; Calamares was removed).
 - **Provisioning** of the installed system through the `x-scripts` payload,
   shipped offline inside the ISO.
-- WSL is built from the dedicated `xlnux/wsl` + `xlnux/wsl-scripts`
+- WSL is built from the dedicated `equislinux/wsl` + `equislinux/wsl-scripts`
   repositories (rootfs release `v0.1.0`).
 
 The ISO uses the standard `mkarchiso` workflow. A custom `[x]` pacman
@@ -34,17 +34,17 @@ decisions and tooling). See `ROADMAP.md` for the roadmap and
 
 ## How this repository maps to the organization
 
-The workspace groups each xlnux repository under `x-lnux/`. Repo names were
+The workspace groups each equislinux repository under `x-lnux/`. Repo names were
 renamed at some point, so older references to `x-linux` (the distro) or to an
 `x` scripts repo must be read with this mapping in mind:
 
 | Repository | Role |
 |------------|------|
-| `xlnux/x` | **The distro (this repo).** archiso profile, live ISO, text installer. |
-| `xlnux/scripts` | Provisioning payload and the `x` CLI (`x setup`, `x theme`, ...). Packaged as `x-scripts` and installed by the text installer. |
-| `xlnux/x-repo` | X binary package repository (hosted on GitHub Pages, `[x]` in `pacman.conf`) plus the package portal. |
-| `xlnux/xpm` | X package manager (Rust). |
-| `xlnux/xpkg` | X packaging tool for developers (Rust). |
+| `equislinux/x` | **The distro (this repo).** archiso profile, live ISO, text installer. |
+| `equislinux/scripts` | Provisioning payload and the `x` CLI (`x setup`, `x theme`, ...). Packaged as `x-scripts` and installed by the text installer. |
+| `equislinux/x-repo` | X binary package repository (hosted on GitHub Pages, `[x]` in `pacman.conf`) plus the package portal. |
+| `equislinux/xpm` | X package manager (Rust). |
+| `equislinux/xpkg` | X packaging tool for developers (Rust). |
 | `equisdots/*` | Org that owns the desktop stack (Hyprland Lua config, Quickshell shell, palettes, engines, SDDM login) consumed read-only by the Hyprland setup tool in `scripts`; its official installer is `equisdots/dots`. |
 
 Related documentation in this repository:
@@ -76,8 +76,8 @@ Related documentation in this repository:
 - **Offline provisioning payload.** The `x-scripts` package (current payload
   `x-scripts 0.1.0-30`) and the Hyprland config snapshot ship inside the ISO,
   so provisioning does not depend on downloading them during install.
-- **WSL support.** The rootfs is built in the dedicated `xlnux/wsl` repository
-  (release `v0.1.0`) and provisioned with `xlnux/wsl-scripts`.
+- **WSL support.** The rootfs is built in the dedicated `equislinux/wsl` repository
+  (release `v0.1.0`) and provisioned with `equislinux/wsl-scripts`.
 
 ## Development model
 
@@ -87,6 +87,6 @@ Related documentation in this repository:
 
 ## Scope
 
-Everything in this repository is part of the xlnux organization. Only
+Everything in this repository is part of the equislinux organization. Only
 references related to building, installing, and provisioning X live here;
 user-facing setup logic lives in the `x-scripts` payload.

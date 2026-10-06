@@ -15,7 +15,7 @@ export default function Footer({ lang }: { lang: Lang }) {
             rel="noreferrer"
             className="transition-colors hover:text-zinc-900 dark:hover:text-zinc-100"
           >
-            github.com/xlnux
+            github.com/equislinux
           </a>
           <span className="mx-2">·</span>
           {t.footer.license}

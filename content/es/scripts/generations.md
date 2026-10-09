@@ -65,7 +65,7 @@ sudo" en vez de una lista vacía cuando se corren sin privilegios.
 | `x gen prune [--keep N] [--older-than DAYS] [--dry-run]` | Elimina generaciones viejas (pinned, running y default siempre quedan) |
 | `x gen restore <path> [--from ID] [--dest PATH]` | Restaura un archivo o directorio desde un snapshot |
 | `x gen restore --pkg <name> [--from ID] [--dest ROOT]` | Restaura todos los archivos de un paquete (db pacman/xpm del snapshot) |
-| `x gen export <id> [--out FILE] [--with-data]` | Empaqueta una generación como bundle portable |
+| `x gen export <id> [--out FILE] [--with-data] [--sign] [--encrypt | --encrypt-to KEY]` | Empaqueta (opcionalmente firmada/cifrada) una generación como bundle portable |
 | `x gen import <file> [--force]` | Importa un bundle a `$X_GEN_STATE` (`--force` reemplaza) |
 | `x gen plan <system.toml>` | Imprime las acciones para cumplir una declaración declarativa |
 | `x gen apply <system.toml> [--dry-run]` | Aplica la declaración y registra una generación |
@@ -140,6 +140,12 @@ copia del árbol con backend `dir`.
 - Los bundles llevan `BUNDLE.sha256` (hash de cada archivo) y `x gen import`
   lo verifica, abortando si no coincide; los bundles sin manifiesto (formato
   viejo) importan con un warning.
+- `--sign` agrega una firma gpg separada (`<bundle>.sig`, `X_GEN_SIGN_KEY`).
+  `--encrypt` genera un bundle simétrico AES256 (passphrase por pinentry o
+  `X_GEN_PASSPHRASE`) y `--encrypt-to KEY` (repetible) cifra a una clave gpg,
+  con la firma embebida al combinar. El import detecta el cifrado por magic,
+  descifra a un temporal 0600 que borra tras extraer y aborta ante passphrase
+  incorrecta o ciphertext manipulado.
 - Al restaurar un stream `btrfs send` se bifurca el subvolumen recibido para
   que la generación quede escribible.
 - La generación importada **no** se selecciona automáticamente: usá

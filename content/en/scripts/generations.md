@@ -59,7 +59,7 @@ empty list when run unprivileged.
 | `x gen prune [--keep N] [--older-than DAYS] [--dry-run]` | Removes old generations (pinned, running and default always stay) |
 | `x gen restore <path> [--from ID] [--dest PATH]` | Restores a file or directory from a snapshot |
 | `x gen restore --pkg <name> [--from ID] [--dest ROOT]` | Restores every file owned by a package (pacman/xpm db inside the snapshot) |
-| `x gen export <id> [--out FILE] [--with-data]` | Packs a generation into a portable bundle |
+| `x gen export <id> [--out FILE] [--with-data] [--sign] [--encrypt | --encrypt-to KEY]` | Packs (optionally signed/encrypted) a generation into a portable bundle |
 | `x gen import <file> [--force]` | Imports a bundle into `$X_GEN_STATE` (`--force` replaces) |
 | `x gen plan <system.toml>` | Prints the actions to match a declarative system declaration |
 | `x gen apply <system.toml> [--dry-run]` | Applies the declaration and records a generation |
@@ -154,7 +154,13 @@ migrations, archived kernel) as `tar.zst` (or `tar.gz` without zstd).
 `--with-data` adds the snapshot itself: `btrfs send` on btrfs (root) or a tree
 copy with the `dir` backend. Bundles carry **`BUNDLE.sha256`** (hash of every
 file) and `x gen import` verifies it, aborting on mismatch; bundles without
-the manifest (older format) import with a warning. Restoring a `btrfs send`
+the manifest (older format) import with a warning. `--sign` adds a detached gpg
+signature (`<bundle>.sig`, `X_GEN_SIGN_KEY`). `--encrypt` produces a symmetric
+AES256 bundle (passphrase via pinentry or `X_GEN_PASSPHRASE`) and
+`--encrypt-to KEY` (repeatable) encrypts to a gpg key, with the signature
+embedded when combined. Import detects encrypted bundles by magic, decrypts to
+a 0600 temp file that is removed right after extraction, and aborts on a wrong
+passphrase or tampered ciphertext. Restoring a `btrfs send`
 stream forks the received subvolume to keep the generation writable. The
 imported generation is not selected automatically — use `x gen rollback <id>`
 after importing. Duplicates fail unless `--force`.

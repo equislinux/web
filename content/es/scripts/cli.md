@@ -49,7 +49,7 @@ Los resúmenes son las cabeceras `x:summary` de cada archivo (los muestra
 | `x gen prune` | Elimina generaciones viejas conservando pinned/running/default (`--keep N`, `--older-than DAYS`, `--dry-run`). |
 | `x gen restore <path>` | Restaura un archivo/directorio desde una generación (`--from ID`, `--dest PATH`). |
 | `x gen restore --pkg <name>` | Restaura todos los archivos de un paquete. |
-| `x gen export` / `x gen import` | Empaqueta/restaura un bundle de generación (`--with-data`, `--force`). |
+| `x gen export` / `x gen import` | Empaqueta/restaura un bundle de generación (`--with-data`, `--sign`, `--encrypt`, `--encrypt-to KEY`, `--force`). |
 | `x gen plan` / `x gen apply` | Imprime/aplica un `system.toml` declarativo (`--dry-run`); registra una generación. |
 | `x gen quota init` / `status` | Habilita quotas btrfs y muestra uso / tabla de qgroups. |
 | `x home` / `x home list` | Lista las generaciones de home del usuario (dotfiles). |

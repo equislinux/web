@@ -12,7 +12,7 @@ propia.
 
 | Fase | Script | Qué hace |
 |------|--------|----------|
-| Config | `install/config.sh` | Siembra `/etc/skel` desde `skel/` (`x_copy_tree`) y aplica el overlay de `/etc` desde `etc/`, un directorio por ruta de `/etc` (p.ej. `etc/sysctl.d/` → `/etc/sysctl.d`). Hoy publica los hooks de pacman `etc/pacman.d/hooks/`; los demás drop-ins están documentados en su README. |
+| Config | `install/config.sh` | Siembra `/etc/skel` desde `skel/` (`x_copy_tree`) y aplica el overlay de `/etc` desde `etc/`, un directorio por ruta de `/etc` (p.ej. `etc/sysctl.d/` → `/etc/sysctl.d`). Los hooks de pacman van en el paquete (`hooks/alpm/`); los drop-ins están documentados en su README. |
 | Hardware | `install/hardware.sh` | Detecta y ejecuta módulos autocontenidos bajo `hardware/` (`nvidia.sh`, `qemu.sh`). NVIDIA corre si `X_HW_NVIDIA=1` o se autodetecta una GPU NVIDIA (`X_HW_AUTO=1`); QEMU corre solo si `X_HW_QEMU=1`. |
 | Login | `install/login.sh` | Habilita servicios base del sistema (NetworkManager). Los arranca solo cuando systemd es PID 1, así que es seguro dentro de un chroot/imagen live. Omite si systemd no está. |
 | Post-install | `install/post-install.sh` | Identidad/branding final del sistema. Hoy es un stub que registra una integración pendiente con el tooling de release. |
@@ -83,7 +83,8 @@ root ni btrfs): `hgen_new`, `hgen_list`, `hgen_status`, `hgen_diff`,
 `user-seed.sh` registra una captura `pre-setup` antes de tocar dotfiles y
 `x update` registra una `pre-update`; `X_HGEN_SKIP=1` desactiva ambas.
 
-Hooks de pacman: `etc/pacman.d/hooks/{10-x-gen-pre,20-x-gen-post}.hook` llaman
+Hooks de pacman: `hooks/alpm/{10-x-gen-pre,95-x-gen-post}.hook` (instalados
+en `/usr/share/libalpm/hooks/`) llaman
 a `hooks/pacman-gen.sh`, que es no-op sin generación actual, en no-btrfs o con
 `X_GEN_SKIP=1` (lo que `x update` setea en su propio pacman para manejar él
 mismo sus generaciones pre/post). Detalles en `generations.md`.

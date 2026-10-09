@@ -30,12 +30,11 @@ de packaging y el ROADMAP del workspace).
 - `bin/` — la CLI `x` (dispatcher + subcomandos por convención de nombres,
   incluidos `x-gen-*.sh` y `x-home-*.sh`).
 - `skel/`, `etc/`, `config/` — semillas de dotfiles para `/etc/skel`,
-  drop-ins de `/etc` (incluidos los hooks de pacman de generaciones en
-  `etc/pacman.d/hooks/`) y configs de usuario.
+  drop-ins de `/etc` y configs de usuario.
 - `hardware/`, `tools/` — módulos opcionales (NVIDIA, QEMU/libvirt, node) y el
   tool de setup del escritorio Hyprland.
-- `hooks/` — `pacman-gen.sh`, el wrapper que llaman los hooks de pacman
-  pre/post para registrar generaciones alrededor de cada transacción.
+- `hooks/` — `pacman-gen.sh` (wrapper de los hooks pre/post) y los hooks alpm
+  en `hooks/alpm/` (instalados en `/usr/share/libalpm/hooks/`).
 - `migrations/`, `themes/` — migraciones por usuario y temas por paleta.
 - `packaging/` — el PKGBUILD de `x-scripts` (instala también `hooks/`) y el
   generador del snapshot de config offline (`vendor-config.sh`).

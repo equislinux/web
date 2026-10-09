@@ -188,8 +188,8 @@ antes de las migraciones. `X_HGEN_SKIP=1` desactiva las capturas automáticas.
 
   | Hook | Cuándo | Efecto |
   |------|--------|--------|
-  | `/etc/pacman.d/hooks/10-x-gen-pre.hook` | PreTransaction | Generación de seguridad (`reason: pacman-pre`) |
-  | `/etc/pacman.d/hooks/20-x-gen-post.hook` | PostTransaction | Registra el resultado (`reason: pacman`) |
+  | `/usr/share/libalpm/hooks/10-x-gen-pre.hook` | PreTransaction | Generación de seguridad (`reason: pacman-pre`) |
+  | `/usr/share/libalpm/hooks/95-x-gen-post.hook` | PostTransaction | Registra el resultado (`reason: pacman`); ordena después de `90-mkinitcpio-*` para capturar kernels nuevos con su initramfs |
 
   Ambos llaman a `/usr/share/x/hooks/pacman-gen.sh`, que es no-op cuando
   todavía no hay generación actual (instalador/pacstrap), en sistemas

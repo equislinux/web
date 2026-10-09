@@ -23,7 +23,7 @@ ADR-0001/ADR-0003 en `DECISIONS.md` en la raíz del workspace).
 | `install/helpers/xgen-home.sh` | Motor de generaciones de home: copias de dotfiles sin root ni btrfs (`x home`). |
 | `install/x-base.packages` | Lista de paquetes base legible por el builder (uno por línea); aún sin consumidor cableado. |
 | `skel/` | Seed de `/etc/skel` para usuarios nuevos (hoy un `.bashrc`). |
-| `etc/` | Overlay de `/etc`, un directorio por ruta. Hoy publica los hooks de pacman `etc/pacman.d/hooks/{10-x-gen-pre,20-x-gen-post}.hook` (los demás drop-ins están documentados en su README). |
+| `etc/` | Overlay de `/etc`, un directorio por ruta (aún no publica drop-ins). |
 | `hooks/` | `pacman-gen.sh`, el wrapper que ejecutan los hooks de pacman pre/post para crear generaciones alrededor de cada transacción. |
 | `config/` | Dotfiles de usuario sincronizados a `~/.config`. `config/hypr/` es solo un punto de entrada documental + wallpaper por defecto; la config real de escritorio viaja offline en el paquete (`/usr/share/x/config/equisdots`), ADR-0005. |
 | `migrations/` | Migraciones por usuario idempotentes (`<timestamp>-<name>.sh`), aplicadas por `x migrate` / `x update`. |
@@ -47,7 +47,7 @@ ADR-0001/ADR-0003 en `DECISIONS.md` en la raíz del workspace).
   vendido, no se mantiene aquí (ver `hyprland.md`, ADR-0005).
 - Las generaciones de sistema viven en `install/helpers/xgen.sh` y las de home
   en `install/helpers/xgen-home.sh`; `x setup`/`x update` registran snapshots
-  automáticos y `etc/pacman.d/hooks/` → `hooks/pacman-gen.sh` captura las
+  automáticos y los hooks alpm (`hooks/alpm/`, en `/usr/share/libalpm/hooks/`) → `hooks/pacman-gen.sh` capturan las
   transacciones manuales de pacman (ver `generations.md` y
   `provisioning.md`).
 

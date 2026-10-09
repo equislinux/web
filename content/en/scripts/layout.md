@@ -23,7 +23,7 @@ ADR-0001/ADR-0003 in `DECISIONS.md` at the workspace root).
 | `install/helpers/xgen-home.sh` | Home-generation engine: dotfile captures with `hgen_new`/`hgen_list`/`hgen_status`/`hgen_diff`/`hgen_restore`/`hgen_prune`. |
 | `install/x-base.packages` | Base package list readable by the builder (one per line); no consumer wired yet. |
 | `skel/` | `/etc/skel` seed for new users (currently a `.bashrc`). |
-| `etc/` | `/etc` overlay, one directory per path; ships the pacman generation hooks under `etc/pacman.d/hooks/`. |
+| `etc/` | `/etc` overlay, one directory per path (no drop-ins shipped yet). |
 | `hooks/` | `pacman-gen.sh`: wrapper called by the pacman hooks; no-op without a current generation, on non-btrfs, or with `X_GEN_SKIP=1`. |
 | `config/` | User dotfiles synced to `~/.config`. `config/hypr/` is only a documentation entry point + default wallpaper; the real desktop config ships offline in the package (`/usr/share/x/config/equisdots`), ADR-0005. |
 | `migrations/` | Per-user idempotent migrations (`<timestamp>-<name>.sh`), applied by `x migrate` / `x update`. |
@@ -48,7 +48,7 @@ ADR-0001/ADR-0003 in `DECISIONS.md` at the workspace root).
 - Generations: `install/helpers/xgen.sh` snapshots the btrfs root (metadata in
   `/var/lib/x`, snapshots in `/.snapshots`); `install/helpers/xgen-home.sh`
   versions the dotfiles under `~/.local/share/x/home-gens` without root or
-  btrfs. The pacman hooks under `etc/pacman.d/hooks/` call `hooks/pacman-gen.sh`.
+  btrfs. The alpm hooks (`hooks/alpm/`, installed to `/usr/share/libalpm/hooks/`) call `hooks/pacman-gen.sh`.
 
 ## Usage
 

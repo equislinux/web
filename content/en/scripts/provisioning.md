@@ -88,7 +88,8 @@ and `hgen_prune`, backing the `x home` commands. `user-seed.sh` records a
 hooks) plus migrations, and records a second generation (`reason: update`).
 If pacman fails, the safety generation is kept for recovery.
 
-Pacman hooks: `etc/pacman.d/hooks/{10-x-gen-pre,20-x-gen-post}.hook` call
+Pacman hooks: `hooks/alpm/{10-x-gen-pre,95-x-gen-post}.hook` (installed to
+`/usr/share/libalpm/hooks/`) call
 `hooks/pacman-gen.sh`, a no-op without a current generation, on non-btrfs, or
 with `X_GEN_SKIP=1`. This captures any manual pacman transaction (for example
 a kernel update outside `x update`). Details in `generations.md`.

@@ -101,7 +101,7 @@ export const UI: Record<Lang, UIStrings> = {
     hero: {
       title: 'Documentation & tools',
       tagline:
-        'A minimal Arch-based distribution, its tooling and its documentation — all in one place.',
+        'Arch-based, snapshot-first Linux with a script-driven installer and its own package tooling — docs and downloads in one place.',
       ctaDownload: 'Download ISO',
       ctaDocs: 'Read the docs',
       ctaGithub: 'GitHub',
@@ -200,7 +200,7 @@ export const UI: Record<Lang, UIStrings> = {
     hero: {
       title: 'Documentación y herramientas',
       tagline:
-        'Una distribución minimalista basada en Arch, su tooling y su documentación — todo en un solo lugar.',
+        'Linux basado en Arch y centrado en snapshots, con instalador por scripts y tooling de paquetes propio — docs y descargas en un solo lugar.',
       ctaDownload: 'Descargar ISO',
       ctaDocs: 'Leer la documentación',
       ctaGithub: 'GitHub',

@@ -1,5 +1,6 @@
 # X distribution repository
 
+> Other languages: [Español](../es/index.md)
 
 This is the documentation index for the `x` repository (`equislinux/x`), the home
 of the **X** distribution (formerly known as *X Linux* / `x-linux`). X is a
@@ -17,8 +18,7 @@ product on its own. It provides:
   (no graphical installer; Calamares was removed).
 - **Provisioning** of the installed system through the `x-scripts` payload,
   shipped offline inside the ISO.
-- WSL is built from the dedicated `equislinux/wsl` + `equislinux/wsl-scripts`
-  repositories (rootfs release `v0.1.0`).
+- Helpers to build **WSL-importable root filesystem tarballs**.
 
 The ISO uses the standard `mkarchiso` workflow. A custom `[x]` pacman
 repository is declared in `pacman.conf` and is used both at build time and on
@@ -27,30 +27,34 @@ the installed system, so X branding and tooling packages (`x-release`,
 
 ## Project status
 
-The distribution is under active development. The current work is the *reboot*
-initiative (script-based provisioning in the style of Omarchy, with X's own
-decisions and tooling). See `ROADMAP.md` for the roadmap and
-`docs/project-state.md` for a state snapshot.
+The distribution is under active development. Signed ISOs are published on
+SourceForge (the stable link is
+<https://equislinux.github.io/web/download/latest/>), and both package
+channels — the pacman `[x]` repository and the native `.xp` endpoint — are
+live. See `ROADMAP.md` and `docs/project-state.md`.
 
 ## How this repository maps to the organization
 
-The workspace groups each equislinux repository under `x-lnux/`. Repo names were
-renamed at some point, so older references to `x-linux` (the distro) or to an
-`x` scripts repo must be read with this mapping in mind:
+Each repository lives in its own folder under the `equislinux` organization on
+GitHub. Repo names changed over time, so older references to `x-linux` (the
+distro) or to an `x` scripts repo must be read with this mapping in mind:
 
 | Repository | Role |
 |------------|------|
-| `equislinux/x` | **The distro (this repo).** archiso profile, live ISO, text installer. |
+| `equislinux/x` | **The distro (this repo).** archiso profile, live ISO, text installer, WSL rootfs builds. |
 | `equislinux/scripts` | Provisioning payload and the `x` CLI (`x setup`, `x theme`, ...). Packaged as `x-scripts` and installed by the text installer. |
 | `equislinux/x-repo` | X binary package repository (hosted on GitHub Pages, `[x]` in `pacman.conf`) plus the package portal. |
 | `equislinux/xpm` | X package manager (Rust). |
 | `equislinux/xpkg` | X packaging tool for developers (Rust). |
+| `equislinux/wsl` / `equislinux/wsl-scripts` | WSL rootfs (published release `v0.1.0`) and its first-run setup. |
+| `equislinux/wiki` / `equislinux/web` | Documentation sources (en/es) and the documentation portal. |
 | `equisdots/*` | Org that owns the desktop stack (Hyprland Lua config, Quickshell shell, palettes, engines, SDDM login) consumed read-only by the Hyprland setup tool in `scripts`; its official installer is `equisdots/dots`. |
 
 Related documentation in this repository:
 
-- [Build the ISO](building.md)
+- [Build the ISO and WSL rootfs](building.md)
 - [Text installer](installer.md)
+- [Generations (btrfs snapshots, rollback, restore)](generations.md)
 - [Testing in a VM](vm-testing.md)
 - [Project layout reference](project-layout.md)
 
@@ -59,23 +63,18 @@ Related documentation in this repository:
 - **Branding.** Identity applied to GRUB (`GRUB_DISTRIBUTOR="X"`), the ISO
   label/publisher, MOTD, and installed packages.
 - **Text installer.** `configurator.sh` collects options and writes a JSON
-  plan; `install.sh` partitions (GPT/btrfs with the `@`, `@home`, `@snapshots`
-  and `@xstate` subvolumes and a 1 GiB ESP), runs `pacstrap`, configures the
-  base system, provisions with `x-scripts`, installs a bootloader and records
-  generation `0001`.
-- **Dualboot mode.** The installer can target the largest free region of a GPT
-  disk (`mode` in the JSON), reusing the existing EFI System Partition and
-  leaving the Windows bootloader (`EFI/Microsoft/**`, `EFI/BOOT/BOOTX64.EFI`)
-  untouched. UEFI only.
-- **Generations.** The btrfs layout plus the `x-scripts` engine record a
-  bootable snapshot and a manifest with the system state for every relevant
-  change: list generations, roll back to a previous one (`x gen rollback`)
-  and restore a single file or a whole package (`x gen restore`, `--pkg`).
+  plan; `install.sh` partitions (GPT/btrfs), runs `pacstrap`, configures the
+  base system, provisions with `x-scripts`, and installs a bootloader.
 - **Unattended install.** The ISO ships an `autoinstall` boot entry (hotkey
   `a`, `xauto=1`) for a disk labeled `cidata` containing `x-install.json`.
-- **Offline provisioning payload.** The `x-scripts` package (current payload
-  `x-scripts 0.1.0-30`) and the Hyprland config snapshot ship inside the ISO,
-  so provisioning does not depend on downloading them during install.
+- **System generations.** The installer creates `@`/`@home`/`@snapshots`/
+  `@xstate` btrfs subvolumes and a bootable first generation; the payload
+  records bootable snapshots with manifests, rollback and granular restore
+  (`x gen`), plus dotfile generations (`x home`) and pacman hooks. See
+  [Generations](generations.md).
+- **Offline provisioning payload.** The `x-scripts` package and the Hyprland
+  config snapshot ship inside the ISO, so provisioning does not depend on
+  downloading them during install.
 - **WSL support.** The rootfs is built in the dedicated `equislinux/wsl` repository
   (release `v0.1.0`) and provisioned with `equislinux/wsl-scripts`.
 

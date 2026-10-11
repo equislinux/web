@@ -28,10 +28,6 @@ xpm/
 │           ├── signing.rs      # verificación de firmas OpenPGP separadas
 │           ├── hooks.rs        # trait Hook + hooks integrados de transacción
 │           ├── transaction.rs  # motor de transacciones (plan/prepare/commit)
-│           ├── journal.rs      # journal persistente de transacciones (history)
-│           ├── txhooks.rs      # runner de hooks pre/post-transaction.d
-│           ├── install_reason.rs # metadatos de razón de instalación (explicit/dep)
-│           ├── local_db.rs     # metadatos de la DB local (version/files/origin)
 │           ├── package/        # lectores y parsers de .xp / .pkg.tar.zst
 │           │   ├── reader.rs, pkginfo.rs, buildinfo.rs, mtree.rs,
 │           │   ├── types.rs, validate.rs
@@ -141,8 +137,8 @@ SHA-256, tamaños y tipos de archivo.
   un paquete y descargan desde el primer mirror alcanzable.
 
 Las bases de datos de sync caen bajo `<db_path>/sync/` (p.ej. `/var/lib/xpm/sync/<repo>.db`). La
-base de datos local de paquetes instalados vive bajo `<db_path>/local/<pkg>/` y guarda las
-entradas `version`, `files`, `reason` y `origin` (estas dos últimas cuando se conocen).
+base de datos local de paquetes instalados vive bajo `<db_path>/local/<pkg>/` y guarda al menos
+un archivo `version` y un manifest `files`.
 
 ## Firma
 
@@ -173,12 +169,17 @@ plan/prepare/commit:
 
 `hooks.rs` ofrece el trait `Hook` y un `HookChain`. La cadena por defecto ejecuta, por operación:
 
-1. `MetadataLoadHook` — carga los metadatos del paquete para la operación.
+1. `MetadataLoadHook` — valida/carga los metadatos del paquete para la operación.
 2. `PreScriptletHook` — ejecuta los pre-scriptlets de `.INSTALL` (`pre_install`, `pre_upgrade`,
    `pre_remove`).
-3. `FileExtractionHook` — extrae los archivos del paquete con la propiedad correcta.
+3. `FileExtractionHook` — extrae los archivos del paquete con la propiedad correcta. Los
+   archivos de configuración (entradas `backup`) nunca se pisan en silencio: si el archivo
+   existente difiere se conserva y la versión nueva se escribe como `<file>.pacnew`; en
+   upgrades, los archivos que la versión nueva ya no trae se eliminan, preservando los configs
+   modificados como `<file>.pacsave`. El `.MTREE` crudo de cada instalación (gzip o plano) queda
+   guardado en la base local para la siguiente comparación.
 4. `FileRemovalHook` — elimina los archivos trackeados al desinstalar (y poda directorios vacíos
-   fuera de la raíz del sistema).
+   fuera de la raíz del sistema); los `backup` modificados pasan a `.pacsave` salvo `--nosave`.
 5. `PostScriptletHook` — ejecuta los post-scriptlets de `.INSTALL` (`post_install`,
    `post_upgrade`, `post_remove`).
 6. `LocalDbHook` — registra/elimina el paquete en la base de datos local.
@@ -186,26 +187,14 @@ plan/prepare/commit:
 Los scriptlets se ejecutan vía `bash` con las variables `XPM_ROOT_DIR`, `XPM_PKG_NAME` y
 `XPM_PKG_VERSION` exportadas.
 
-## Journal de transacciones, history y metadatos locales
+Alrededor de la transacción, `alpm_hooks.rs` ejecuta los `.hook` estilo pacman
+(`/usr/share/libalpm/hooks`, `/etc/pacman.d/hooks`, override con
+`XPM_ALPM_HOOKS_DIRS`): triggers `Operation`/`Type=Package` con globs, `Depends`,
+`AbortOnFail` y `NeedsTargets`; un pre-hook fallido aborta cuando está marcado.
 
-Cada transacción se persiste como JSON **antes** de tocar el sistema de ficheros y se finaliza
-tras el commit:
-
-- `<db_path>/journal/<epoch>-<pid>.json` (por defecto `/var/lib/xpm/journal/`), con `schema`,
-  `id`, `action`, `root_dir`, `started`/`finished` en epoch, `result`
-  (`running`/`ok`/`failed`), la lista de paquetes con versiones `from`/`to` y un `error`
-  opcional. `xpm history [--json]` lo lee (el resumen humano muestra timestamps ISO-8601).
-- `txhooks.rs` ejecuta los ejecutables de `pre-transaction.d/` y `post-transaction.d/`
-  (raíz por defecto `/usr/lib/xpm/hooks`, anulable con `XPM_HOOKS_DIR`) en orden léxico con
-  `XPM_ROOT_DIR`, `XPM_ACTION`, `XPM_JOURNAL`, `XPM_PKG_NAMES` y `XPM_PKG_VERSIONS`. Un fallo
-  en un hook pre aborta la transacción; un fallo en un hook post solo avisa.
-- `install_reason.rs` y `local_db.rs` persisten los metadatos que leen `query`, `files` e
-  `info`: `<db_path>/local/<pkg>/reason` (`explicit`/`dep`), `origin` (repositorio de origen)
-  y `files` (manifest `%FILES%` compatible con pacman, derivado del `.MTREE` del paquete).
-  Los ficheros ausentes usan `explicit`, `unknown` y lista vacía por defecto en vez de fallar.
-
-xpm en sí sigue sin saber de snapshots ni generaciones: los hooks de `x gen` que aportará
-`x-scripts` consumen este journal cuando xpm sea el gestor activo.
+La integración con generaciones vive en `journal.rs`/`generations.rs`/`rollback.rs`: el journal
+enlaza la generación vigente tras los post-hooks, `diff` lee el `packages.tsv` de una generación
+y `rollback` invierte un journal exitoso usando la caché de paquetes (`cache.rs`).
 
 ## Configuración
 
@@ -238,9 +227,9 @@ Notas:
 
 - Si el archivo no existe, xpm cae a los defaults integrados (`XpmConfig::default`), cuyo único
   repositorio es `x` en `https://equislinux.github.io/x-repo/x/$arch`.
-- El archivo de ejemplo y algunos fragmentos de README/help difieren en el default del
-  directorio GPG: el código usa `/etc/pacman.d/gnupg/`, mientras que la guía del README usa
-  `/etc/xpm/gnupg/`. Conviene reconciliar esta discrepancia antes de depender de ella.
+- El directorio GPG se resuelve con `effective_gpg_dir()`: el `gpg_dir` configurado si existe,
+  luego `/etc/pacman.d/gnupg` (compartido con pacman) y luego `/etc/xpm/gnupg`. La vieja
+  discrepancia código/README ya no existe.
 - La validación de config rechaza `parallel_downloads = 0`, nombres de repo vacíos y
   repositorios sin servidores.
 - `sig_level` puede definirse globalmente o por repositorio; el valor por repo gana si está
@@ -262,7 +251,7 @@ mirrors se prueban en orden hasta que uno responde.
 | Área | Crates |
 |------|--------|
 | CLI | `clap` 4 |
-| Serialización | `serde` 1, `serde_json` 1, `toml` 0.8 |
+| Serialización | `serde` 1, `toml` 0.8 |
 | Errores | `anyhow` 1, `thiserror` 2 |
 | Resolución | `resolvo` 0.10, `itertools` 0.14 |
 | Archivos/compresión | `tar` 0.4, `zstd` 0.13, `flate2` 1, `xz2` 0.1 |

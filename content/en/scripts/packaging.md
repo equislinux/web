@@ -22,10 +22,9 @@ currently out of scope for packaging; see the workspace ROADMAP, Phase 4.)
   `tools/hyprland-install.sh`). There are **no remote `source=()` entries**: the
   snapshot is vendored in-repo and never fetched at build time.
 
-Version metadata: `pkgver=0.1.0`, `pkgrel` bumped per iteration (currently 19
-in the PKGBUILD, so the payload is `x-scripts 0.1.0-19`). A leftover build
-artifact (`*.pkg.tar.zst`) may sit in the directory but is stale and
-git-ignored; rebuild produces the current pkgrel.
+Version metadata: `pkgver=0.1.0`, `pkgrel` bumped per iteration (currently 13
+in the PKGBUILD). A leftover build artifact (`*.pkg.tar.zst`) may sit in the
+directory but is stale and git-ignored; rebuild produces the current pkgrel.
 
 To build (network-free regarding the config sources; the vendored tree must be
 present first, see below):
@@ -36,14 +35,6 @@ makepkg   # requires packaging/.vendor/x-config to be present
 ```
 
 `packaging/.gitignore` ignores `src/`, `pkg/`, `.vendor/` and built artifacts.
-
-## Payload checks
-
-The test suite guards the packaged payload: `test/package-payload.sh` (run by
-`test/validate.sh`) requires the generation engine inside the built `.pkg`,
-compares `xgen.sh` against the branch and checks that the payload embedded in
-the distro ISO is unique and identical. Bump `pkgrel` and rebuild whenever the
-payload content changes so the check stays reproducible.
 
 ## `vendor-config.sh` — the offline snapshot
 

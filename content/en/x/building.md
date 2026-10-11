@@ -1,7 +1,10 @@
 # Building the ISO
 
+> Other languages: [Español](../es/building.md)
+
 This guide explains how to build the X live ISO from this repository with
-`xbuild.sh`, and summarizes the separate WSL rootfs build scripts.
+`xbuild.sh`. The WSL rootfs is built from the dedicated `equislinux/wsl`
+repository.
 
 ## Prerequisites
 
@@ -81,25 +84,22 @@ the `build-*.log` files.
   Server = https://equislinux.github.io/x-repo/repo/x86_64
   ```
 
-  The build host uses `Never` (it may not have the project key). The live ISO
-  and the installed target use `SigLevel = Required`: the public key ships at
-  `/etc/pacman.d/x-repo.pub`; in the live environment `pacman-init.service`
-  recreates the keyring on tmpfs and `x-keyring.service` imports and locally
-  signs the project key, while `install.sh` prepares the target keyring the
-  same way.
-- The provisioning payload (`x-scripts`, current version `0.1.0-30`) is
-  shipped **offline** inside the ISO at
-  `airootfs/root/x-installer/packages/x-scripts-*.pkg.tar.zst`, so the
+  The *build host* uses `Never` (it may not have the project key). The **live
+  ISO and the installed target** use `SigLevel = Required`: the public key
+  ships at `/etc/pacman.d/x-repo.pub`; in the live environment
+  `pacman-init.service` recreates the keyring on tmpfs and `x-keyring.service`
+  imports and locally signs the project key, while `install.sh` prepares the
+  target keyring the same way.
+- The provisioning payload (`x-scripts`) is shipped **offline** inside the ISO
+  at `airootfs/root/x-installer/packages/x-scripts-*.pkg.tar.zst`, so the
   installer does not need to fetch it from the network during installation.
-  The installer uses it to provision the target and to record generation
-  `0001` at the end of the installation.
 
 ## Troubleshooting
 
 - If no ISO is generated, inspect the build log first (`build-*.log`).
 - Common failure causes:
   - insufficient disk space;
-  - errors in profile customization logic;
+  - errors in a live helper or pacman hook;
   - invalid profile configuration in `profiledef.sh`;
   - stale mounts under `work/x86_64/airootfs` (the script tries to clean them;
     unmount with `sudo umount -R work/x86_64/airootfs` if needed).
@@ -113,5 +113,5 @@ WSL is not built from this repository. The canonical flow lives in:
 | `equislinux/wsl` | `build-rootfs.sh` produces an importable rootfs tarball (`.tar.gz` + `.sha256`); `install.ps1` imports it on Windows. Published release: `v0.1.0`. |
 | `equislinux/wsl-scripts` | Two-stage in-distro provisioning (`stage-root.sh` / `stage-user.sh`). |
 
-The two repositories above are the source of truth for building and
-provisioning X on WSL.
+See `docs/build-wsl.md` for the summary; the two repositories above are the
+source of truth.

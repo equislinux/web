@@ -1,5 +1,6 @@
 # Instalador de texto
 
+> Otros idiomas: [English](../en/installer.md)
 
 X se instala desde el **ISO en vivo** con un **instalador de texto**. No hay
 instalador gráfico (Calamares fue eliminado). Todo lo que se describe vive bajo
@@ -61,7 +62,6 @@ cae a prompts de texto plano en caso contrario (`ui.sh`).
 | Paso | Opciones | Valor almacenado |
 |------|----------|------------------|
 | Disco | cualquier dispositivo de bloque de tipo `disk` (de `lsblk`) | `disk` (p. ej. `/dev/sda`) |
-| Modo de instalación | Wipe the disk (delete everything) / Dualboot (use free space, keep existing OS) | `mode` (`wipe`/`dualboot`) |
 | Idioma del sistema | English, Español, Deutsch, Français | `language` + `locale` |
 | Distribución de teclado | `us`, `es`, `de`, `fr`, `uk`, `latam`, `br-abnt2` | `keyboard` |
 | Zona horaria | `UTC`, `Europe/Madrid`, `Europe/London`, `Europe/Berlin`, `America/Mexico_City`, `America/Argentina/Buenos_Aires`, `America/Los_Angeles`, `Asia/Tokyo` | `timezone` |
@@ -91,12 +91,11 @@ Reglas de validación: el hostname debe cumplir
 ni `\`.
 
 Antes de escribir la configuración, el configurador pide una confirmación
-final acorde al modo: en `wipe` avisa que se borrará todo el disco; en
-`dualboot` aclara que solo se usará el espacio libre y que las particiones
-existentes y la ESP se preservan. El JSON resultante tiene este aspecto:
+final de que todo lo que haya en el disco seleccionado será borrado. El JSON
+resultante tiene este aspecto:
 
 ```json
-{"disk":"/dev/sda","mode":"wipe","hostname":"x","username":"x","password":"secret","language":"en","locale":"en_US.UTF-8","keyboard":"us","timezone":"UTC","profile":"full","bootloader":"grub","kernel":"linux","encryption":"no","luks_password":"","hyprland":"no","agents":"no"}
+{"disk":"/dev/sda","hostname":"x","username":"x","password":"secret","language":"en","locale":"en_US.UTF-8","keyboard":"us","timezone":"UTC","profile":"full","bootloader":"grub","kernel":"linux","encryption":"no","luks_password":"","hyprland":"no","agents":"no"}
 ```
 
 El JSON se escribe en la ruta de `X_CONFIG_OUT` (por defecto
@@ -108,13 +107,11 @@ están.
 
 1. **Analizar y validar** el JSON (`disk`, `hostname`, `username`); requiere
    root y un dispositivo de bloque real.
-2. **Particionar** con GPT (`sgdisk --zap-all` primero; en modo `dualboot`
-   nunca se toca la tabla existente):
+2. **Particionar** con GPT (`sgdisk --zap-all` primero):
    - `grub`: partición `bios_grub` de 1 MiB, partición EFI de 1 GiB, resto =
      raíz.
    - `systemd-boot`: partición EFI de 1 GiB, resto = raíz.
-
-   1 GiB deja lugar para varias generaciones de entries de arranque en el ESP.
+   (1 GiB deja lugar para varias generaciones de entries de arranque.)
 3. **LUKS** (si `encryption=yes`): `cryptsetup luksFormat --type luks2` sobre
    la partición raíz (passphrase de `luks_password`, con fallback a la
    password del usuario) y apertura como `/dev/mapper/xroot`.
@@ -129,20 +126,24 @@ están.
      pipewire-pulse pipewire-alsa wireplumber alsa-utils sddm`, más
      `grub efibootmgr` para
      GRUB y `cryptsetup` para LUKS. `btrfs-progs` lo requiere el motor de
-     generaciones y se instala en todos los perfiles.
+     generaciones; las herramientas de X (`xfetch`, `xtop`) se instalan en
+     todos los perfiles.
    - Perfil `full`: añade todos los paquetes del manifiesto apuntado por
      `X_PKGLIST` (por defecto `/root/x-installer/packages.x86_64`).
    - Perfil `core`: añade solo `vim zsh`.
    - El perfil `full` con el escritorio Hyprland compila paquetes de AUR
      (`quickshell-git`, `swayosd-git`, ...): dale al instalador **≥6 GB de
      RAM**; en máquinas con poca memoria limita los jobs de build.
-6. **Esperar a la red** (comprobación de DNS contra
-   `geo.mirror.pkgbuild.com`, hasta ~120 s) y ejecutar
-   `pacstrap /mnt <pkgs>` desde los mirrors oficiales más el repositorio
-   `[x]` firmado (`Required`). Antes, el instalador prepara el keyring del
-   destino (`pacman-key --gpgdir /mnt/etc/pacman.d/gnupg --init`,
-   `--populate archlinux`, agrega y firma localmente
-   `/etc/pacman.d/x-repo.pub`).
+6. **Preparar los keyrings** y **esperar a la red** (DNS contra
+   `geo.mirror.pkgbuild.com`, hasta ~120 s). Después `pacstrap /mnt <pkgs>`
+   desde los mirrors oficiales más el repositorio `[x]` firmado (`Required`).
+   - Live: se agrega y firma localmente `/etc/pacman.d/x-repo.pub`
+     (`pacman-key --init/--populate archlinux/--add/--lsign-key`). Lo
+     re-aplica al boot `x-keyring.service` porque `pacman-init.service`
+     recrea `/etc/pacman.d/gnupg` en tmpfs; `install.sh` lo repite de forma
+     idempotente antes de `pacstrap` (que verifica contra el keyring live).
+   - Destino: `pacman-key --gpgdir /mnt/etc/pacman.d/gnupg --init`,
+     `--populate archlinux`, agregar y firmar localmente la misma clave.
 7. **Instalar `x-scripts` offline**: el payload
    `packages/x-scripts-*.pkg.tar.zst` presente en el entorno en vivo se copia
    al destino y se instala con `pacman -U` dentro del chroot.
@@ -187,12 +188,11 @@ están.
       removable `BOOTX64.EFI` si hiciera falta y una entrada de arranque
       `X Linux` (solo UEFI) con la línea `root=` o `cryptdevice=` adecuada.
 15. **Primera generación**: dentro del chroot,
-    `X_GEN_CMDLINE="$CMDROOT" X_GEN_LIVE_SUBVOL=/@
-    X_GEN_SUBVOL_PREFIX=/@snapshots x gen new --reason install --label first`
-    crea `/.snapshots/0001`, el manifiesto en `/var/lib/x/generations/0001` y
-    las entries de arranque (systemd-boot `loader/entries/x-gen-0001.conf`,
-    GRUB `custom.cfg`). Es la base para rollbacks y restores granulares; el
-    contrato completo vive en la documentación de `x-scripts`.
+    `X_GEN_CMDLINE="$CMDROOT" X_GEN_LIVE_SUBVOL=/@ x gen new --reason install
+    --label first` crea `/.snapshots/0001`, el manifiesto en
+    `/var/lib/x/generations/0001` y las entries de arranque (systemd-boot
+    `loader/entries/x-gen-0001.conf`, GRUB `custom.cfg`). Es la base para
+    rollbacks y restores granulares; ver `generations.md`.
 16. **Limpieza**: al salir se desmontan los sistemas de archivos, se cierra el
     mapeo LUKS si está abierto y se elimina el JSON de instalación.
 
@@ -201,9 +201,12 @@ de instalación.
 
 ## Autoinstalación
 
-Instalación desatendida desde el ISO en vivo: arrancá la entrada **autoinstall**
-(hotkey `a`, `xauto=1`) con un dispositivo etiquetado **`cidata`** que contenga
-**`x-install.json`** (por ejemplo, un disco virtual extra en QEMU).
+El instalador soporta la instalación desatendida desde el ISO en vivo:
+
+- La línea de comandos del kernel debe contener **`xauto=1`**.
+- Debe existir un dispositivo de almacenamiento etiquetado como **`cidata`**
+  con un archivo **`x-install.json`** (por ejemplo, un disco virtual extra en
+  QEMU).
 
 `x-autoinstall.service` (habilitada en la imagen en vivo) ejecuta
 `autoinstall.sh`, que:
@@ -225,8 +228,10 @@ ejemplo:
 ```
 
 `kernel_params` es opcional: parámetros extra que se añaden al cmdline del
-sistema instalado (validados contra un conjunto de caracteres seguro), por
-ejemplo `console=ttyS0` para validación headless.
+kernel del sistema instalado (restringidos a un conjunto de caracteres seguro
+y validados antes de particionar). Es útil para validación headless, por
+ejemplo `"kernel_params":"console=ttyS0"` para conservar la consola serie tras
+la instalación.
 
 Consulta [Pruebas en una máquina virtual](vm-testing.md) para un ejemplo de
 disco cidata.
@@ -310,9 +315,8 @@ Qué hace:
    - GRUB: `grub-install --target=x86_64-efi --bootloader-id=x` más
      `os-prober` (`GRUB_DISABLE_OS_PROBER=false`) para agregar Windows.
 5. Mantiene el Windows Boot Manager primero en el orden del firmware (best
-   effort vía `efibootmgr`), crea la entry NVRAM de X con `efibootmgr` si el
-   instalador del bootloader no la escribió (habitual dentro del chroot), y
-   las generaciones de X nunca pisan archivos de Microsoft.
+   effort vía `efibootmgr`), y las generaciones de X nunca pisan archivos de
+   Microsoft.
 
 Salvedades: no hay dualboot BIOS/MBR, y encoger una partición existente para
 hacer lugar queda fuera de alcance (el espacio libre ya tiene que existir).
@@ -322,12 +326,8 @@ hacer lugar queda fuera de alcance (el espacio libre ya tiene que existir).
 - La instalación requiere **acceso a red**: `pacstrap` descarga desde los
   mirrors oficiales de Arch y el repositorio `[x]`. Un mirror offline incluido
   en el ISO está pendiente (consulta la ROADMAP del workspace).
-- En modo `wipe`, el disco de destino se borra por completo; el modo
-  `dualboot` solo usa la región libre y preserva el resto.
+- El disco de destino se borra por completo.
 - `systemd-boot` es **solo UEFI**; GRUB escribe tanto la ruta BIOS (con la
   partición `bios_grub`) como la UEFI (removable), de modo que cualquiera de
   los dos modos de arranque funciona.
 - LUKS usa LUKS2 con el hook `encrypt` clásico del initramfs.
-- La matriz del instalador está validada en VM: BIOS/GRUB,
-  UEFI/systemd-boot, perfil `full`, LUKS y dualboot; el multi-kernel (una
-  entry por `pkgbase`) está cubierto a nivel de motor.

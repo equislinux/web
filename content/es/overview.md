@@ -1,8 +1,9 @@
 # Documentación de X Linux
 
-**X Linux** es una distribución minimalista basada en Arch, construida a partir de
-los repositorios oficiales de Arch, con un instalador de texto guiado por scripts,
-branding propio y una capa de aprovisionamiento.
+**X Linux** es una distribución basada en Arch y centrada en snapshots, con
+instalador por scripts y tooling de paquetes propio: generaciones btrfs
+booteables, soporte multi-kernel, repositorio `[x]` firmado y endpoint nativo
+`.xp`.
 
 Este sitio reúne la documentación de todos los repositorios de la organización
 `equislinux` en inglés y español. Usa la barra lateral para navegar por componente, o

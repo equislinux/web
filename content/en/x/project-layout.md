@@ -1,5 +1,7 @@
 # Project layout reference
 
+> Other languages: [Español](../es/project-layout.md)
+
 Reference of the repository composition and the role of its key files and
 directories. See also the top-level `README.md` and the single-language guides
 under `docs/`.
@@ -75,11 +77,11 @@ The text installer shipped in the live image:
 |------|---------|
 | `installer.sh` | Entry point; runs the configurator then the installer. |
 | `configurator.sh` | Interactive configuration (gum/plain prompts); writes the JSON plan. |
-| `install.sh` | Performs partitioning, `pacstrap`, base config, user, provisioning, bootloader and the first generation (`0001`). |
+| `install.sh` | Performs partitioning, `pacstrap`, base config, user, provisioning, bootloader. |
 | `autoinstall.sh` | Unattended installer (triggered by `xauto=1` + `cidata` disk). |
 | `ui.sh` | Shared UI helpers used by the other scripts. |
 | `packages.x86_64` | Default manifest for the `full` package profile. |
-| `packages/` | Offline `x-scripts` payload bundled into the live image (currently `x-scripts-0.1.0-19`). |
+| `packages/` | Offline `x-scripts-*.pkg.tar.zst` payload bundled into the live image. |
 
 ## Build-critical files
 

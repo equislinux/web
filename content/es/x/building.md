@@ -1,7 +1,10 @@
 # Construir el ISO
 
-Esta guía explica cómo construir el ISO en vivo de X desde este repositorio con
-`xbuild.sh` y resume los scripts separados de construcción de rootfs para WSL.
+> Otros idiomas: [English](../en/building.md)
+
+Esta guía explica cómo construir el ISO en vivo de X desde este repositorio
+con `xbuild.sh`. El rootfs de WSL se construye desde el repositorio dedicado
+`equislinux/wsl`.
 
 ## Prerrequisitos
 
@@ -84,18 +87,16 @@ Tanto `work/` como `out/` se recrean en cada construcción y están en
   Server = https://equislinux.github.io/x-repo/repo/x86_64
   ```
 
-  El host de build usa `Never` (puede no tener la clave del proyecto). El ISO
-  live y el destino instalado usan `SigLevel = Required`: la clave pública
-  viaja en `/etc/pacman.d/x-repo.pub`; en el entorno en vivo
+  El *host de build* usa `Never` (puede no tener la clave del proyecto). El
+  **ISO live y el destino instalado** usan `SigLevel = Required`: la clave
+  pública viaja en `/etc/pacman.d/x-repo.pub`; en el entorno en vivo
   `pacman-init.service` recrea el keyring en tmpfs y `x-keyring.service`
   importa y firma localmente la clave del proyecto, mientras que `install.sh`
   prepara el keyring del destino de la misma forma.
-- El *payload* de aprovisionamiento (`x-scripts` `0.1.0-30`) se incluye
-  **offline** dentro del ISO en
-  `airootfs/root/x-installer/packages/x-scripts-0.1.0-30-any.pkg.tar.zst`, de
-  modo que el instalador no necesita descargarlo de la red durante la
-  instalación. El instalador lo usa para aprovisionar el destino y para
-  registrar la primera generación (`0001`) al final de la instalación.
+- El *payload* de aprovisionamiento (`x-scripts`) se incluye **offline**
+  dentro del ISO en `airootfs/root/x-installer/packages/x-scripts-*.pkg.tar.zst`,
+  de modo que el instalador no necesita descargarlo de la red durante la
+  instalación.
 
 ## Solución de problemas
 
@@ -103,7 +104,7 @@ Tanto `work/` como `out/` se recrean en cada construcción y están en
   (`build-*.log`).
 - Causas de fallo habituales:
   - espacio en disco insuficiente;
-  - errores en la lógica de personalización del perfil;
+  - errores en un helper en vivo o en un hook de pacman;
   - configuración de perfil inválida en `profiledef.sh`;
   - montajes obsoletos bajo `work/x86_64/airootfs` (el script intenta
     limpiarlos; si hace falta, desmonta con
@@ -118,5 +119,5 @@ WSL no se construye desde este repositorio. El flujo canónico vive en:
 | `equislinux/wsl` | `build-rootfs.sh` produce un tarball de rootfs importable (`.tar.gz` + `.sha256`); `install.ps1` lo importa en Windows. Release publicada: `v0.1.0`. |
 | `equislinux/wsl-scripts` | Aprovisionamiento en dos etapas dentro de la distro (`stage-root.sh` / `stage-user.sh`). |
 
-Los dos repositorios de arriba son la fuente de verdad para construir y
-aprovisionar X en WSL.
+Consulta `docs/build-wsl.md` para el resumen; los dos repositorios de arriba
+son la fuente de verdad.

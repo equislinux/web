@@ -13,8 +13,8 @@
         "checksums": "https://sourceforge.net/projects/equislinux/files/iso/SHA256SUMS/download"
       },
       "wsl": {
-        "name": "x-2026.01.31.tar.zst",
-        "url": "https://github.com/equislinux/x/releases/download/x/x-2026.01.31.tar.zst"
+        "name": "x-wsl-rootfs.tar.gz",
+        "url": "https://github.com/equislinux/wsl/releases/download/v0.1.0/x-wsl-rootfs.tar.gz"
       }
     }
   ]

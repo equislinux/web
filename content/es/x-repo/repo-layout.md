@@ -3,9 +3,7 @@
 ## Nivel superior
 
 ```
-app/                  Fuente del portal Next.js (App Router)
-components/           Componentes React usados por el portal
-lib/                  Helpers de cliente (diccionario i18n)
+app/                  Página Next.js (layout, page y estilos)
 packages/             Fuentes de paquetes y artefactos de build
 public/               Contenido estático servido en GitHub Pages
   repo/x86_64/        Repositorio [x] de pacman (db + tarballs .pkg.tar.zst)
@@ -40,8 +38,16 @@ El README señala que mientras `PKGBUILD` se mantiene para el tooling legacy de 
   `/usr/bin/x-dev-env` y helpers bajo `/usr/share/x-dev/` (aliases de shell, scripts
   de setup de NVIDIA/QEMU/Node). Depende de `zsh git base-devel curl wget`.
   `install=x-dev.install` ejecuta la lógica post-instalación.
+- **`opencode-bin`** — binario oficial precompilado del CLI opencode
+  (`anomalyco/opencode`, `1.18.34`), redistribuido para que `agents=yes` y los
+  usuarios de `x agent` tengan agente sin recurrir a AUR.
+  `provides`/`conflicts` `opencode`; el tarball va verificado por checksum en el
+  PKGBUILD.
 
-Hoy solo estos dos se construyen desde su `PKGBUILD` con `build-packages.sh`.
+Los artefactos del repo pacman `[x]` se construyen con `build-packages.sh`
+(`makepkg` + `repo-add`); el endpoint nativo `.xp` se construye con
+`scripts/build-xp.sh` (`xpkg`). Las recetas usan `PKGBUILD` (compatible Arch) o
+`XBUILD` (nativo).
 
 ### x-scripts: artefacto importado, sin fuente aquí
 
@@ -49,11 +55,11 @@ Hoy solo estos dos se construyen desde su `PKGBUILD` con `build-packages.sh`.
 hermano `equislinux/scripts` bajo `scripts/packaging/` y empaqueta todo el payload de
 aprovisionamiento (fases, CLI `x`, configs). El tarball resultante se construye allí y
 se **importa** a este repo, commiteado bajo `public/repo/x86_64/` (actualmente
-`x-scripts-0.1.0-19-any.pkg.tar.zst`).
+`x-scripts-0.1.0-36-any.pkg.tar.zst`).
 
 - No existe un directorio de fuente `packages/x-scripts/` aquí.
 - El artefacto publicado y el `PKGBUILD` de `scripts/packaging/` están alineados en
-  `0.1.0-19` (la revisión del payload multi-kernel). `build-packages.sh` importa el
+  `0.1.0-36` (el payload de aprovisionamiento actual). `build-packages.sh` importa el
   build hermano automáticamente; vuelve a ejecutarlo al republicar el payload.
 
 ### Solo recetas
@@ -69,14 +75,10 @@ Este directorio es el repositorio orientado a pacman. Archivos presentes:
 | Archivo | Rol |
 |---|---|
 | `x.db`, `x.db.tar.gz` | Base de datos de paquetes (`x.db` es la copia sin comprimir de `x.db.tar.gz`). |
-| `x.db.sig`, `x.db.tar.gz.sig` | Firma OpenPGP detached de la base de datos (builds firmados). |
 | `x.files`, `x.files.tar.gz` | Base de datos de listas de archivos para `pacman -F`. |
-| `x.files.sig`, `x.files.tar.gz.sig` | Firma detached de la base de listas de archivos (builds firmados). |
-| `*.pkg.tar.zst` | Los paquetes: `x-release-1.0-8`, `x-dev-1.0-2`, `x-scripts-0.1.0-19`, `xpm-0.1.0-3`. |
-| `*.pkg.tar.zst.sig` | Firma OpenPGP detached junto a cada paquete (builds firmados). |
+| `*.pkg.tar.zst` | Los paquetes: `x-release-1.0-8`, `x-dev-1.0-2`, `x-scripts-0.1.0-36`, `xpm-0.1.0-3`, `xfetch-bin-1.0.0-1`, `xtop-git-r35.cb17bb7-1`, `opencode-bin-1.18.34-1`. |
 | `SHA256SUMS` | Checksums de todos los archivos del directorio. |
-| `SHA256SUMS.sig` | Firma detached de `SHA256SUMS` (builds firmados). |
-| `signing.pub`, `trustedkeys.gpg` | Clave pública del proyecto y keyring GPG que importan los consumidores para verificar el repositorio (`signing.pub` es la clave armada; `trustedkeys.gpg` el keyring binario). |
+| `signing.pub`, `trustedkeys.gpg` | Material de firma/confianza consumido por el endpoint nativo. |
 
 Los clientes configuran el repositorio en `pacman.conf` como:
 
@@ -97,7 +99,8 @@ repo-add -R x.db.tar.gz *.pkg.tar.zst
 rm -f x.db x.files
 cp x.db.tar.gz x.db
 cp x.files.tar.gz x.files
-sha256sum * > SHA256SUMS
+rm -f SHA256SUMS SHA256SUMS.sig
+sha256sum $(find . -maxdepth 1 -type f ! -name 'SHA256SUMS*' -printf '%P\n' | sort) > SHA256SUMS
 ```
 
 - `repo-add` crea `x.db.tar.gz` y `x.files.tar.gz` a partir de los `.pkg.tar.zst`.
@@ -105,14 +108,9 @@ sha256sum * > SHA256SUMS
   directorio, así que también se eliminan entradas de paquetes que ya no existen.
 - `x.db`/`x.files` son copias planas de los `.tar.gz` para que pacman pueda leerlos
   directamente.
-- Por defecto la base se regenera sin firmar. Cuando `X_REPO_SIGN_KEY` está
-  exportada, `build-packages.sh` llama a `repo-add -s -k`, firma `SHA256SUMS` y
-  (re)exporta `trustedkeys.gpg` + `signing.pub`; el estado firmado vive hoy en la
-  rama `feat/signing` (ver [signing.md](signing.md)).
-- `SHA256SUMS` se regenera a partir de todos los archivos del directorio y se firma
-  como `SHA256SUMS.sig` cuando la firma está activa.
-- Las firmas por paquete (`*.pkg.tar.zst.sig`) las produce `makepkg --sign` y se
-  conservan junto a su tarball.
+- Con `X_REPO_SIGN_KEY` definida, `repo-add -s` firma la base y todos los artefactos
+  (ver `signing.md`); sin clave, el repo se publica sin firmar y se avisa por stderr.
+- `SHA256SUMS` se regenera a partir de todos los archivos del directorio.
 
 ## public/x/x86_64/ — endpoint nativo .xp
 
@@ -132,8 +130,10 @@ Script local (se ejecuta desde la raíz del repo; requiere un entorno tipo Arch 
 1. Construye en su sitio los paquetes PKGBUILD configurados
    (`build_pkgbuild x-release`, `build_pkgbuild x-dev`) con `makepkg -cf --noconfirm`.
    El helper `build_xbuild` para la vía nativa existe pero está comentado.
-2. Copia todos los `packages/*/*.pkg.tar.zst` a `public/repo/x86_64/` y elimina el
-   artefacto de build después.
+2. Importa `../scripts/packaging/x-scripts-*.pkg.tar.zst` cuando existe, copia los
+   tarballs recién construidos de `x-release`/`x-dev` a `public/repo/x86_64/` y
+   elimina después esos artefactos de build (los binarios commiteados bajo los demás
+   directorios `packages/*` no se tocan).
 3. Regenera la base de datos de pacman y `SHA256SUMS` como se muestra arriba.
 4. Imprime el recordatorio final:
 

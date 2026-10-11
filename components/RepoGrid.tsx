@@ -12,7 +12,7 @@ export default function RepoGrid({ lang }: { lang: Lang }) {
       <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
         {t.landing.reposSubtitle}
       </p>
-      <div className="mt-8 grid gap-3 sm:grid-cols-2">
+      <div className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2">
         {REPOS.map((repo) => (
           <a
             key={repo.name}

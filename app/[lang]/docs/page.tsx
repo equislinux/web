@@ -34,7 +34,7 @@ export default async function DocsHome({
   return (
     <DocsShell lang={lang} path="/docs" sections={sections} activeSlug="">
       <Markdown markdown={overview} lang={lang} section="overview" />
-      <div className="mt-12 grid gap-3 sm:grid-cols-2">
+      <div className="mt-12 grid grid-cols-1 gap-3 sm:grid-cols-2">
         {sections.map((section) => (
           <Link
             key={section.id}

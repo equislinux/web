@@ -17,6 +17,8 @@ html.dark {
 
 body {
   @apply bg-white text-zinc-900 antialiased dark:bg-zinc-950 dark:text-zinc-50;
+  /* Safety net: never allow page-level horizontal scroll on this site. */
+  overflow-x: clip;
 }
 
 ::selection {
@@ -82,6 +84,12 @@ body {
 
 .docs-prose {
   @apply text-[15px] leading-7 text-zinc-600 dark:text-zinc-400;
+  overflow-wrap: break-word;
+}
+
+.docs-prose a,
+.docs-prose code {
+  overflow-wrap: anywhere;
 }
 
 .docs-prose > * + * {

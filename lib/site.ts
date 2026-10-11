@@ -2,6 +2,8 @@ import type { Lang } from './i18n';
 
 export const GITHUB_ORG = 'https://github.com/equislinux';
 
+export const SITE_BASE = '/web';
+
 export interface RepoInfo {
   name: string;
   href: string;

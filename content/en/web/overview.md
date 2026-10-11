@@ -4,6 +4,13 @@
 documentation of every repository (sourced from `equislinux/wiki`) and presents it with a
 landing page and a browsable docs section, in English and Spanish.
 
+## Landing
+
+The landing (`/en`, `/es`) gathers the downloads (ISO and the WSL rootfs), a
+screenshot showcase, the "Why X" feature grid and an install guide in three
+steps — all in the same monochrome design system as the docs. Screenshots live
+only in `public/showcase/`.
+
 ## Stack
 
 - **Next.js** (App Router) with static export to GitHub Pages.

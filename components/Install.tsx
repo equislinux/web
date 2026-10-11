@@ -12,7 +12,7 @@ export default function Install({ lang }: { lang: Lang }) {
       <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
         {t.install.subtitle}
       </p>
-      <div className="mt-8 grid gap-3 md:grid-cols-3">
+      <div className="mt-8 grid grid-cols-1 gap-3 md:grid-cols-3">
         <article className="rounded-xl border border-zinc-200 p-6 dark:border-zinc-800">
           <h3 className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
             1 · {t.install.step1Title}

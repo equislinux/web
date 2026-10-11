@@ -1,12 +1,13 @@
 # Pruebas de X en una máquina virtual
 
+> Otros idiomas: [English](../en/vm-testing.md)
 
 Comandos auxiliares para ejecutar el ISO en vivo de X y arrancar un disco ya
 instalado con QEMU. Ajusta las rutas (`ISO`, `DISK`) a tu máquina.
 
 ```bash
-ISO=/home/x0z/Documents/repos/x-lnux/x/out/x-2026.09.06-x86_64.iso
-DISK=/home/x0z/x-vm.qcow2
+ISO="$HOME/Documents/repos/xlnux/x/out/x-<version>-x86_64.iso"
+DISK="$HOME/x-vm.qcow2"
 ```
 
 Ajusta `ISO` al artefacto producido por `xbuild.sh` (consulta
@@ -103,7 +104,9 @@ python3 tests/e2e-autoinstall.py --mode uefi --kernel linux-lts
 python3 tests/e2e-autoinstall.py --mode uefi --multikernel
 ```
 
-Los artefactos (disco, logs serie y de QEMU) quedan en `../tmp/e2e/`.
+Los artefactos (disco, logs serie y de QEMU) quedan en `../tmp/e2e/`. El JSON
+semilla que genera incluye `"kernel_params":"console=ttyS0"` para que el
+sistema instalado también exponga la consola en el puerto serie.
 
 ### Disco semilla manual
 
@@ -116,9 +119,9 @@ rm -rf "$SEED" && mkdir -p "$SEED"
 printf '{"disk":"/dev/vda","hostname":"x-vm","username":"x","password":"secret","profile":"core","bootloader":"grub","kernel":"linux","encryption":"no","hyprland":"no","kernel_params":"console=ttyS0"}\n' \
   > "$SEED/x-install.json"
 
-qemu-img create -f raw /home/x0z/cidata.img 64M
-mkfs.vfat -n cidata /home/x0z/cidata.img
-mcopy -i /home/x0z/cidata.img "$SEED/x-install.json" ::x-install.json
+qemu-img create -f raw "$SEED/cidata.img" 64M
+mkfs.vfat -n cidata "$SEED/cidata.img"
+mcopy -i "$SEED/cidata.img" "$SEED/x-install.json" ::x-install.json
 ```
 
 Después, añadí el disco semilla al comando de arranque del ISO y seleccioná
@@ -127,7 +130,7 @@ la entrada autoinstall (`xauto=1` ya es parte de su cmdline):
 ```bash
 qemu-system-x86_64 -enable-kvm -m 6144 -smp 4 -cpu host \
   -cdrom "$ISO" \
-  -drive file=/home/x0z/cidata.img,format=raw,if=virtio \
+  -drive file="$SEED/cidata.img",format=raw,if=virtio \
   -netdev user,id=net0 -device virtio-net-pci,netdev=net0 \
   -boot d
 ```
@@ -136,15 +139,14 @@ qemu-system-x86_64 -enable-kvm -m 6144 -smp 4 -cpu host \
 Consulta [Autoinstalación](installer.md#autoinstalación) para las condiciones
 exactas de activación.
 
-Notas de testing desatendido (aprendidas en la validación de 2026-10):
+Notas de testing desatendido (aprendidas en la validación P0 de 2026-10):
 
 - `xauto=1` vive en la entrada dedicada **autoinstall** de cada gestor:
   syslinux (BIOS) y `grub/` (UEFI). Arrancar la entrada por defecto saltea la
   autoinstalación (`autoinstall: no xauto=1; skipping` en el serial).
 - **Apagá el guest limpiamente** (`poweroff`/`reboot` dentro del guest o
-  `quit` del monitor QEMU) antes de matar QEMU. Matarlo puede perder
-  escrituras en page cache del guest y dejar el sistema instalado con
-  metadata en 0 bytes.
+  `quit` del monitor QEMU) antes de matar QEMU. Matarlo puede perder escrituras
+  en page cache del guest y dejar el sistema instalado con metadata en 0 bytes.
 - Capturá el serial (`-serial file:...`) y, si usás `-display none`, agregá
   `-monitor unix:...,server=on,nowait` para tomar `screendump`s y manejar la
   consola con `sendkey`.

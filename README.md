@@ -1,7 +1,8 @@
 <h1 align="center"> X Web </h1>
 
 <div align="center">
-  <p><b>Documentation portal for X Linux: landing + docs, in English and Spanish.</b></p>
+  <p><b>Arch-based, snapshot-first Linux with a script-driven installer and its own package tooling.</b></p>
+  <p>Documentation portal: landing + docs, in English and Spanish.</p>
   <p>
     <a href="https://equislinux.github.io/web/">Live site</a> •
     <a href="https://github.com/equislinux/wiki">Docs sources</a> •
@@ -22,8 +23,10 @@
 
 `equislinux/web` is the public documentation portal of the X Linux project:
 
-- **Landing** — hero, the repository grid, the two packaging paths (pacman `[x]`
-  and native `.xp` for `xpm`) and a docs call to action.
+- **Landing** — hero with the ISO download, screenshot showcase
+  (`public/showcase/`), a "Why X" feature grid, install steps, the repository
+  grid, the two packaging paths (pacman `[x]` and native `.xp` for `xpm`) and a
+  docs call to action.
 - **Docs** — every repository of the organization documented in a browsable
   sidebar, rendered from markdown, with a language switch (English/Spanish).
 
@@ -47,7 +50,8 @@ app/
   [lang]/page.tsx             # /en and /es landings
   [lang]/docs/page.tsx        # docs home (overview + section cards)
   [lang]/docs/[...slug]/      # one route for every docs page
-components/                   # Navbar, Footer, Hero, RepoGrid, DocsShell, Markdown
+components/                   # Navbar, Footer, Hero, Downloads, Showcase,
+                              # Features, Install, RepoGrid, DocsShell, Markdown
 content/
   en/<section>/<page>.md      # documentation sources (English)
   es/<section>/<page>.md      # documentation sources (Spanish)
@@ -67,6 +71,10 @@ npm run build    # static export in ./out
 
 The site uses `basePath: /web` (GitHub Pages project path), so both the dev
 server and the exported assets live under `/web`.
+
+The layout is checked free of horizontal overflow at 390/360/320 px (grids use
+`minmax(0, 1fr)` tracks, prose wraps long tokens and `body` clamps with
+`overflow-x: clip` as a safety net).
 
 ## Adding a page
 

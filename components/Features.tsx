@@ -20,7 +20,7 @@ export default function Features({ lang }: { lang: Lang }) {
       <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
         {t.features.subtitle}
       </p>
-      <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {items.map((feature) => (
           <article
             key={feature.title}

@@ -1,5 +1,6 @@
 # Text installer
 
+> Other languages: [Español](../es/installer.md)
 
 X is installed from the **live ISO** using a **text installer**. There is no
 graphical installer (Calamares was removed). Everything below lives under
@@ -60,7 +61,6 @@ to plain text prompts otherwise (`ui.sh`).
 | Step | Options | Stored value |
 |------|---------|--------------|
 | Disk | any block device of type `disk` (from `lsblk`) | `disk` (e.g. `/dev/sda`) |
-| Install mode | `Wipe disk` / `Dualboot (keep existing partitions)` | `mode` (`wipe`/`dualboot`) |
 | System language | English, Español, Deutsch, Français | `language` + `locale` |
 | Keyboard layout | `us`, `es`, `de`, `fr`, `uk`, `latam`, `br-abnt2` | `keyboard` |
 | Timezone | `UTC`, `Europe/Madrid`, `Europe/London`, `Europe/Berlin`, `America/Mexico_City`, `America/Argentina/Buenos_Aires`, `America/Los_Angeles`, `Asia/Tokyo` | `timezone` |
@@ -89,11 +89,10 @@ username `^[a-z_][a-z0-9_-]{0,31}$`; passwords/passphrases cannot contain
 `"` or `\`.
 
 Before writing the config, the configurator asks for final confirmation that
-everything on the selected disk will be erased (`wipe` mode). The resulting
-JSON looks like:
+everything on the selected disk will be erased. The resulting JSON looks like:
 
 ```json
-{"disk":"/dev/sda","mode":"wipe","hostname":"x","username":"x","password":"secret","language":"en","locale":"en_US.UTF-8","keyboard":"us","timezone":"UTC","profile":"full","bootloader":"grub","kernel":"linux","encryption":"no","luks_password":"","hyprland":"no","agents":"no"}
+{"disk":"/dev/sda","hostname":"x","username":"x","password":"secret","language":"en","locale":"en_US.UTF-8","keyboard":"us","timezone":"UTC","profile":"full","bootloader":"grub","kernel":"linux","encryption":"no","luks_password":"","hyprland":"no","agents":"no"}
 ```
 
 The JSON is written to the path in `X_CONFIG_OUT` (default
@@ -115,7 +114,6 @@ are required; the remaining keys have sensible defaults when absent.
    at `/mnt/boot`; the root (or LUKS mapping) as btrfs with the `@`, `@home`,
    `@snapshots` and `@xstate` subvolumes mounted at `/`, `/home`,
    `/.snapshots` and `/var/lib/x`. `/tmp` is appended to the fstab as tmpfs.
-   In `dualboot` mode the existing ESP is reused and never formatted.
 5. **Package set**:
    - Base set: `base base-devel linux linux-firmware sudo networkmanager
      openssh git jq x-release btrfs-progs xfetch-bin xtop-git kitty pipewire
@@ -129,11 +127,16 @@ are required; the remaining keys have sensible defaults when absent.
    - The `full` profile with the Hyprland desktop compiles AUR packages
      (`quickshell-git`, `swayosd-git`, ...): give the installer **≥6 GB RAM**;
      on low-RAM machines it limits the build jobs automatically.
-6. **Wait for network** (DNS check against `geo.mirror.pkgbuild.com`, up to
-   ~120 s) and run `pacstrap /mnt <pkgs>` from the official mirrors plus the
-   signed `[x]` repository (`Required`). Before that, the installer prepares
-   the target keyring (`pacman-key --gpgdir /mnt/etc/pacman.d/gnupg --init`,
-   `--populate archlinux`, add + locally sign `/etc/pacman.d/x-repo.pub`).
+6. **Prepare the keyrings** and **wait for network** (DNS check against
+   `geo.mirror.pkgbuild.com`, up to ~120 s), then `pacstrap /mnt <pkgs>` from
+   the official mirrors plus the signed `[x]` repository (`Required`).
+   - Live: `/etc/pacman.d/x-repo.pub` is added and locally signed
+     (`pacman-key --init/--populate archlinux/--add/--lsign-key`). This is
+     re-applied at boot by `x-keyring.service` because `pacman-init.service`
+     recreates `/etc/pacman.d/gnupg` on a tmpfs; `install.sh` repeats it
+     idempotently before `pacstrap` (which verifies against the live keyring).
+   - Target: `pacman-key --gpgdir /mnt/etc/pacman.d/gnupg --init`,
+     `--populate archlinux`, add + locally sign the same key.
 7. **Install `x-scripts` offline**: the payload
    `packages/x-scripts-*.pkg.tar.zst` present in the live environment is copied
    into the target and installed with `pacman -U` inside the chroot.
@@ -144,8 +147,7 @@ are required; the remaining keys have sensible defaults when absent.
 9. **User**: create the user (member of `wheel`, login shell `bash`), set the
    password with `chpasswd`, and enable `%wheel` in `sudoers`.
 10. **Provisioning** with the `x` CLI from the `x-scripts` package:
-    - system phases as root: `X_HW_AUTO=0 X_GEN_SKIP=1 x setup` (generation
-      recording is deferred to the first-generation step below);
+    - system phases as root: `X_HW_AUTO=0 x setup`;
     - user phases as the new user:
       `X_HYPRLAND=0 X_HW_AUTO=0 x setup --user`.
     - PipeWire/Pulse/WirePlumber are enabled for all users; the Hyprland setup
@@ -183,8 +185,7 @@ are required; the remaining keys have sensible defaults when absent.
     --label first` creates `/.snapshots/0001`, the manifest under
     `/var/lib/x/generations/0001` and the boot entries (systemd-boot
     `loader/entries/x-gen-0001.conf`, GRUB `custom.cfg`). This is the base for
-    rollbacks and granular restores; see the generations page in the Scripts
-    section.
+    rollbacks and granular restores; see `generations.md`.
 16. **Cleanup**: on exit, mounts are unmounted, the LUKS mapping is closed if
     open, and the install JSON is removed.
 
@@ -193,9 +194,11 @@ installation medium.
 
 ## Autoinstall
 
-Unattended installation from the live ISO: boot the **autoinstall** menu entry
-(hotkey `a`, `xauto=1`) with a storage device labeled **`cidata`** containing
-**`x-install.json`** (for example an extra virtual disk in QEMU).
+The installer supports unattended installation from the live ISO:
+
+- The kernel cmdline must contain **`xauto=1`**.
+- A storage device labeled **`cidata`** must exist and contain an
+  **`x-install.json`** file (for example an extra virtual disk in QEMU).
 
 `x-autoinstall.service` (enabled in the live image) runs
 `autoinstall.sh`, which:
@@ -214,9 +217,10 @@ The JSON for an unattended run only requires the base keys, for example:
 {"disk":"/dev/vda","hostname":"x-vm","username":"x","password":"secret","profile":"core","bootloader":"grub","kernel":"linux","encryption":"no","hyprland":"no","kernel_params":"console=ttyS0"}
 ```
 
-`kernel_params` is optional: extra kernel parameters appended to the installed
-system's cmdline (validated against a safe character set), e.g.
-`console=ttyS0` for headless validation.
+`kernel_params` is optional: extra kernel command-line parameters appended to
+the installed system's cmdline (restricted to a safe character set and
+validated before partitioning). It is useful for headless validation, e.g.
+`"kernel_params":"console=ttyS0"` to keep the serial console after install.
 
 See [Testing in a VM](vm-testing.md) for an example cidata disk.
 
@@ -257,9 +261,9 @@ Notes:
 ## Live medium vs installed system (credentials)
 
 The live medium is intentionally permissive so it can be used without a
-password: root autologin on TTY1, empty root password, and sshd with
-`PermitRootLogin yes` plus password authentication. All of that ships only in
-`airootfs` (the live squashfs).
+password: root autologin on tty1, empty root password and sshd with
+`PermitRootLogin yes` + password authentication. **All of that ships only in
+`airootfs`** (the live squashfs).
 
 The installer never copies those files to the target: the installed system
 takes `/etc/shadow` from the `shadow` package (root locked), creates the wheel
@@ -268,10 +272,10 @@ post-install automation: never copy `/etc` from the live into the target.
 
 ## Dualboot mode
 
-`install.sh` supports two modes (`mode` in the JSON): `wipe` (default) erases
-the disk and builds a fresh GPT; `dualboot` installs into the **largest
-unallocated region**, preserving every existing partition and the Windows
-bootloader. The configurator asks for the mode.
+`install.sh` supports two modes (`"mode"` in the JSON): `wipe` (default)
+erases the disk and builds a fresh GPT; `dualboot` installs into the
+**largest unallocated region**, preserving every existing partition and the
+Windows bootloader. The configurator asks for the mode.
 
 `dualboot` is UEFI-only in this iteration and requires a GPT disk with an
 existing EFI System Partition:
@@ -288,20 +292,17 @@ What it does:
 2. Takes the largest free block (`sgdisk -F`/`-E`), checks `min_size` and
    creates **only** the root partition there (`sgdisk -n 0:start:end -t
    0:8300`). Existing entries are never modified.
-3. Mounts the existing ESP at `/mnt/boot` and never formats it; btrfs with the
-   `@`/`@home`/`@snapshots`/`@xstate` subvolumes exactly as in wipe mode.
+3. Mounts the existing ESP at `/mnt/boot` and never formats it; btrfs +
+   `@`/`@home`/`@snapshots`/`@xstate` exactly as in wipe mode.
 4. Bootloader without touching `EFI/Microsoft/**`:
    - systemd-boot: `bootctl install` on the shared ESP; sd-boot auto-detects
      the Windows Boot Manager and lists it in the menu. The pre-existing
      fallback `EFI/BOOT/BOOTX64.EFI` (possibly Windows') is saved and restored
      around `bootctl`.
-   - GRUB: `grub-install --target=x86_64-efi --bootloader-id=x` (its own ID,
-     never Microsoft's) plus `os-prober` (`GRUB_DISABLE_OS_PROBER=false`) to
-     add the Windows entry.
+   - GRUB: `grub-install --target=x86_64-efi --bootloader-id=x` plus
+     `os-prober` (`GRUB_DISABLE_OS_PROBER=false`) to add the Windows entry.
 5. Keeps the Windows Boot Manager first in the firmware order (best effort via
-   `efibootmgr`) and creates the X NVRAM entry with `efibootmgr` when
-   `bootctl` did not write one (common inside a chroot). X generations never
-   overwrite Microsoft files.
+   `efibootmgr`), and X generations never overwrite Microsoft files.
 
 Caveats: BIOS/MBR dualboot is not supported, and shrinking an existing
 partition to make room is out of scope (the free space must already exist).
@@ -311,12 +312,8 @@ partition to make room is out of scope (the free space must already exist).
 - Installation requires **network access**: `pacstrap` pulls from the official
   Arch mirrors and the `[x]` repository. An offline mirror bundled in the ISO
   is pending (see the workspace ROADMAP).
-- In `wipe` mode the target disk is completely erased; `dualboot` only uses
-  the free region and leaves existing partitions untouched.
+- The target disk is completely erased.
 - `systemd-boot` is **UEFI only**; GRUB writes both a BIOS (with the
   `bios_grub` partition) and a UEFI (removable) path, so either boot mode
   works.
 - LUKS uses LUKS2 with the legacy `encrypt` initramfs hook.
-- The BIOS/GRUB, UEFI/systemd-boot, LUKS and dualboot install paths have been
-  validated end-to-end in QEMU VMs (autoinstall, generation `0001`, clean boot
-  and `x gen verify`).

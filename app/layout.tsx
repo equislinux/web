@@ -17,7 +17,7 @@ const themeScript = `(function(){try{var s=localStorage.getItem('theme');var d=s
 export const metadata: Metadata = {
   title: 'X Linux — Documentation',
   description:
-    'Documentation portal for X Linux: distro, WSL, provisioning, packaging and the package repository.',
+    'Arch-based, snapshot-first Linux with a script-driven installer and its own package tooling — landing, documentation and downloads.',
 };
 
 export default function RootLayout({

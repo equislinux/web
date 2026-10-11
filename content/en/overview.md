@@ -1,8 +1,8 @@
 # X Linux documentation
 
-**X Linux** is a minimal, Arch-based distribution built from the official Arch
-repositories, with a script-driven text installer, its own branding and a
-provisioning layer.
+**X Linux** is an Arch-based, snapshot-first distribution with a script-driven
+installer and its own package tooling: bootable btrfs generations, multi-kernel
+support, a signed `[x]` repository and a native `.xp` endpoint.
 
 This site collects the documentation of every repository of the `equislinux`
 organization in English and Spanish. Use the sidebar to browse by component, or

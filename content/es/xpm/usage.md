@@ -108,45 +108,6 @@ nuevas o que ahora se requieren se instalan en la misma pasada. Los paquetes act
 conservan su razón de instalación; las dependencias arrastradas se registran como deps. Sin
 paquetes instalados informa de que no hay nada que hacer.
 
-### `history` — Journal de transacciones
-
-Muestra las transacciones registradas, de la más reciente a la más antigua. Cada `install`,
-`remove` y `upgrade` escribe una entrada JSON en `<db_path>/journal/<epoch>-<pid>.json`
-(por defecto `/var/lib/xpm/journal/`) antes de tocar el sistema de ficheros, y la finaliza
-como `ok`/`failed` tras el commit.
-
-```bash
-xpm history [OPTIONS]
-```
-
-| Flag | Descripción |
-|------|-------------|
-| `--json` | Emite un objeto JSON por transacción (consumo por máquinas) |
-
-```bash
-xpm history                # Resumen humano (timestamps ISO-8601)
-xpm history --json         # Una línea JSON por transacción
-```
-
-Las transacciones que quedan en estado `running` tras un crash permanecen en el journal como
-evidencia; la recuperación completa sigue siendo `x gen rollback` (capa de generaciones), no
-un comando de xpm.
-
-Alrededor de cada transacción, xpm ejecuta los ejecutables de
-`/usr/lib/xpm/hooks/pre-transaction.d/` y `post-transaction.d/` en orden léxico (la raíz se
-anula con `XPM_HOOKS_DIR`). El contrato es un conjunto de variables de entorno:
-
-| Variable | Significado |
-|----------|-------------|
-| `XPM_ROOT_DIR` | Raíz destino |
-| `XPM_ACTION` | `install`, `remove` o `upgrade` |
-| `XPM_JOURNAL` | Ruta del journal de la transacción |
-| `XPM_PKG_NAMES` / `XPM_PKG_VERSIONS` | Listas separadas por espacios |
-
-Un fallo en un hook **pre** aborta la transacción (sin cambios); un fallo en un hook **post**
-solo registra un aviso. El runner lo aporta xpm; los scripts de hook los aportará `x-scripts`
-cuando xpm sea el gestor activo.
-
 ### `query` — Consultar la base de datos local
 
 Alias: `Q`. Lista los paquetes instalados desde la base de datos local.
@@ -159,19 +120,15 @@ xpm Q [FILTER] [OPTIONS]
 | Argumento / Flag | Corta | Descripción |
 |------------------|-------|-------------|
 | `FILTER` | | Filtro opcional por nombre de paquete |
-| `--format` | | Formato de salida: `plain` (por defecto) o `tsv` |
-| `--explicit` | `-e` | Solo paquetes registrados como instalados explícitamente |
-| `--deps` | `-d` | Solo paquetes registrados como dependencias |
+| `--explicit` | `-e` | Solo paquetes instalados explícitamente |
+| `--deps` | `-d` | Solo paquetes instalados como dependencias |
 | `--orphans` | `-t` | Paquetes huérfanos (ya no requeridos) |
 | `--upgrades` | `-u` | Paquetes con actualizaciones disponibles |
 
-Nota de implementación: implementado. `query` lee la base de datos local (y las entradas
-remotas sincronizadas para `--upgrades`); `--format tsv` imprime `name<TAB>version` para
-scripts. Los filtros `--explicit`/`--deps` usan la razón de instalación guardada por paquete
-(`<db_path>/local/<pkg>/reason`); los paquetes sin fichero `reason`, o instalados antes de la
-función, cuentan como `explicit`. `--explicit` y `--deps` juntos son un error. `--orphans`
-sigue fallando con un mensaje claro porque la base de datos local aún no registra el grafo
-inverso de dependencias.
+Nota de implementación: implementado contra las bases local y sync (filtro por nombre más
+`--explicit`, `--deps` y `--upgrades`). `--orphans` lista paquetes de dependencia que ningún
+paquete explícito requiere, usando las aristas `depends`/`provides` registradas al instalar;
+las entradas legacy sin registro se omiten.
 
 ### `search` — Buscar paquetes
 
@@ -186,8 +143,8 @@ xpm Ss <QUERY> [OPTIONS]
 |------|-------|-------------|
 | `--local` | `-l` | Busca en la base de datos local en lugar de en las de sync |
 
-Nota de implementación: implementado — busca por nombre, descripción y provides en las bases
-sync o local.
+Nota de implementación: implementado como match case-insensitive sobre nombre, descripción y
+provides; `--local` matchea nombres de paquetes instalados.
 
 ### `info` — Información de paquete
 
@@ -202,11 +159,8 @@ xpm Si <PACKAGE> [OPTIONS]
 |------|-------|-------------|
 | `--local` | `-l` | Consulta la base de datos local en lugar de las de sync |
 
-Nota de implementación: implementado. Muestra nombre, versión, razón de instalación y
-repositorio de origen; cuando la base de datos de sync está disponible añade la descripción y
-las dependencias del repositorio (gana el repositorio de mayor prioridad). Para paquetes no
-instalados se muestra solo la entrada de sync. Las instalaciones heredadas sin ficheros
-`reason`/`origin` usan `explicit`/`unknown` por defecto en vez de fallar.
+Nota de implementación: implementado; combina la entrada instalada con la entrada sync de mayor
+prioridad, y `--local` limita la salida a la base instalada.
 
 ### `files` — Listar archivos de un paquete
 
@@ -217,10 +171,22 @@ xpm files <PACKAGE>
 xpm Ql <PACKAGE>
 ```
 
-Nota de implementación: implementado. Lee `<db_path>/local/<pkg>/files`, un manifest
-compatible con pacman (cabecera `%FILES%`, rutas relativas, directorios con `/` final)
-derivado del `.MTREE` del paquete; es el mismo manifest que consume
-`x gen restore --pkg`.
+Nota de implementación: implementado; lee el manifiesto `files` registrado al instalar (vacío
+para instalaciones legacy).
+
+### `history`, `rollback`, `diff` — Journal y generaciones
+
+- `xpm history [--json]` — transacciones registradas, la más nueva primero. Las terminadas
+  enlazan la generación que produjeron (`gen:NNNN`, si el directorio de estado es legible).
+- `xpm rollback [--last | --journal <ID>] [--dry-run]` — reaplica la inversa de una transacción
+  exitosa usando la caché de paquetes; aborta antes de tocar nada si falta un paquete viejo.
+- `xpm diff <GENERATION> [--json]` — compara los paquetes instalados contra el `packages.tsv`
+  de una generación (`current` resuelve el id por defecto).
+
+Los archivos de configuración declarados con `backup` en `.PKGINFO` siguen la semántica de
+pacman: `.pacnew` al instalar/actualizar y `.pacsave` al eliminar (se desactiva con `--nosave`).
+Los hooks estilo pacman de `/usr/share/libalpm/hooks` y `/etc/pacman.d/hooks` corren alrededor de
+cada transacción.
 
 ### `repo` — Gestión de repositorios
 
@@ -277,7 +243,6 @@ xpm usage <command>          # ayuda de un comando concreto (sync, install, remo
 xpm sync                       # refresca las bases de datos de paquetes
 xpm install <package>          # instala un paquete
 xpm upgrade                    # actualiza los paquetes instalados (hace sync primero)
-xpm history                    # inspecciona las transacciones registradas
 xpm query                      # lista los paquetes instalados
 xpm remove <package>           # elimina un paquete
 ```
@@ -291,8 +256,7 @@ raíz de instalación no es `/`, xpm activa la integración de shell y crea shim
 
 `RUST_LOG` se respeta a través del `EnvFilter` de `tracing-subscriber` para controlar la
 verbosidad de los logs. `docs/CLI.md` documenta además `XPM_CONFIG`, `XPM_CACHE_DIR`,
-`XPM_HOOKS_DIR` (anula la raíz de los hooks de transacción, por defecto
-`/usr/lib/xpm/hooks`) y `NO_COLOR`.
+`XPM_HOOKS_DIR`, `XPM_ALPM_HOOKS_DIRS`, `X_GEN_STATE` y `NO_COLOR`.
 
 `docs/CLI.md` documenta una matriz de códigos de salida (0 éxito, 1 error general, 2 error de
 uso, hasta 7 base de datos bloqueada). Nota: esa matriz es intención documentada más que un

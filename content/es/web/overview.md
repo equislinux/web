@@ -4,6 +4,13 @@
 documentación de todos los repositorios (con origen en `equislinux/wiki`) y la presenta
 con una landing y una sección de docs navegable, en inglés y español.
 
+## Landing
+
+La landing (`/en`, `/es`) reúne las descargas (ISO y rootfs de WSL), una
+galería de capturas, la parrilla "Por qué X" y una guía de instalación en tres
+pasos — todo con el mismo sistema de diseño monocromo que los docs. Las
+capturas viven solo en `public/showcase/`.
+
 ## Stack
 
 - **Next.js** (App Router) con export estático a GitHub Pages.

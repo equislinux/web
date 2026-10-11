@@ -28,10 +28,6 @@ xpm/
 │           ├── signing.rs      # OpenPGP detached signature verification
 │           ├── hooks.rs        # Hook trait + built-in transaction hooks
 │           ├── transaction.rs  # transaction engine (plan/prepare/commit)
-│           ├── journal.rs      # persistent transaction journal (history)
-│           ├── txhooks.rs      # pre/post-transaction.d hook runner
-│           ├── install_reason.rs # explicit/dep install-reason metadata
-│           ├── local_db.rs     # local DB metadata (version/files/origin)
 │           ├── package/        # .xp / .pkg.tar.zst readers and parsers
 │           │   ├── reader.rs, pkginfo.rs, buildinfo.rs, mtree.rs,
 │           │   ├── types.rs, validate.rs
@@ -139,8 +135,8 @@ sizes, and file types.
   package and download from the first reachable mirror.
 
 Sync databases land under `<db_path>/sync/` (e.g. `/var/lib/xpm/sync/<repo>.db`). The local
-database of installed packages lives under `<db_path>/local/<pkg>/` and stores the `version`,
-`files`, `reason` and `origin` entries (the latter two when known).
+database of installed packages lives under `<db_path>/local/<pkg>/` and stores at least a
+`version` file and a `files` manifest.
 
 ## Signing
 
@@ -167,12 +163,16 @@ Enforcement is controlled by `sig_level` from the config (per-repository overrid
 
 `hooks.rs` provides the `Hook` trait and a `HookChain`. The default chain runs, per operation:
 
-1. `MetadataLoadHook` — load package metadata for the operation.
+1. `MetadataLoadHook` — validate/load package metadata for the operation.
 2. `PreScriptletHook` — run `.INSTALL` pre-scriptlets (`pre_install`, `pre_upgrade`,
    `pre_remove`).
-3. `FileExtractionHook` — extract package files with correct ownership.
+3. `FileExtractionHook` — extract package files with correct ownership. Configuration files
+   (`backup` entries) are never silently overwritten: an existing file that differs is kept and
+   the new version is written as `<file>.pacnew`; on upgrades, files dropped by the new version
+   are removed, preserving modified configs as `<file>.pacsave`. The raw `.MTREE` of each
+   install (gzip-wrapped or plain) is stored in the local DB for the next comparison.
 4. `FileRemovalHook` — remove tracked files on uninstall (and prune empty directories outside
-   system root).
+   system root); modified `backup` files become `.pacsave` unless `--nosave`.
 5. `PostScriptletHook` — run `.INSTALL` post-scriptlets (`post_install`, `post_upgrade`,
    `post_remove`).
 6. `LocalDbHook` — register/remove the package in the local database.
@@ -180,31 +180,15 @@ Enforcement is controlled by `sig_level` from the config (per-repository overrid
 Scriptlets are sourced through `bash` with `XPM_ROOT_DIR`, `XPM_PKG_NAME`, and
 `XPM_PKG_VERSION` exported.
 
-## Transaction journal, history and local metadata
+Around the transaction, `alpm_hooks.rs` runs pacman-style `.hook` files
+(`/usr/share/libalpm/hooks`, `/etc/pacman.d/hooks`, override with
+`XPM_ALPM_HOOKS_DIRS`): `Operation`/`Type=Package` glob triggers, `Depends`,
+`AbortOnFail` and `NeedsTargets`; pre-hook failures abort when flagged.
 
-Every transaction is persisted as JSON **before** the filesystem is touched and
-finalized after the commit:
-
-- `<db_path>/journal/<epoch>-<pid>.json` (default `/var/lib/xpm/journal/`),
-  with `schema`, `id`, `action`, `root_dir`, epoch `started`/`finished`,
-  `result` (`running`/`ok`/`failed`), the package list with `from`/`to`
-  versions and an optional `error`. `xpm history [--json]` reads it back (the
-  human summary renders ISO-8601 timestamps).
-- `txhooks.rs` runs the executables in `pre-transaction.d/` and
-  `post-transaction.d/` (default root `/usr/lib/xpm/hooks`, override with
-  `XPM_HOOKS_DIR`) in lexical order with `XPM_ROOT_DIR`, `XPM_ACTION`,
-  `XPM_JOURNAL`, `XPM_PKG_NAMES` and `XPM_PKG_VERSIONS`. A failing pre hook
-  aborts the transaction; a failing post hook only warns.
-- `install_reason.rs` and `local_db.rs` persist the metadata that `query`,
-  `files` and `info` read back: `<db_path>/local/<pkg>/reason`
-  (`explicit`/`dep`), `origin` (source repository) and `files` (a
-  pacman-compatible `%FILES%` manifest derived from the package's `.MTREE`).
-  Missing files default to `explicit`, `unknown` and an empty list instead of
-  failing.
-
-xpm itself stays unaware of snapshots and generations: the `x gen` hooks that
-`x-scripts` will contribute consume this journal once xpm becomes the active
-manager.
+The generation integration lives in `journal.rs`/`generations.rs`/`rollback.rs`:
+journals link the generation current after the post hooks, `diff` reads a
+generation's `packages.tsv`, and `rollback` inverts a successful journal using
+the package cache (`cache.rs`).
 
 ## Configuration
 
@@ -237,9 +221,9 @@ Notes:
 
 - If the file does not exist, xpm falls back to built-in defaults (`XpmConfig::default`), whose
   single repository is `x` at `https://equislinux.github.io/x-repo/x/$arch`.
-- The example file and some README/help snippets differ on the GPG directory default: code uses
-  `/etc/pacman.d/gnupg/`, while README guidance uses `/etc/xpm/gnupg/`. This discrepancy is
-  worth reconciling before depending on it.
+- The GPG directory resolves through `effective_gpg_dir()`: the configured `gpg_dir` when it
+  exists, then `/etc/pacman.d/gnupg` (shared with pacman), then `/etc/xpm/gnupg`. The old
+  code/README discrepancy is gone.
 - Config validation rejects `parallel_downloads = 0`, empty repository names, and repositories
   without servers.
 - `sig_level` can be set globally or per repository; the per-repo value wins when present.
@@ -259,7 +243,7 @@ provides a package wins); within a repository, mirrors are tried in order until 
 | Area | Crates |
 |------|--------|
 | CLI | `clap` 4 |
-| Serialization | `serde` 1, `serde_json` 1, `toml` 0.8 |
+| Serialization | `serde` 1, `toml` 0.8 |
 | Errors | `anyhow` 1, `thiserror` 2 |
 | Resolution | `resolvo` 0.10, `itertools` 0.14 |
 | Archive/compression | `tar` 0.4, `zstd` 0.13, `flate2` 1, `xz2` 0.1 |

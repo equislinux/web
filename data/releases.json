@@ -14,7 +14,7 @@
       },
       "wsl": {
         "name": "x-wsl-rootfs.tar.gz",
-        "url": "https://github.com/equislinux/wsl/releases/download/v0.1.0/x-wsl-rootfs.tar.gz"
+        "url": "https://sourceforge.net/projects/equislinux/files/wsl/x-wsl-rootfs.tar.gz/download"
       }
     }
   ]

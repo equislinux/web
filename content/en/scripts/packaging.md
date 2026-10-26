@@ -22,7 +22,7 @@ currently out of scope for packaging; see the workspace ROADMAP, Phase 4.)
   `tools/hyprland-install.sh`). There are **no remote `source=()` entries**: the
   snapshot is vendored in-repo and never fetched at build time.
 
-Version metadata: `pkgver=0.1.0`, `pkgrel` bumped per iteration (currently 13
+Version metadata: `pkgver=0.1.0`, `pkgrel` bumped per iteration (currently 42
 in the PKGBUILD). A leftover build artifact (`*.pkg.tar.zst`) may sit in the
 directory but is stale and git-ignored; rebuild produces the current pkgrel.
 
@@ -43,11 +43,16 @@ makepkg   # requires packaging/.vendor/x-config to be present
 `main`), which are used read-only and remain the source of truth:
 
 - `equisdots/{dots,hyprland,shell,palettes,theme-sync,davincix,timex,login}`
-  → `equisdots/<repo>` (the whole desktop stack; `equisdots/dots` is the
+  → `equisdots/<repo>` (the Hyprland desktop stack; `equisdots/dots` is the
   official installer and ships the standalone `install-xwww.sh`).
 - `xscriptor-colors/terminal` → kitty only (`kitty.conf` + `themes/`) and
   starship (`prompts/starship`: template + themes).
 - `xscriptor-colors/nvim` → the whole `nvim` tree.
+
+niri is **not** vendored: `tools/niri-install.sh` clones
+`equisdots/niri-meta` online and runs `dotsniri setup -y`. KDE Plasma branding
+is a separate `x-kde-settings` package bundled in the live ISO, not part of
+this payload.
 
 Behavior:
 
@@ -100,7 +105,8 @@ is exactly how `tools/hyprland-install.sh` consumes it offline.
 ## Offline ISO usage
 
 The point of vendoring is that a **Hyprland/equisdots desktop can be
-provisioned offline** right after install:
+provisioned offline** right after install. niri and KDE Plasma are online
+install paths:
 
 1. A maintainer runs `vendor-config.sh` and builds `x-scripts` (snapshot
    embedded in the package).

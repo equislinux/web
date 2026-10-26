@@ -6,7 +6,7 @@ export default function Footer({ lang }: { lang: Lang }) {
 
   return (
     <footer className="border-t border-zinc-200 dark:border-zinc-800">
-      <div className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-3 px-6 py-10 text-sm text-zinc-500 sm:flex-row dark:text-zinc-500">
+      <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-6 py-10 text-sm text-zinc-500 sm:flex-row dark:text-zinc-500">
         <p>{t.footer.tagline}</p>
         <p>
           <a

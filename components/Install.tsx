@@ -5,14 +5,14 @@ export default function Install({ lang }: { lang: Lang }) {
   const t = UI[lang];
 
   return (
-    <section className="mx-auto max-w-5xl border-t border-zinc-200 px-6 py-16 dark:border-zinc-800">
+    <section className="mx-auto max-w-6xl border-t border-zinc-200 px-6 py-16 dark:border-zinc-800">
       <h2 className="text-lg font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
         {t.install.title}
       </h2>
       <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
         {t.install.subtitle}
       </p>
-      <div className="mt-8 grid grid-cols-1 gap-3 md:grid-cols-3">
+      <div className="mt-8 grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
         <article className="rounded-xl border border-zinc-200 p-6 dark:border-zinc-800">
           <h3 className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
             1 · {t.install.step1Title}
@@ -53,6 +53,17 @@ export default function Install({ lang }: { lang: Lang }) {
           >
             {t.install.guideCta}
           </Link>
+        </article>
+        <article className="rounded-xl border border-zinc-200 p-6 dark:border-zinc-800">
+          <h3 className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
+            4 · {t.install.step4Title}
+          </h3>
+          <p className="mt-2 text-sm leading-6 text-zinc-500 dark:text-zinc-400">
+            {t.install.step4Desc}
+          </p>
+          <p className="mt-4 font-mono text-[10px] uppercase tracking-[0.12em] text-zinc-400 dark:text-zinc-600">
+            /@ · btrfs · 0001
+          </p>
         </article>
       </div>
     </section>

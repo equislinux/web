@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import AsciiLogo from './AsciiLogo';
+import HeroAsciiField from './HeroAsciiField';
 import { GITHUB_ORG } from '@/lib/site';
 import { UI, type Lang } from '@/lib/i18n';
 
@@ -7,13 +8,10 @@ export default function Hero({ lang }: { lang: Lang }) {
   const t = UI[lang];
 
   return (
-    <section className="px-6 pb-12 pt-24 sm:pt-28">
-      <div className="mx-auto max-w-2xl text-center">
-        <p className="text-xs font-medium uppercase tracking-[0.2em] text-zinc-400 dark:text-zinc-500">
-          X Linux
-        </p>
-
-        <div className="mt-10 flex flex-col items-center">
+    <section className="x-hero relative overflow-hidden px-6 pb-16 pt-20 sm:pt-24">
+      <HeroAsciiField />
+      <div className="relative z-10 mx-auto max-w-2xl text-center">
+        <div className="flex flex-col items-center">
           <AsciiLogo />
           <hr className="x-rule mt-7 w-24" />
           <h1 className="mt-6 font-mono text-4xl font-medium tracking-[0.3em] text-zinc-900 sm:text-5xl dark:text-zinc-50">

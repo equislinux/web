@@ -5,11 +5,14 @@ import Hero from './Hero';
 import Downloads from './Downloads';
 import Showcase from './Showcase';
 import AsciiBand from './AsciiBand';
+import Foundation from './Foundation';
 import DesktopLayers from './DesktopLayers';
+import Generations from './Generations';
 import Features from './Features';
-import SpecSheet from './SpecSheet';
+import StatsStrip from './StatsStrip';
 import Install from './Install';
 import RepoGrid from './RepoGrid';
+import PackageChannels from './PackageChannels';
 import { UI, type Lang } from '@/lib/i18n';
 
 export default function Landing({ lang }: { lang: Lang }) {
@@ -23,46 +26,17 @@ export default function Landing({ lang }: { lang: Lang }) {
         <Downloads lang={lang} />
         <Showcase lang={lang} />
         <AsciiBand lang={lang} />
+        <Foundation lang={lang} />
         <DesktopLayers lang={lang} />
+        <Generations lang={lang} />
         <Features lang={lang} />
-        <SpecSheet lang={lang} />
+        <StatsStrip lang={lang} />
         <Install lang={lang} />
         <RepoGrid lang={lang} />
 
-        <section className="mx-auto max-w-5xl border-t border-zinc-200 px-6 py-16 dark:border-zinc-800">
-          <h2 className="text-lg font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
-            {t.landing.pathsTitle}
-          </h2>
-          <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-            {t.landing.pathsSubtitle}
-          </p>
-          <div className="mt-8 grid grid-cols-1 gap-3 md:grid-cols-2">
-            <article className="rounded-xl border border-zinc-200 p-6 dark:border-zinc-800">
-              <h3 className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
-                {t.landing.pacmanTitle}
-              </h3>
-              <p className="mt-2 text-sm leading-6 text-zinc-500 dark:text-zinc-400">
-                {t.landing.pacmanDescription}
-              </p>
-              <pre className="mt-4 overflow-x-auto rounded-lg border border-zinc-200 bg-zinc-50 p-3 font-mono text-xs leading-6 text-zinc-700 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300">
-                <code>{`[x]\nServer = https://equislinux.github.io/x-repo/repo/x86_64`}</code>
-              </pre>
-            </article>
-            <article className="rounded-xl border border-zinc-200 p-6 dark:border-zinc-800">
-              <h3 className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
-                {t.landing.nativeTitle}
-              </h3>
-              <p className="mt-2 text-sm leading-6 text-zinc-500 dark:text-zinc-400">
-                {t.landing.nativeDescription}
-              </p>
-              <pre className="mt-4 overflow-x-auto rounded-lg border border-zinc-200 bg-zinc-50 p-3 font-mono text-xs leading-6 text-zinc-700 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300">
-                <code>{`[[repo]]\nserver = ["https://equislinux.github.io/x-repo/x/$arch"]`}</code>
-              </pre>
-            </article>
-          </div>
-        </section>
+        <PackageChannels lang={lang} />
 
-        <section className="mx-auto max-w-5xl border-t border-zinc-200 px-6 py-16 dark:border-zinc-800">
+        <section className="mx-auto max-w-6xl border-t border-zinc-200 px-6 py-16 dark:border-zinc-800">
           <div className="rounded-2xl border border-zinc-200 p-10 text-center dark:border-zinc-800">
             <h2 className="text-lg font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
               {t.landing.docsTitle}

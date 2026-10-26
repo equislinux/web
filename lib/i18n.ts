@@ -30,11 +30,20 @@ export interface UIStrings {
   showcase: {
     title: string;
     subtitle: string;
+    tabs: string[];
+    prev: string;
+    next: string;
     captionDesktop: string;
     captionDemo: string;
     captionTools: string;
     captionBoot: string;
     captionInstaller: string;
+    captionDeploy: string;
+    captionGen: string;
+    captionReboot: string;
+    captionStart: string;
+    captionFirstView: string;
+    captionXDots: string;
   };
   features: {
     title: string;
@@ -49,6 +58,8 @@ export interface UIStrings {
     toolingDesc: string;
     wslTitle: string;
     wslDesc: string;
+    signedTitle: string;
+    signedDesc: string;
     themesTitle: string;
     themesDesc: string;
   };
@@ -73,13 +84,27 @@ export interface UIStrings {
     sceneHint: string;
     layers: { name: string; desc: string }[];
   };
-  specs: {
+  stats: {
+    layers: string;
+    desktops: string;
+    boot: string;
+    repo: string;
+  };
+  foundation: {
     eyebrow: string;
     title: string;
     subtitle: string;
     body: string;
     cta: string;
     items: { label: string; value: string }[];
+  };
+  generations: {
+    eyebrow: string;
+    title: string;
+    subtitle: string;
+    body: string;
+    cta: string;
+    items: { id: string; label: string }[];
   };
   install: {
     title: string;
@@ -90,6 +115,8 @@ export interface UIStrings {
     step2Desc: string;
     step3Title: string;
     step3Desc: string;
+    step4Title: string;
+    step4Desc: string;
     guideCta: string;
   };
   landing: {
@@ -145,13 +172,34 @@ export const UI: Record<Lang, UIStrings> = {
     showcase: {
       title: 'A look at X',
       subtitle:
-        'Screenshots from a running Hyprland install — niri and KDE Plasma are selectable in the installer.',
+        'Real screens from an X install — desktop, tools, boot and installer.',
+      tabs: [
+        'Desktop',
+        'Demo',
+        'Tools',
+        'Boot',
+        'Installer',
+        'Deploy X',
+        'x-gen',
+        'Reboot',
+        'Start X',
+        'First view',
+        'X × dots',
+      ],
+      prev: 'Previous',
+      next: 'Next',
       captionDesktop: 'Hyprland desktop (equisdots) — light and dark themes.',
       captionDemo: 'Desktop demo: xtop and xfetch on Hyprland.',
       captionTools: 'xtop and xfetch — the X tools, written in Rust.',
       captionBoot:
         'Boot menu: every package transaction becomes a bootable generation.',
       captionInstaller: 'Text installer: btrfs subvolumes and keyring setup.',
+      captionDeploy: 'Deploy X — the target system being provisioned.',
+      captionGen: 'x-gen — bootable generations from the terminal.',
+      captionReboot: 'Reboot menu — choose the generation to boot.',
+      captionStart: 'Start X — SDDM login with the Hyprland session selected.',
+      captionFirstView: 'First view — the X desktop after the first login.',
+      captionXDots: 'X × dots — equisdots settings on X.',
     },
     features: {
       title: 'Why X',
@@ -171,6 +219,9 @@ export const UI: Record<Lang, UIStrings> = {
       wslTitle: 'Runs on WSL',
       wslDesc:
         'An importable rootfs plus a friendly first-run setup for terminal-only use on Windows.',
+      signedTitle: 'Signed end to end',
+      signedDesc:
+        'The ISO, checksums and [x] packages are signed; the installed system trusts the embedded keyring.',
       themesTitle: 'Curated desktops',
       themesDesc:
         'Choose the equisdots Hyprland or niri stack, or KDE Plasma with X branding; the installer applies the desktop during install.',
@@ -207,26 +258,44 @@ export const UI: Record<Lang, UIStrings> = {
         { name: 'Delivery', desc: 'signed ISO · [x] repo · branding' },
       ],
     },
-    specs: {
-      eyebrow: 'Under the hood',
-      title: 'System sheet',
-      subtitle: 'The stack, in plain text.',
+    stats: {
+      layers: 'system layers',
+      desktops: 'desktop choices',
+      boot: 'boot modes',
+      repo: 'signed repository',
+    },
+    foundation: {
+      eyebrow: 'Foundation',
+      title: 'Arch, without the mystery',
+      subtitle: 'A familiar base, extended with intent.',
       body:
-        'The installer, the bootable snapshots and the package tooling are all inspectable — no hidden layer.',
-      cta: 'Read the architecture',
+        'Kernel, systemd and pacman stay where you expect them. X adds the text installer, btrfs generations, signed packages and a desktop layer you can replace.',
+      cta: 'See the project layout',
       items: [
-        { label: 'Base', value: 'Arch Linux · x86_64 · rolling' },
-        { label: 'Boot', value: 'BIOS / UEFI · GRUB / systemd-boot · LUKS' },
-        { label: 'Root', value: 'btrfs · @, @home, @snapshots, @xstate' },
-        { label: 'Generations', value: 'bootable snapshots · rollback · diff · verify' },
-        { label: 'Packages', value: 'pacman + [x] · xpm .xp · xpkg' },
-        { label: 'Desktops', value: 'Hyprland · niri · KDE Plasma · console' },
-        { label: 'Delivery', value: 'signed ISO · SourceForge · WSL rootfs' },
+        { label: 'Kernel', value: 'linux · linux-lts · linux-zen' },
+        { label: 'Init', value: 'systemd · journald · logind' },
+        { label: 'Packages', value: 'pacman · [x] · keyring' },
+        { label: 'Filesystem', value: 'btrfs · subvolumes · snapshots' },
+      ],
+    },
+    generations: {
+      eyebrow: 'Generations',
+      title: 'Rollback is a layer',
+      subtitle: 'Every transaction leaves a bootable snapshot.',
+      body:
+        'x gen records packages, services, the kernel and /etc as a generation. Boot it, diff it, pin it or restore a single path.',
+      cta: 'Read the generations',
+      items: [
+        { id: '0001', label: 'first install' },
+        { id: '0002', label: 'pre-update' },
+        { id: '0003', label: 'kernel change' },
+        { id: '0004', label: 'desktop layer' },
+        { id: '0005', label: 'current' },
       ],
     },
     install: {
-      title: 'Install in three steps',
-      subtitle: 'From ISO to first boot — the installer runs in the terminal.',
+      title: 'Install in four steps',
+      subtitle: 'From ISO to the first bootable generation — the installer runs in the terminal.',
       step1Title: 'Download the ISO',
       step1Desc:
         'Get the latest signed ISO from SourceForge — the stable link always points to the current release.',
@@ -235,6 +304,9 @@ export const UI: Record<Lang, UIStrings> = {
       step3Title: 'Boot and follow the installer',
       step3Desc:
         'Pick disk layout, kernel, desktop and profile; the first generation is created for you.',
+      step4Title: 'Boot generation 0001',
+      step4Desc:
+        'Reboot into the first btrfs snapshot. Roll back, diff or pin it whenever you need.',
       guideCta: 'Read the install guide',
     },
     landing: {
@@ -293,7 +365,22 @@ export const UI: Record<Lang, UIStrings> = {
     showcase: {
       title: 'Así se ve X',
       subtitle:
-        'Capturas de una instalación Hyprland real — niri y KDE Plasma se eligen en el instalador.',
+        'Capturas reales de una instalación X — escritorio, herramientas, arranque e instalador.',
+      tabs: [
+        'Escritorio',
+        'Demo',
+        'Herramientas',
+        'Arranque',
+        'Instalador',
+        'Despliegue X',
+        'x-gen',
+        'Reinicio',
+        'Iniciar X',
+        'Primera vista',
+        'X × dots',
+      ],
+      prev: 'Anterior',
+      next: 'Siguiente',
       captionDesktop: 'Escritorio Hyprland (equisdots) — temas claro y oscuro.',
       captionDemo: 'Demo del escritorio: xtop y xfetch sobre Hyprland.',
       captionTools: 'xtop y xfetch — las herramientas de X, escritas en Rust.',
@@ -301,6 +388,12 @@ export const UI: Record<Lang, UIStrings> = {
         'Menú de arranque: cada transacción se convierte en una generación booteable.',
       captionInstaller:
         'Instalador de texto: subvolúmenes btrfs y configuración de keyring.',
+      captionDeploy: 'Despliegue X — el sistema destino siendo aprovisionado.',
+      captionGen: 'x-gen — generaciones arrancables desde la terminal.',
+      captionReboot: 'Menú de reinicio — elige la generación que quieres arrancar.',
+      captionStart: 'Inicio de X — login SDDM con la sesión Hyprland seleccionada.',
+      captionFirstView: 'Primera vista — el escritorio X tras el primer inicio.',
+      captionXDots: 'X × dots — ajustes de equisdots en X.',
     },
     features: {
       title: 'Por qué X',
@@ -320,6 +413,9 @@ export const UI: Record<Lang, UIStrings> = {
       wslTitle: 'Corre en WSL',
       wslDesc:
         'Un rootfs importable y un primer arranque amigable para usar solo terminal en Windows.',
+      signedTitle: 'Firma de extremo a extremo',
+      signedDesc:
+        'El ISO, los checksums y los paquetes de [x] están firmados; el sistema instalado confía en el keyring incluido.',
       themesTitle: 'Escritorios curados',
       themesDesc:
         'Elige el stack Hyprland o niri de equisdots, o KDE Plasma con branding X; el instalador aplica el escritorio durante la instalación.',
@@ -356,26 +452,44 @@ export const UI: Record<Lang, UIStrings> = {
         { name: 'Entrega', desc: 'ISO firmada · repo [x] · branding' },
       ],
     },
-    specs: {
-      eyebrow: 'Bajo el capó',
-      title: 'Ficha del sistema',
-      subtitle: 'El stack, en texto plano.',
+    stats: {
+      layers: 'capas del sistema',
+      desktops: 'escritorios',
+      boot: 'modos de arranque',
+      repo: 'repositorio firmado',
+    },
+    foundation: {
+      eyebrow: 'Fundamento',
+      title: 'Arch, sin misterio',
+      subtitle: 'Una base conocida, extendida con intención.',
       body:
-        'El instalador, los snapshots arrancables y el tooling de paquetes se pueden inspeccionar — sin capas ocultas.',
-      cta: 'Leer la arquitectura',
+        'Kernel, systemd y pacman siguen donde esperas. X añade el instalador de texto, generaciones btrfs, paquetes firmados y una capa de escritorio que puedes cambiar.',
+      cta: 'Ver la estructura del proyecto',
       items: [
-        { label: 'Base', value: 'Arch Linux · x86_64 · rolling' },
-        { label: 'Arranque', value: 'BIOS / UEFI · GRUB / systemd-boot · LUKS' },
-        { label: 'Raíz', value: 'btrfs · @, @home, @snapshots, @xstate' },
-        { label: 'Generaciones', value: 'snapshots arrancables · rollback · diff · verify' },
-        { label: 'Paquetes', value: 'pacman + [x] · xpm .xp · xpkg' },
-        { label: 'Escritorios', value: 'Hyprland · niri · KDE Plasma · consola' },
-        { label: 'Entrega', value: 'ISO firmada · SourceForge · rootfs WSL' },
+        { label: 'Kernel', value: 'linux · linux-lts · linux-zen' },
+        { label: 'Init', value: 'systemd · journald · logind' },
+        { label: 'Paquetes', value: 'pacman · [x] · keyring' },
+        { label: 'Sistema de archivos', value: 'btrfs · subvolúmenes · snapshots' },
+      ],
+    },
+    generations: {
+      eyebrow: 'Generaciones',
+      title: 'El rollback es una capa',
+      subtitle: 'Cada transacción deja un snapshot arrancable.',
+      body:
+        'x gen registra paquetes, servicios, kernel y /etc como una generación. Arráncala, compara, fíjala o restaura una sola ruta.',
+      cta: 'Leer las generaciones',
+      items: [
+        { id: '0001', label: 'primera instalación' },
+        { id: '0002', label: 'pre-update' },
+        { id: '0003', label: 'cambio de kernel' },
+        { id: '0004', label: 'capa de escritorio' },
+        { id: '0005', label: 'actual' },
       ],
     },
     install: {
-      title: 'Instala en tres pasos',
-      subtitle: 'Del ISO al primer arranque — el instalador corre en la terminal.',
+      title: 'Instala en cuatro pasos',
+      subtitle: 'Del ISO a la primera generación arrancable — el instalador corre en la terminal.',
       step1Title: 'Descarga el ISO',
       step1Desc:
         'Baja el último ISO firmado desde SourceForge — el enlace estable siempre apunta al release actual.',
@@ -384,6 +498,9 @@ export const UI: Record<Lang, UIStrings> = {
       step3Title: 'Arranca y sigue el instalador',
       step3Desc:
         'Elige el esquema de disco, kernel, escritorio y perfil; la primera generación se crea sola.',
+      step4Title: 'Arranca la generación 0001',
+      step4Desc:
+        'Reinicia en el primer snapshot btrfs. Haz rollback, diff o pin cuando lo necesites.',
       guideCta: 'Leer la guía de instalación',
     },
     landing: {

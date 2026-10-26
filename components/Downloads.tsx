@@ -63,7 +63,7 @@ export default function Downloads({ lang }: { lang: Lang }) {
   ];
 
   return (
-    <section className="mx-auto max-w-5xl px-6 pb-16">
+    <section className="mx-auto max-w-6xl px-6 pb-16">
       <p className="text-center text-xs font-medium uppercase tracking-[0.2em] text-zinc-400 dark:text-zinc-500">
         {t.downloads.title}
       </p>

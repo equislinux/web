@@ -20,12 +20,12 @@ export default function Install({ lang }: { lang: Lang }) {
           <p className="mt-2 text-sm leading-6 text-zinc-500 dark:text-zinc-400">
             {t.install.step1Desc}
           </p>
-          <a
+          <Link
             href="/download/latest/"
             className="mt-4 inline-flex h-10 items-center rounded-lg bg-zinc-900 px-4 text-sm font-medium text-white transition-colors hover:bg-zinc-700 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200"
           >
             {t.hero.ctaDownload}
-          </a>
+          </Link>
         </article>
         <article className="rounded-xl border border-zinc-200 p-6 dark:border-zinc-800">
           <h3 className="text-sm font-medium text-zinc-900 dark:text-zinc-100">

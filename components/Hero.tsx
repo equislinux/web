@@ -28,12 +28,12 @@ export default function Hero({ lang }: { lang: Lang }) {
           {t.hero.tagline}
         </p>
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-          <a
+          <Link
             href="/download/latest/"
             className="inline-flex h-10 items-center rounded-lg bg-zinc-900 px-4 text-sm font-medium text-white transition-colors hover:bg-zinc-700 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200"
           >
             {t.hero.ctaDownload}
-          </a>
+          </Link>
           <Link
             href={`/${lang}/docs`}
             className="inline-flex h-10 items-center rounded-lg border border-zinc-200 px-4 text-sm font-medium text-zinc-700 transition-colors hover:border-zinc-300 hover:text-zinc-900 dark:border-zinc-800 dark:text-zinc-300 dark:hover:border-zinc-700 dark:hover:text-zinc-50"

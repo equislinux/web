@@ -4,7 +4,10 @@ import Footer from './Footer';
 import Hero from './Hero';
 import Downloads from './Downloads';
 import Showcase from './Showcase';
+import AsciiBand from './AsciiBand';
+import DesktopLayers from './DesktopLayers';
 import Features from './Features';
+import SpecSheet from './SpecSheet';
 import Install from './Install';
 import RepoGrid from './RepoGrid';
 import { UI, type Lang } from '@/lib/i18n';
@@ -19,7 +22,10 @@ export default function Landing({ lang }: { lang: Lang }) {
         <Hero lang={lang} />
         <Downloads lang={lang} />
         <Showcase lang={lang} />
+        <AsciiBand lang={lang} />
+        <DesktopLayers lang={lang} />
         <Features lang={lang} />
+        <SpecSheet lang={lang} />
         <Install lang={lang} />
         <RepoGrid lang={lang} />
 

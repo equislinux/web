@@ -117,11 +117,12 @@ are required; the remaining keys have sensible defaults when absent.
    `/.snapshots` and `/var/lib/x`. `/tmp` is appended to the fstab as tmpfs.
 5. **Package set**:
    - Base set: `base base-devel linux linux-firmware sudo networkmanager
-     openssh git jq x-release btrfs-progs xfetch-bin xtop-git kitty pipewire
-     pipewire-pulse pipewire-alsa wireplumber alsa-utils sddm zsh`, plus
-     `grub efibootmgr` for GRUB and `cryptsetup` for LUKS. `btrfs-progs` is
-     required by the generations engine; the X tools (`xfetch`, `xtop`) and
-     `zsh` are installed in every profile.
+     openssh git jq x-release x-wallpapers btrfs-progs xfetch-bin xtop-git kitty
+     pipewire pipewire-pulse pipewire-alsa wireplumber alsa-utils sddm zsh
+     rsync curl python`, plus `grub efibootmgr` for GRUB and `cryptsetup` for
+     LUKS. `btrfs-progs` is required by the generations engine; the X tools
+     (`xfetch`, `xtop`), `x-wallpapers` and `zsh` are installed in every
+     profile.
    - `full` profile: adds every package in the manifest pointed to by
      `X_PKGLIST` (default `/root/x-installer/packages.x86_64`).
    - `core` profile: adds only `vim`.
@@ -140,7 +141,9 @@ are required; the remaining keys have sensible defaults when absent.
      `--populate archlinux`, add + locally sign the same key.
 7. **Install `x-scripts` offline**: the payload
    `packages/x-scripts-*.pkg.tar.zst` present in the live environment is copied
-   into the target and installed with `pacman -U` inside the chroot.
+   into the target and installed with `pacman -U` inside the chroot. When the
+   `kde` desktop is selected, the bundled `x-kde-settings-*.pkg.tar.zst`
+   branding package is installed the same way.
 8. **Base configuration**: `genfstab`, timezone symlink, `locale.gen` +
    `/etc/locale.conf`, `KEYMAP` in `/etc/vconsole.conf`, hostname, copy of the
    working mirrorlist, and the `[x]` repository appended to the target's
@@ -171,12 +174,21 @@ are required; the remaining keys have sensible defaults when absent.
       bundled snapshot.
     NVIDIA is owned by the system hardware phase; the tool falls back to the
     upstream equisdots NVIDIA setup only if a GPU is present without a driver.
-12. **Initramfs (LUKS only)**: replace `HOOKS` in `mkinitcpio.conf` to include
+12. **niri setup** (if `desktop=niri`): a temporary passwordless-sudo drop-in
+    is created and `/usr/share/x/tools/niri-install.sh` runs as the target user.
+    The tool clones `equisdots/niri-meta` online and runs `dotsniri setup -y`;
+    the drop-in is removed afterwards. niri needs a GPU with working EGL/GBM
+    acceleration (see the desktop section below).
+13. **KDE Plasma setup** (if `desktop=kde`): Plasma is already installed from
+    the official repositories; the installer disables `plasmalogin.service`,
+    enables `sddm.service` and installs the bundled `x-kde-settings` package so
+    the X Dark look-and-feel, wallpaper and SDDM theme apply on first login.
+14. **Initramfs (LUKS only)**: replace `HOOKS` in `mkinitcpio.conf` to include
     the `encrypt` hook and rebuild with `mkinitcpio -P`.
-13. **Branding**: `x-release-apply` (from `x-release`) is run *before* the
+15. **Branding**: `x-release-apply` (from `x-release`) is run *before* the
     bootloader step so a LUKS kernel cmdline written afterwards is not
     overwritten.
-14. **Bootloader**:
+16. **Bootloader**:
     - `grub`: `grub-install` for `x86_64-efi` (removable) and `i386-pc`
       (booting from the whole disk), then `grub-mkconfig`.
       `GRUB_CMDLINE_LINUX` always carries the root command line with
@@ -186,13 +198,13 @@ are required; the remaining keys have sensible defaults when absent.
       removable fallback if needed, and a loader entry
       `X Linux` (UEFI only) with the matching `root=` or `cryptdevice=`
       cmdline.
-15. **First generation**: inside the chroot,
+17. **First generation**: inside the chroot,
     `X_GEN_CMDLINE="$CMDROOT" X_GEN_LIVE_SUBVOL=/@ x gen new --reason install
     --label first` creates `/.snapshots/0001`, the manifest under
     `/var/lib/x/generations/0001` and the boot entries (systemd-boot
     `loader/entries/x-gen-0001.conf`, GRUB `custom.cfg`). This is the base for
     rollbacks and granular restores; see `generations.md`.
-16. **Cleanup**: on exit, mounts are unmounted, the LUKS mapping is closed if
+18. **Cleanup**: on exit, mounts are unmounted, the LUKS mapping is closed if
     open, and the install JSON is removed.
 
 A message tells you the installation is complete; reboot and remove the

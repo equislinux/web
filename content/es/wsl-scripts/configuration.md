@@ -17,7 +17,8 @@ fichero.
 | Locale    | activa el locale en `/etc/locale.gen`, ejecuta `locale-gen`, escribe `LANG` en `/etc/locale.conf` |
 | Teclado   | escribe `KEYMAP` en `/etc/vconsole.conf`                  |
 | Zona horaria | enlaza `/usr/share/zoneinfo/<zona>` a `/etc/localtime` y, con systemd activo, llama a `timedatectl set-timezone`. Con `windows-time` no escribe nada (WSL refleja el reloj de Windows) |
-| Herramientas | `pacman -S sudo git curl wget` (mas el shell de login si no esta); se omite sin red o con `--no-install` |
+| Herramientas | `pacman -S sudo git curl wget` (más el shell de login si no está); se omite sin red o con `--no-install` |
+| Identidad X | habilita el repositorio firmado `[x]` en `/etc/pacman.conf` (clave fijada por huella y firmada localmente) e instala `x-release`, para que `/etc/os-release` reporte X Linux y `pacman -Syu` lo mantenga; también se omite con `--no-install`, en non-x86_64 o sin red (solo aviso) |
 | Usuario   | crea o asegura el usuario, lo anade a `wheel` y fija su shell de login |
 | Sudo      | `/etc/sudoers.d/x-wsl-wheel` con `%wheel ALL=(ALL:ALL) NOPASSWD: ALL` (`nopasswd`, el default) o `%wheel ALL=(ALL:ALL) ALL` (`password`); con `password` la contrasena del usuario se pide interactivamente |
 | Usuario por defecto | fija `[user] default=<usuario>` en `/etc/wsl.conf` (default; desactivable con `X_SET_DEFAULT_USER=0`). Si falta `/etc/wsl.conf` o se desactiva, la fase muestra guia |
@@ -61,6 +62,8 @@ del usuario. Las variables `WSL_INTEROP` y relacionadas no se tocan.
 ## Ficheros que cambian
 
 - `/etc/locale.gen`, `/etc/locale.conf`, `/etc/vconsole.conf`, `/etc/localtime`
+- `/etc/pacman.conf` (la stanza `[x]`, si falta) y la clave de confianza en `/etc/pacman.d/x-repo.pub`
+- `/etc/pacman.conf` (la stanza `[x]`, si falta) y la clave de confianza en `/etc/pacman.d/x-repo.pub`
 - `/etc/sudoers.d/x-wsl-wheel`
 - `/etc/profile.d/x-wsl.sh`
 - `/etc/wsl.conf` - solo el valor `[user] default` (el resto intacto)

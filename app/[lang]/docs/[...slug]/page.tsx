@@ -7,7 +7,7 @@ import {
   getSectionTitle,
   getSections,
   getStaticParams,
-  getWikiSourceUrl,
+  getSourceUrl,
 } from '@/lib/docs';
 import { UI, isLang } from '@/lib/i18n';
 
@@ -62,7 +62,7 @@ export default async function DocPage({
       <Markdown markdown={page.markdown} lang={lang} section={page.section} />
       <p className="mt-12 border-t border-zinc-200 pt-6 text-sm dark:border-zinc-800">
         <a
-          href={getWikiSourceUrl(lang, page.section, page.file)}
+          href={getSourceUrl(lang, page.section, page.file)}
           target="_blank"
           rel="noreferrer"
           className="text-zinc-500 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"

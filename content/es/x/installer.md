@@ -123,12 +123,12 @@ están.
    tmpfs.
 5. **Conjunto de paquetes**:
    - Conjunto base: `base base-devel linux linux-firmware sudo networkmanager
-     openssh git jq x-release btrfs-progs xfetch-bin xtop-git kitty pipewire
-     pipewire-pulse pipewire-alsa wireplumber alsa-utils sddm zsh`, más
-     `grub efibootmgr` para
+     openssh git jq x-release x-wallpapers btrfs-progs xfetch-bin xtop-git kitty
+     pipewire pipewire-pulse pipewire-alsa wireplumber alsa-utils sddm zsh
+     rsync curl python`, más `grub efibootmgr` para
      GRUB y `cryptsetup` para LUKS. `btrfs-progs` lo requiere el motor de
-     generaciones; las herramientas de X (`xfetch`, `xtop`) y `zsh` se
-     instalan en todos los perfiles.
+     generaciones; las herramientas de X (`xfetch`, `xtop`), `x-wallpapers` y
+     `zsh` se instalan en todos los perfiles.
    - Perfil `full`: añade todos los paquetes del manifiesto apuntado por
      `X_PKGLIST` (por defecto `/root/x-installer/packages.x86_64`).
    - Perfil `core`: añade solo `vim`.
@@ -147,7 +147,9 @@ están.
      `--populate archlinux`, agregar y firmar localmente la misma clave.
 7. **Instalar `x-scripts` offline**: el payload
    `packages/x-scripts-*.pkg.tar.zst` presente en el entorno en vivo se copia
-   al destino y se instala con `pacman -U` dentro del chroot.
+   al destino y se instala con `pacman -U` dentro del chroot. Si se elige el
+   escritorio `kde`, el paquete de branding `x-kde-settings-*.pkg.tar.zst`
+   incluido se instala de la misma forma.
 8. **Configuración base**: `genfstab`, enlace simbólico de la zona horaria,
    `locale.gen` + `/etc/locale.conf`, `KEYMAP` en `/etc/vconsole.conf`,
    hostname, copia del mirrorlist funcional y anexado del repositorio `[x]` al
@@ -178,12 +180,22 @@ están.
     NVIDIA lo gestiona la fase de hardware del sistema; la herramienta recurre
     al setup NVIDIA de equisdots únicamente si hay GPU y ningún driver
     instalado.
-12. **Initramfs (solo LUKS)**: sustituir `HOOKS` en `mkinitcpio.conf` para
+12. **Setup de niri** (si `desktop=niri`): se crea un drop-in temporal de sudo
+    sin contraseña y `/usr/share/x/tools/niri-install.sh` corre como el usuario
+    destino. La herramienta clona `equisdots/niri-meta` online y ejecuta
+    `dotsniri setup -y`; después se elimina el drop-in. niri necesita una GPU
+    con aceleración EGL/GBM real (ver la sección de escritorios).
+13. **Setup de KDE Plasma** (si `desktop=kde`): Plasma ya se instaló desde los
+    repos oficiales; el instalador desactiva `plasmalogin.service`, activa
+    `sddm.service` e instala el paquete `x-kde-settings` incluido para que el
+    look-and-feel X Dark, el wallpaper y el tema SDDM se apliquen en el primer
+    login.
+14. **Initramfs (solo LUKS)**: sustituir `HOOKS` en `mkinitcpio.conf` para
     incluir el hook `encrypt` y reconstruir con `mkinitcpio -P`.
-13. **Branding**: `x-release-apply` (del paquete `x-release`) se ejecuta
+15. **Branding**: `x-release-apply` (del paquete `x-release`) se ejecuta
     *antes* del paso del gestor de arranque para que la línea de comandos del
     kernel de LUKS escrita después no se sobrescriba.
-14. **Gestor de arranque**:
+16. **Gestor de arranque**:
     - `grub`: `grub-install` para `x86_64-efi` (removable) y `i386-pc`
       (arranque desde el disco completo) y después `grub-mkconfig`.
       `GRUB_CMDLINE_LINUX` siempre lleva el cmdline de la raíz con
@@ -192,13 +204,13 @@ están.
     - `systemd-boot`: `bootctl --esp-path=/boot install`, un fallback
       removable `BOOTX64.EFI` si hiciera falta y una entrada de arranque
       `X Linux` (solo UEFI) con la línea `root=` o `cryptdevice=` adecuada.
-15. **Primera generación**: dentro del chroot,
+17. **Primera generación**: dentro del chroot,
     `X_GEN_CMDLINE="$CMDROOT" X_GEN_LIVE_SUBVOL=/@ x gen new --reason install
     --label first` crea `/.snapshots/0001`, el manifiesto en
     `/var/lib/x/generations/0001` y las entries de arranque (systemd-boot
     `loader/entries/x-gen-0001.conf`, GRUB `custom.cfg`). Es la base para
     rollbacks y restores granulares; ver `generations.md`.
-16. **Limpieza**: al salir se desmontan los sistemas de archivos, se cierra el
+18. **Limpieza**: al salir se desmontan los sistemas de archivos, se cierra el
     mapeo LUKS si está abierto y se elimina el JSON de instalación.
 
 Un mensaje indica que la instalación ha terminado; reinicia y retira el medio

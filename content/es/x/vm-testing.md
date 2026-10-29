@@ -6,7 +6,7 @@ Comandos auxiliares para ejecutar el ISO en vivo de X y arrancar un disco ya
 instalado con QEMU. Ajusta las rutas (`ISO`, `DISK`) a tu máquina.
 
 ```bash
-ISO="$HOME/Documents/repos/xlnux/x/out/x-<version>-x86_64.iso"
+ISO="$HOME/equislinux/x/out/x-<version>-x86_64.iso"
 DISK="$HOME/x-vm.qcow2"
 ```
 

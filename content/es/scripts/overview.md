@@ -14,11 +14,12 @@ branding propios.
 | `equislinux/xpkg` / `equislinux/xpm` | Tooling Rust de empaquetado/gestión de paquetes. |
 | `equislinux/x-repo` | Repo de paquetes + portal. |
 
-La distro (`x`) consume este repo empaquetado como el paquete `x-scripts`; el
-instalador ejecuta las fases root (`x setup`) durante la instalación y la fase
-de usuario (`x setup --user`) en el primer arranque. El tooling Rust
-(`xpkg`/`xpm`) construye y consume el endpoint nativo `.xp`; el sistema se
-aprovisiona con pacman + `[x]`.
+La distro (`x`) consume este repo empaquetado como el paquete `x-scripts`. El
+instalador de texto ejecuta ambas fases durante la instalación: las fases root
+(`x setup`) aprovisionan el sistema y la fase de usuario (`x setup --user`)
+siembra el home del usuario nuevo antes de desplegar el escritorio elegido. El
+tooling Rust (`xpkg`/`xpm`) construye y consume el endpoint nativo `.xp`; el
+sistema se aprovisiona con pacman + `[x]`.
 
 ## Qué aporta este repo
 
@@ -75,7 +76,7 @@ paquete `x-kde-settings` de `[x]`. Ver `hyprland.md`, `niri.md` y ADR-0005.
 ## Rama y estado
 
 Los entregables de este repo se trackean en **`main`**. La fuente del payload
-es `x-scripts` 0.1.0-42, incluida en el ISO 2026.10.25; el repositorio público
+es `x-scripts` 0.1.0-42, incluida en el ISO 2026.10.27; el repositorio público
 `[x]` sirve actualmente 0.1.0-39. El paquete también incluye la herramienta no
 interactiva `niri-install.sh` que usa el instalador de texto. Restos de
 auditoría pendientes: `x-base.packages` sin consumidor, pulido de CLI y más

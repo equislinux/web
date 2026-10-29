@@ -75,7 +75,7 @@ Tanto `work/` como `out/` se recrean en cada construcción y están en
 
 - `packages.x86_64` es el manifiesto completo de paquetes del ISO en vivo.
   Incluye el sistema base más *tooling* de rescate/en vivo, fuentes, un
-  navegador (Firefox), los paquetes de X `x-release` y `x-dev` (del
+  navegador (Firefox), los paquetes de X `x-release`, `x-wallpapers` y `x-dev` (del
   repositorio `[x]`) y `gum` (usado por la interfaz del instalador de texto).
 - `bootstrap_packages.x86_64` es el conjunto mínimo (`base`,
   `arch-install-scripts`) que archiso usa para el root de arranque.
@@ -96,7 +96,9 @@ Tanto `work/` como `out/` se recrean en cada construcción y están en
 - El *payload* de aprovisionamiento (`x-scripts`) se incluye **offline**
   dentro del ISO en `airootfs/root/x-installer/packages/x-scripts-*.pkg.tar.zst`,
   de modo que el instalador no necesita descargarlo de la red durante la
-  instalación.
+  instalación. El paquete de branding de KDE (`x-kde-settings-*.pkg.tar.zst`)
+  se incluye en el mismo directorio y solo se instala si se elige el
+  escritorio `kde`.
 
 ## Solución de problemas
 

@@ -72,7 +72,8 @@ the `build-*.log` files.
 
 - `packages.x86_64` is the full package manifest for the live ISO. It includes
   the base system plus recovery/live tooling, fonts, a browser (Firefox),
-  the X packages `x-release` and `x-dev` (from the `[x]` repository), and `gum`
+  the X packages `x-release`, `x-wallpapers` and `x-dev` (from the `[x]`
+  repository), and `gum`
   (used by the text installer UI).
 - `bootstrap_packages.x86_64` is the minimal set (`base`,
   `arch-install-scripts`) used by archiso for the bootstrap root.
@@ -93,6 +94,8 @@ the `build-*.log` files.
 - The provisioning payload (`x-scripts`) is shipped **offline** inside the ISO
   at `airootfs/root/x-installer/packages/x-scripts-*.pkg.tar.zst`, so the
   installer does not need to fetch it from the network during installation.
+  The KDE branding package (`x-kde-settings-*.pkg.tar.zst`) is bundled in the
+  same directory and installed only when the `kde` desktop is selected.
 
 ## Troubleshooting
 

@@ -17,7 +17,6 @@ export interface DocSection {
 interface SectionManifest {
   id: string;
   title: Record<Lang, string>;
-  wiki: string;
   files: string[];
 }
 
@@ -25,50 +24,52 @@ const SECTIONS: SectionManifest[] = [
   {
     id: 'web',
     title: { en: 'web — this portal', es: 'web — este portal' },
-    wiki: '',
     files: ['overview'],
   },
   {
     id: 'x',
     title: { en: 'X Linux (distro)', es: 'X Linux (distro)' },
-    wiki: 'x',
-    files: ['index', 'building', 'installer', 'vm-testing', 'project-layout'],
+    files: ['index', 'building', 'installer', 'vm-testing', 'project-layout', 'generations'],
+  },
+  {
+    id: 'x-arm',
+    title: { en: 'x-arm — aarch64', es: 'x-arm — aarch64' },
+    files: ['overview', 'build', 'vm', 'acceptance'],
   },
   {
     id: 'wsl',
     title: { en: 'X for WSL', es: 'X para WSL' },
-    wiki: 'wsl/wsl',
     files: ['architecture', 'import'],
   },
   {
     id: 'wsl-scripts',
     title: { en: 'WSL scripts', es: 'Scripts de WSL' },
-    wiki: 'wsl/wsl-scripts',
     files: ['usage', 'configuration', 'architecture'],
   },
   {
     id: 'scripts',
     title: { en: 'Scripts and CLI', es: 'Scripts y CLI' },
-    wiki: 'scripts',
     files: ['overview', 'provisioning', 'generations', 'cli', 'hyprland', 'niri', 'layout', 'packaging'],
   },
   {
     id: 'xpm',
     title: { en: 'xpm — package manager', es: 'xpm — gestor de paquetes' },
-    wiki: 'xpm',
     files: ['overview-and-status', 'usage', 'architecture', 'future-integration'],
   },
   {
     id: 'xpkg',
     title: { en: 'xpkg — package builder', es: 'xpkg — builder de paquetes' },
-    wiki: 'xpkg',
     files: ['01-overview-and-status', '02-usage', '03-architecture', '04-future-integration'],
   },
   {
     id: 'x-repo',
     title: { en: 'x-repo — package repository', es: 'x-repo — repositorio de paquetes' },
-    wiki: 'x-repo',
-    files: ['overview', 'repo-layout', 'publishing', 'signing', 'web-portal'],
+    files: ['overview', 'repo-layout', 'publishing', 'signing', 'web-portal', 'iso-releases'],
+  },
+  {
+    id: 'utils',
+    title: { en: 'utils — operator tools', es: 'utils — herramientas de operador' },
+    files: ['overview', 'workspace-layout', 'cloning', 'sudo', 'keygen', 'restore'],
   },
 ];
 
@@ -131,19 +132,12 @@ export function getSectionTitle(sectionId: string, lang: Lang): string {
   return section ? section.title[lang] : sectionId;
 }
 
-export function getWikiSourceUrl(
+export function getSourceUrl(
   lang: Lang,
   sectionId: string,
   file: string
 ): string {
-  const section = SECTIONS.find((candidate) => candidate.id === sectionId);
-  if (!section) {
-    return 'https://github.com/equislinux/wiki';
-  }
-  if (sectionId === 'web') {
-    return `https://github.com/equislinux/web/blob/main/content/${lang}/web/${file}.md`;
-  }
-  return `https://github.com/equislinux/wiki/blob/main/${section.wiki}/${lang}/${file}.md`;
+  return `https://github.com/equislinux/web/blob/main/content/${lang}/${sectionId}/${file}.md`;
 }
 
 export function getStaticParams(): { lang: Lang; slug: string[] }[] {

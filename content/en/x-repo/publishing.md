@@ -20,7 +20,7 @@ cd packages/x-release      # or packages/x-dev
 makepkg -cf --noconfirm
 ```
 
-This produces a `.pkg.tar.zst` (e.g. `x-release-1.0-8-any.pkg.tar.zst`) inside the
+This produces a `.pkg.tar.zst` (e.g. `x-release-1.0-9-any.pkg.tar.zst`) inside the
 package directory.
 
 ### External package (x-scripts)
@@ -42,25 +42,27 @@ this repo.
 ### Native .xp packages (xpm/xpkg path)
 
 The `.xp` endpoint under `public/x/x86_64/` is generated separately with
-`scripts/build-xp.sh` (xpkg builds + gpg signing + `xpkg repo-add`) and deploys with
-the same Pages workflow; see `docs/build-x-native-workflow.md`.
+`scripts/build-xp.sh` (xpkg builds + gpg signing + `xpkg repo-add`) and is live;
+it deploys with the same Pages workflow. See
+`docs/build-x-native-workflow.md`.
 
 ## 2. Regenerate the repository (repo-add)
 
 From the repository root run:
 
 ```bash
-./build-packages.sh              # builds x-release/x-dev + imports x-scripts + indexes
+./build-packages.sh              # builds the PKGBUILDs + imports x-scripts + indexes
 ./build-packages.sh --index-only # skip the local builds (only import/index)
 ```
 
 The script:
 
-1. Rebuilds the configured PKGBUILD packages (`x-release`, `x-dev`) with `makepkg`
+1. Rebuilds the configured PKGBUILD packages (`x-release`, `x-wallpapers`,
+   `x-dev`, `x-kde-settings`, `opencode-bin`, `xfetch`, `xtop`) with `makepkg`
    unless `--index-only` is given.
 2. Imports `../scripts/packaging/x-scripts-*.pkg.tar.zst` when present and copies the
-   freshly built `x-release`/`x-dev` tarballs into `public/repo/x86_64/`, deleting
-   only those build artifacts. The committed leftovers under `packages/xpm`,
+   freshly built packages into `public/repo/x86_64/`, deleting only those build
+   artifacts. The committed leftovers under `packages/xpm`,
    `packages/xpkg`, `packages/xfetch` and `packages/xtop` are not touched.
 3. Rebuilds the pacman database from scratch from every tarball in the directory
    (this also drops entries for packages that no longer exist):
@@ -96,7 +98,7 @@ Commit the repository changes, for example:
 
 ```bash
 git add packages/x-release public/repo/x86_64
-git commit -m "publish x-release 1.0-8"
+git commit -m "publish x-release 1.0-9"
 ```
 
 ## 4. Pull request

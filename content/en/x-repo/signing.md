@@ -98,7 +98,9 @@ for it:
 4. **Lost (not compromised)**: same as a planned change; old signatures stay
    valid, you just cannot sign new updates until the new key is distributed.
 
-Because signatures are published while `[x]` stays `Optional` during
-development, a key change breaks nobody. Flip to `Required` only when the
-keyring distribution path (ISO + an updatable `x-keyring` package) is in
-place.
+The repository and the installed systems use `SigLevel = Required`, so a key
+change is a trust transition: distribute the updated keyring (new ISO, WSL
+rootfs and, if available, an updatable `x-keyring` package) before the first
+package signed with the new key. Keep the old key in `trustedkeys.gpg` for at
+least one release cycle and never remove old signatures until clients have the
+new key.

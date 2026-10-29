@@ -2,7 +2,14 @@ import type { Lang } from './i18n';
 
 export const GITHUB_ORG = 'https://github.com/equislinux';
 
-export const SITE_BASE = '/web';
+// Canonical public URL of the portal. Override with NEXT_PUBLIC_SITE_URL only
+// when deploying to a different domain.
+export const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL ?? 'https://equislinux.org';
+
+// Assets are served from the site root. Set NEXT_PUBLIC_BASE_PATH at build time
+// only if the static export is hosted under a subdirectory.
+export const SITE_BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? '';
 
 export interface RepoInfo {
   name: string;
@@ -17,6 +24,14 @@ export const REPOS: RepoInfo[] = [
     description: {
       en: 'Arch-based distro: archiso profile, text installer and ISO build.',
       es: 'Distro basada en Arch: perfil archiso, instalador de texto y build del ISO.',
+    },
+  },
+  {
+    name: 'equislinux/x-arm',
+    href: `${GITHUB_ORG}/x-arm`,
+    description: {
+      en: 'aarch64 overlay build: live ISO, [x]/aarch64 repository and VM images.',
+      es: 'Build overlay para aarch64: ISO en vivo, repositorio [x]/aarch64 e imágenes de VM.',
     },
   },
   {
@@ -65,6 +80,14 @@ export const REPOS: RepoInfo[] = [
     description: {
       en: 'Binary package repository ([x]) and package portal.',
       es: 'Repositorio binario de paquetes ([x]) y portal de paquetes.',
+    },
+  },
+  {
+    name: 'equislinux/utils',
+    href: `${GITHUB_ORG}/utils`,
+    description: {
+      en: 'Operator utilities: workspace discovery, clone, sudo rules and signing keys.',
+      es: 'Utilidades de operador: workspace, clonado, reglas sudo y claves de firma.',
     },
   },
   {

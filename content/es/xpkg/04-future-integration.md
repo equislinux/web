@@ -17,9 +17,10 @@ Documentos relacionados en esta carpeta:
 Hay **dos vías vivas** que se regeneran en cada release:
 
 - **Repositorio pacman `[x]`** — `x-repo/build-packages.sh` construye con
-  **makepkg + repo-add** los paquetes del sistema (`x-release`, `x-dev`,
-  `x-scripts`, `opencode-bin`, `xfetch-bin`, `xtop-git`, `xpm`). Es la vía que
-  usa el instalador y los sistemas instalados.
+  **makepkg + repo-add** los paquetes del sistema (`x-release`, `x-wallpapers`,
+  `x-dev`, `x-kde-settings`, `opencode-bin`, `xfetch-bin`, `xtop-git`) e importa
+  el build de `x-scripts` desde el repo hermano. Es la vía que usa el instalador
+  y los sistemas instalados.
 - **Endpoint nativo `.xp`** — `x-repo/scripts/build-xp.sh` construye y firma
   los mismos paquetes con **xpkg** (XBUILD o PKGBUILD) y regenera
   `public/x/x86_64` (DB, `history.json`, `SHA256SUMS`), servido en

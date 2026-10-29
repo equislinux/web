@@ -329,7 +329,7 @@ export const UI: Record<Lang, UIStrings> = {
     },
     docs: {
       title: 'Documentation',
-      subtitle: 'Guides for every repository of the X Linux project.',
+      subtitle: 'Guides for every published repository of the X Linux project.',
       overview: 'Overview',
       pages: 'pages',
       edit: 'Edit this page on GitHub',
@@ -523,7 +523,7 @@ export const UI: Record<Lang, UIStrings> = {
     },
     docs: {
       title: 'Documentación',
-      subtitle: 'Guías de todos los repositorios del proyecto X Linux.',
+      subtitle: 'Guías de todos los repositorios publicados del proyecto X Linux.',
       overview: 'Resumen',
       pages: 'páginas',
       edit: 'Editar esta página en GitHub',

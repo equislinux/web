@@ -17,6 +17,7 @@ default user. Only that value is touched, never the rest of the file.
 | Keyboard   | write `KEYMAP` to `/etc/vconsole.conf`                    |
 | Timezone   | link `/usr/share/zoneinfo/<zone>` to `/etc/localtime` and, when systemd is running, call `timedatectl set-timezone`. With `windows-time` nothing is written (WSL mirrors the Windows clock) |
 | Tools      | `pacman -S sudo git curl wget` (+ the login shell when not present); skipped offline or with `--no-install` |
+| X identity | enable the signed `[x]` repository in `/etc/pacman.conf` (key pinned by fingerprint and locally signed) and install `x-release`, so `/etc/os-release` reports X Linux and `pacman -Syu` keeps it updated; also skipped with `--no-install`, on non-x86_64 or offline (warning only) |
 | User       | create or ensure the user, add it to `wheel`, set its login shell |
 | Sudo       | `/etc/sudoers.d/x-wsl-wheel` with `%wheel ALL=(ALL:ALL) NOPASSWD: ALL` (`nopasswd`, the default) or `%wheel ALL=(ALL:ALL) ALL` (`password`); with `password` the user password is set interactively |
 | Default user | pin `[user] default=<user>` in `/etc/wsl.conf` (default; disable with `X_SET_DEFAULT_USER=0`). If `/etc/wsl.conf` is missing or the pin is disabled, the stage prints guidance instead |
@@ -59,6 +60,7 @@ and related variables are not touched.
 ## Files that change
 
 - `/etc/locale.gen`, `/etc/locale.conf`, `/etc/vconsole.conf`, `/etc/localtime`
+- `/etc/pacman.conf` (the `[x]` stanza, when missing) and the trusted key at `/etc/pacman.d/x-repo.pub`
 - `/etc/sudoers.d/x-wsl-wheel`
 - `/etc/profile.d/x-wsl.sh`
 - `/etc/wsl.conf` - only the `[user] default` value (kept intact otherwise)

@@ -1,0 +1,23 @@
+# Hostinger (Apache/LiteSpeed) — static export of equislinux.org
+# This file lives in public/ and is copied verbatim into out/.
+
+# Use the Next.js 404 page for unknown routes.
+ErrorDocument 404 /404.html
+
+# No directory listings.
+Options -Indexes
+
+# Long cache for hashed Next.js assets, short cache for HTML.
+<IfModule mod_headers.c>
+  <FilesMatch "^.*\\.(js|css|woff2?|png|jpe?g|gif|svg|mp4|webp)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+  <FilesMatch "\\.html$">
+    Header set Cache-Control "public, max-age=0, must-revalidate"
+  </FilesMatch>
+</IfModule>
+
+# Compression when the module is available.
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css text/plain text/xml application/javascript application/json image/svg+xml
+</IfModule>

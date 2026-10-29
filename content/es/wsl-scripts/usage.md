@@ -47,9 +47,10 @@ export X_LOCALE=de_DE.UTF-8 X_KEYMAP=de X_TIMEZONE=Europe/Berlin \
 sudo ./install.sh
 ```
 
-Para saltar la instalacion de herramientas base (`sudo git curl wget`, mas el
-shell de login si no esta), usa `--no-install` o `X_INSTALL=0`. Para seguir
-entrando como root en vez de fijar el usuario nuevo, usa `X_SET_DEFAULT_USER=0`.
+Para saltar la instalación de herramientas base (`sudo git curl wget`, más el
+shell de login si no está) **y** la capa de identidad X (`[x]` + `x-release`),
+usa `--no-install` o `X_INSTALL=0`. Para seguir entrando como root en vez de
+fijar el usuario nuevo, usa `X_SET_DEFAULT_USER=0`.
 
 La fase solo aplica las acciones pedidas; con `X_DRY=1` no se aplica nada y
 con `X_AUTO=1` se usan los valores por defecto sin preguntar.

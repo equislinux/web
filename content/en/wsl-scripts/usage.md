@@ -46,8 +46,9 @@ sudo ./install.sh
 ```
 
 To skip the base-tool install (`sudo git curl wget`, plus the login shell when
-it is not present), use `--no-install` or `X_INSTALL=0`. To keep logging in as
-root instead of pinning the new user, use `X_SET_DEFAULT_USER=0`.
+it is not present) **and** the X identity layer (`[x]` + `x-release`), use
+`--no-install` or `X_INSTALL=0`. To keep logging in as root instead of pinning
+the new user, use `X_SET_DEFAULT_USER=0`.
 
 The stage applies only the requested actions; with `X_DRY=1` nothing is
 changed and with `X_AUTO=1` the defaults are used without prompting.

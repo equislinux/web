@@ -35,11 +35,11 @@ X (`x-release`, `x-dev`) se instalan con `pacman`.
 ## Estado del proyecto
 
 La distribución está en desarrollo activo. Los ISOs firmados se publican en
-SourceForge (el enlace estable es
-<https://equislinux.github.io/web/download/latest/>) y los dos canales de
-paquetes —el repositorio pacman `[x]` y el endpoint nativo `.xp`— están vivos.
-El instalador de texto ofrece Hyprland, niri, KDE Plasma o un sistema solo de
-consola. Consulta `ROADMAP.md` y `docs/project-state.md`.
+SourceForge; el enlace estable del portal
+<https://equislinux.org/download/latest/> solo redirige allí. Los dos canales de paquetes —el repositorio pacman `[x]` y el
+endpoint nativo `.xp`— están vivos. El instalador de texto ofrece Hyprland,
+niri, KDE Plasma o un sistema solo de consola. Consulta `ROADMAP.md` y
+`docs/project-state.md`.
 
 ## Cómo se mapea este repositorio en la organización
 
@@ -50,12 +50,14 @@ GitHub. Los nombres cambiaron con el tiempo, así que las referencias antiguas a
 | Repositorio | Rol |
 |-------------|-----|
 | `equislinux/x` | **La distro (este repo).** Perfil archiso, ISO en vivo, instalador de texto, construcción de rootfs para WSL. |
+| `equislinux/x-arm` | Build overlay aarch64: ISO UEFI, repositorio `[x]/aarch64` e imágenes de VM. |
 | `equislinux/scripts` | *Payload* de aprovisionamiento y la CLI `x` (`x setup`, `x theme`, ...). Se empaqueta como `x-scripts` y lo instala el instalador de texto. |
-| `equislinux/x-repo` | Repositorio binario de paquetes de X (alojado en GitHub Pages, `[x]` en `pacman.conf`) y el portal de paquetes. |
+| `equislinux/x-repo` | Repositorio binario de paquetes de X (alojado en GitHub Pages, `[x]` en `pacman.conf`), portal de paquetes y publicación de ISOs. |
 | `equislinux/xpm` | Gestor de paquetes de X (Rust). |
 | `equislinux/xpkg` | Herramienta de empaquetado de X para desarrolladores (Rust). |
 | `equislinux/wsl` / `equislinux/wsl-scripts` | Rootfs de WSL (release publicado `v0.1.0`) y su setup de primer arranque. |
-| `equislinux/wiki` / `equislinux/web` | Fuentes de documentación (en/es) y el portal de documentación. |
+| `equislinux/utils` | Utilidades de operador: descubrimiento del workspace, clonado, reglas sudo y claves de firma. |
+| `equislinux/wiki` / `equislinux/web` | Espejo de documentación (en/es) y el portal de documentación. |
 | `equisdots/*` | Org dueña de los stacks de escritorio (config Lua de Hyprland, config de niri, shell Quickshell, paletas, motores, login SDDM) consumidos de solo lectura por las herramientas de escritorio en `scripts`. Instaladores oficiales: `equisdots/dots` (Hyprland) y `equisdots/niri-meta` (niri). |
 
 Documentación relacionada en este repositorio:

@@ -1,10 +1,11 @@
 # Portal web
 
-El portal es una **página estática de Next.js** con dos bloques: los enlaces a todos
-los repositorios de la organización `equislinux` (animados con `XDecryptedText`) y una
-explicación breve, en inglés, de que este repositorio sirve artefactos para X Linux.
-No hay navbar, temas ni formularios: el sitio es una sola ruta (`/`) que se exporta
-estáticamente y se despliega en GitHub Pages junto a los paquetes.
+El portal es una **página estática de Next.js** con dos bloques: los enlaces a los
+repositorios principales de la organización `equislinux` (animados con
+`XDecryptedText`) y una explicación breve, en inglés, de que este repositorio
+sirve artefactos para X Linux. No hay navbar, temas ni formularios: el sitio es
+una sola ruta (`/`) que se exporta estáticamente y se despliega en GitHub Pages
+junto a los paquetes.
 
 ## Stack
 

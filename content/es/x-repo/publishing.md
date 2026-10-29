@@ -20,7 +20,7 @@ cd packages/x-release      # o packages/x-dev
 makepkg -cf --noconfirm
 ```
 
-Esto produce un `.pkg.tar.zst` (p. ej. `x-release-1.0-8-any.pkg.tar.zst`) dentro del
+Esto produce un `.pkg.tar.zst` (p. ej. `x-release-1.0-9-any.pkg.tar.zst`) dentro del
 directorio del paquete.
 
 ### Paquete externo (x-scripts)
@@ -42,25 +42,26 @@ de build. También puedes colocar el tarball directamente en
 ### Paquetes nativos .xp (vía xpm/xpkg)
 
 El endpoint `.xp` bajo `public/x/x86_64/` se genera aparte con
-`scripts/build-xp.sh` (builds de xpkg + firma gpg + `xpkg repo-add`) y se despliega con
-el mismo workflow de Pages; ver `docs/build-x-native-workflow.md`.
+`scripts/build-xp.sh` (builds de xpkg + firma gpg + `xpkg repo-add`) y está vivo;
+se despliega con el mismo workflow de Pages; ver `docs/build-x-native-workflow.md`.
 
 ## 2. Regenerar el repositorio (repo-add)
 
 Desde la raíz del repositorio ejecuta:
 
 ```bash
-./build-packages.sh              # construye x-release/x-dev + importa x-scripts + indexa
+./build-packages.sh              # construye los PKGBUILDs + importa x-scripts + indexa
 ./build-packages.sh --index-only # omite los builds locales (solo importa/indexa)
 ```
 
 El script:
 
-1. Reconstruye los paquetes PKGBUILD configurados (`x-release`, `x-dev`) con
-   `makepkg` salvo con `--index-only`.
+1. Reconstruye los paquetes PKGBUILD configurados (`x-release`, `x-wallpapers`,
+   `x-dev`, `x-kde-settings`, `opencode-bin`, `xfetch`, `xtop`) con `makepkg`
+   salvo con `--index-only`.
 2. Importa `../scripts/packaging/x-scripts-*.pkg.tar.zst` cuando existe y copia los
-   tarballs recién construidos de `x-release`/`x-dev` a `public/repo/x86_64/`,
-   borrando solo esos artefactos de build. Los binarios commiteados bajo
+   paquetes recién construidos a `public/repo/x86_64/`, borrando solo esos
+   artefactos de build. Los binarios commiteados bajo
    `packages/xpm`, `packages/xpkg`, `packages/xfetch` y `packages/xtop` no se tocan.
 3. Reconstruye la base de datos de pacman desde cero a partir de todos los tarballs
    del directorio (esto también elimina entradas de paquetes que ya no existen):
@@ -97,7 +98,7 @@ Commitea los cambios del repositorio, por ejemplo:
 
 ```bash
 git add packages/x-release public/repo/x86_64
-git commit -m "publish x-release 1.0-8"
+git commit -m "publish x-release 1.0-9"
 ```
 
 ## 4. Pull request

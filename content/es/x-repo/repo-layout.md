@@ -29,11 +29,20 @@ El README señala que mientras `PKGBUILD` se mantiene para el tooling legacy de 
 
 ### Paquetes construibles (PKGBUILD)
 
-- **`x-release`** — identidad y branding de X Linux (PKGBUILD `1.0-8`). Incluye la
-  plantilla `os-release`, defaults de GRUB, logo de distribución, fondos y la
-  herramienta `x-release-apply`, además de hooks de pacman (`99-x-os-release.hook`,
+- **`x-release`** — identidad y branding de X Linux (PKGBUILD `1.0-9`). Incluye la
+  plantilla `os-release`, defaults de GRUB, logo de distribución y la herramienta
+  `x-release-apply`, además de hooks de pacman (`99-x-os-release.hook`,
   `99-x-grub.hook`) que reaplican el branding tras actualizaciones de
-  `filesystem`/`grub`.
+  `filesystem`/`grub`. El manejo de GRUB es opcional (guarda `/boot/grub`), así
+  que es seguro en sistemas headless como WSL; los fondos viven en
+  `x-wallpapers` (optdepends).
+- **`x-wallpapers`** — fondos de escritorio (PKGBUILD `1.0-1`). Instala
+  `/usr/share/backgrounds/x/x-wallpaper.{png,jpg}`. Se mantiene separado para que
+  las instalaciones headless no carguen las imágenes.
+- **`x-kde-settings`** — branding de X para Plasma (PKGBUILD `1.0-2`): colores
+  X Dark, look-and-feel, wallpaper y tema SDDM, además de defaults en `/etc/skel`
+  y el autostart del primer login. El repositorio `[x]` publica `1.0-1`; el build
+  `1.0-2` va dentro del ISO en vivo para las imágenes de prueba de escritorio.
 - **`x-dev`** — paquete de entorno de desarrollo (PKGBUILD `1.0-2`). Instala
   `/usr/bin/x-dev-env` y helpers bajo `/usr/share/x-dev/` (aliases de shell, scripts
   de setup de NVIDIA/QEMU/Node). Depende de `zsh git base-devel curl wget`.
@@ -59,7 +68,7 @@ se **importa** a este repo, commiteado bajo `public/repo/x86_64/` (actualmente
 
 - No existe un directorio de fuente `packages/x-scripts/` aquí.
 - El último artefacto publicado es `0.1.0-39`; la fuente en `scripts/packaging/`
-  está en `0.1.0-42`, incluida en el ISO 2026.10.25. `build-packages.sh` importa
+  está en `0.1.0-42`, incluida en el ISO 2026.10.27. `build-packages.sh` importa
   el build hermano; vuelve a ejecutarlo al publicar 42 en `[x]`.
 
 ### Solo recetas
@@ -76,7 +85,7 @@ Este directorio es el repositorio orientado a pacman. Archivos presentes:
 |---|---|
 | `x.db`, `x.db.tar.gz` | Base de datos de paquetes (`x.db` es la copia sin comprimir de `x.db.tar.gz`). |
 | `x.files`, `x.files.tar.gz` | Base de datos de listas de archivos para `pacman -F`. |
-| `*.pkg.tar.zst` | Los paquetes: `x-release-1.0-8`, `x-dev-1.0-2`, `x-scripts-0.1.0-39`, `x-kde-settings-1.0-1`, `xpm-0.1.0-3`, `xfetch-bin-1.0.0-1`, `xtop-git-r35.cb17bb7-1`, `opencode-bin-1.18.34-1`. |
+| `*.pkg.tar.zst` | Los paquetes: `x-release-1.0-9`, `x-wallpapers-1.0-1`, `x-dev-1.0-2`, `x-scripts-0.1.0-39`, `x-kde-settings-1.0-1`, `xpm-0.1.0-3`, `xfetch-bin-1.0.0-1`, `xtop-git-r35.cb17bb7-1`, `opencode-bin-1.18.34-1`. |
 | `SHA256SUMS` | Checksums de todos los archivos del directorio. |
 | `signing.pub`, `trustedkeys.gpg` | Material de firma/confianza consumido por el endpoint nativo. |
 
@@ -127,11 +136,12 @@ repositorio documentada para `xpm` es `https://equislinux.github.io/x-repo/x/$ar
 Script local (se ejecuta desde la raíz del repo; requiere un entorno tipo Arch con
 `makepkg` y `repo-add`). El script:
 
-1. Construye en su sitio los paquetes PKGBUILD configurados
-   (`build_pkgbuild x-release`, `build_pkgbuild x-dev`) con `makepkg -cf --noconfirm`.
-   El helper `build_xbuild` para la vía nativa existe pero está comentado.
+1. Construye en su sitio los paquetes PKGBUILD configurados (`x-release`,
+   `x-wallpapers`, `x-dev`, `x-kde-settings`, `opencode-bin`, `xfetch`, `xtop`)
+   con `makepkg -cf --noconfirm`. El helper `build_xbuild` para la vía nativa
+   existe pero está comentado.
 2. Importa `../scripts/packaging/x-scripts-*.pkg.tar.zst` cuando existe, copia los
-   tarballs recién construidos de `x-release`/`x-dev` a `public/repo/x86_64/` y
+   paquetes recién construidos a `public/repo/x86_64/` y
    elimina después esos artefactos de build (los binarios commiteados bajo los demás
    directorios `packages/*` no se tocan).
 3. Regenera la base de datos de pacman y `SHA256SUMS` como se muestra arriba.

@@ -29,10 +29,19 @@ native path for `xpkg`/`xpm`.
 
 ### Buildable packages (PKGBUILD)
 
-- **`x-release`** — X Linux identity and branding (PKGBUILD `1.0-8`). Ships the
-  `os-release` template, GRUB defaults, distributor logo, wallpapers and the
+- **`x-release`** — X Linux identity and branding (PKGBUILD `1.0-9`). Ships the
+  `os-release` template, GRUB defaults, distributor logo and the
   `x-release-apply` tool, plus pacman hooks (`99-x-os-release.hook`,
   `99-x-grub.hook`) that re-apply branding after `filesystem`/`grub` upgrades.
+  GRUB handling is optional (`/boot/grub` guard), so the package is safe on
+  headless systems such as WSL; wallpapers live in `x-wallpapers` (optdepends).
+- **`x-wallpapers`** — desktop wallpapers (PKGBUILD `1.0-1`). Installs
+  `/usr/share/backgrounds/x/x-wallpaper.{png,jpg}`. Kept separate so headless
+  installs do not carry the images.
+- **`x-kde-settings`** — X Plasma branding (PKGBUILD `1.0-2`): X Dark colors,
+  look-and-feel, wallpaper and SDDM theme, plus `/etc/skel` defaults and the
+  first-login autostart. The `[x]` repository currently publishes `1.0-1`; the
+  `1.0-2` build ships inside the live ISO for the desktop test images.
 - **`x-dev`** — development environment package (PKGBUILD `1.0-2`). Installs
   `/usr/bin/x-dev-env` and helpers under `/usr/share/x-dev/` (shell aliases,
   NVIDIA/QEMU/Node setup scripts). Depends on `zsh git base-devel curl wget`.
@@ -56,7 +65,7 @@ into this repo, committed under `public/repo/x86_64/` (currently
 
 - There is no `packages/x-scripts/` source directory here.
 - The latest published artifact is `0.1.0-39`; the `scripts/packaging/` source is
-  at `0.1.0-42`, bundled in the 2026.10.25 ISO. `build-packages.sh` imports the
+  at `0.1.0-42`, bundled in the 2026.10.27 ISO. `build-packages.sh` imports the
   sibling build; re-run it when publishing 42 to `[x]`.
 
 ### Recipes only
@@ -73,7 +82,7 @@ This directory is the pacman-facing repository. Files present:
 |---|---|
 | `x.db`, `x.db.tar.gz` | Package database (`x.db` is the uncompressed copy of `x.db.tar.gz`). |
 | `x.files`, `x.files.tar.gz` | File-list database for `pacman -F`. |
-| `*.pkg.tar.zst` | The packages: `x-release-1.0-8`, `x-dev-1.0-2`, `x-scripts-0.1.0-39`, `x-kde-settings-1.0-1`, `xpm-0.1.0-3`, `xfetch-bin-1.0.0-1`, `xtop-git-r35.cb17bb7-1`, `opencode-bin-1.18.34-1`. |
+| `*.pkg.tar.zst` | The packages: `x-release-1.0-9`, `x-wallpapers-1.0-1`, `x-dev-1.0-2`, `x-scripts-0.1.0-39`, `x-kde-settings-1.0-1`, `xpm-0.1.0-3`, `xfetch-bin-1.0.0-1`, `xtop-git-r35.cb17bb7-1`, `opencode-bin-1.18.34-1`. |
 | `SHA256SUMS` | Checksums over every file in the directory. |
 | `signing.pub`, `trustedkeys.gpg` | Signing/trust material consumed by the native endpoint. |
 
@@ -125,13 +134,14 @@ xfetch-bin, xtop-git, opencode-bin, x-scripts), its own database (`x.db.tar.gz`,
 Local script (run from the repo root, requires an Arch-like environment with
 `makepkg` and `repo-add`). It:
 
-1. Builds the configured PKGBUILD packages in place (`build_pkgbuild x-release`,
-   `build_pkgbuild x-dev`) using `makepkg -cf --noconfirm`. The `build_xbuild` helper
-   for the native path is present but commented out.
+1. Builds the configured PKGBUILD packages in place (`x-release`, `x-wallpapers`,
+   `x-dev`, `x-kde-settings`, `opencode-bin`, `xfetch`, `xtop`) using
+   `makepkg -cf --noconfirm`. The `build_xbuild` helper for the native path is
+   present but commented out.
 2. Imports `../scripts/packaging/x-scripts-*.pkg.tar.zst` when present, copies the
-   freshly built `x-release`/`x-dev` tarballs into `public/repo/x86_64/` and removes
-   the build artifacts afterwards (the committed leftovers under the other
-   `packages/*` directories are not touched).
+   freshly built packages into `public/repo/x86_64/` and removes the build
+   artifacts afterwards (the committed leftovers under the other `packages/*`
+   directories are not touched).
 3. Regenerates the pacman database and `SHA256SUMS` as shown above.
 4. Prints the closing reminder:
 

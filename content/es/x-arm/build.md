@@ -22,16 +22,22 @@ upstream, que ya soporta aarch64 (`grub_target=arm64-efi`, `BOOTAA64.EFI`,
 No compiles como root el repo: `makepkg` lo rechaza. Usa el usuario normal;
 solo `build-iso.sh` necesita root.
 
+Como alternativa, el [builder Docker](docker.md) ejecuta el mismo pipeline
+dentro de un contenedor Arch Linux ARM en cualquier host Docker (nativo en
+Apple Silicon), sin necesidad de una VM ALARM en el host.
+
 ## 2. Entradas
 
 ```bash
 scripts/fetch-x.sh            # vendor/x en vendor/x.sha
 scripts/fetch-archiso.sh      # vendor/archiso en vendor/archiso.sha
-scripts/apply-overlay.sh      # reset + overlay + parche del instalador + checks
+scripts/apply-overlay.sh      # reset + overlay + parches + checks
 ```
 
-`apply-overlay.sh` resetea `vendor/x` a su commit fijado, así el resultado es
-reproducible y no se cuelan ficheros viejos.
+`apply-overlay.sh` resetea `vendor/x` y `vendor/archiso` a sus commits fijados,
+así el resultado es reproducible y no se cuelan ficheros viejos. Después aplica
+el overlay, los parches aarch64 del instalador y de `mkarchiso`, y ejecuta los
+checks estáticos.
 
 `vendor/x.sha` es el contrato con x86_64: súbelo a propósito cuando quieras
 cambios nuevos de upstream, y vuelve a aplicar el overlay y los checks.
@@ -84,12 +90,16 @@ Ver [Imágenes de VM](vm.md) para importar en UTM/Parallels/VMware y el aviso de
 ## 6. Publicar
 
 ```bash
+X_REPO_SIGN_KEY=... scripts/publish-repo.sh --push
 X_REPO_SIGN_KEY=... scripts/publish-arm.sh --verify
 ```
 
-Sube a SourceForge (`/home/frs/project/equislinux/arm/iso`) y actualiza
-`web/data/releases-arm.json` (se añade con la primera release ARM), separado
-del índice x86_64.
+`publish-repo.sh` publica `out/repo/aarch64` en el repositorio GitHub Pages
+`equislinux/x-arm-repo`, servido en
+`https://equislinux.github.io/x-arm-repo/repo/aarch64`; `x-repo` sigue sirviendo
+solo x86_64. `publish-arm.sh` sube la ISO a SourceForge
+(`/home/frs/project/equislinux/arm/iso`) y actualiza
+`web/data/releases-arm.json`, separado del índice x86_64.
 
 ## Problemas típicos
 

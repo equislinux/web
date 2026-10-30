@@ -44,6 +44,25 @@ aarch64 limpio.
 - [ ] `uname -m` es `aarch64`; `pacman -Q linux-aarch64` funciona.
 - [ ] La vía dualboot no toca una ESP existente ni entradas EFI ajenas.
 
+## Escritorio (Hyprland/equisdots)
+
+- [ ] El instalador ejecuta `x-hyprland-arm` (no el script compartido x86_64).
+- [ ] `quickshell` y `swayosd` vienen de `extra` de ALARM; no se ejecuta
+      ningún build de `yay`/makepkg y no se instala `quickshell-git`.
+- [ ] Los paquetes ausentes en ALARM (`rofi-emoji`) se omiten sin ser fatales:
+      la transacción de pacman termina.
+- [ ] `pacman -Sy` corre antes de la transacción de escritorio (sin 404 por
+      versiones antiguas).
+- [ ] Tras el login, `quickshell` dibuja la barra/paneles (`hyprctl layers`
+      muestra la capa `quickshell`) y `SUPER+Return` abre kitty.
+- [ ] El payload online de equisdots instala `core/sdk/PluginHost.qml`
+      (el snapshot offline no lo incluye, así que solo el modo online da un
+      shell funcional).
+- [ ] `hyprctl configerrors` está vacío tras el primer login
+      (`decoration.shadow.render_power` recortado a 4).
+- [ ] Con virtio-gpu: el wallpaper se ve, las ventanas no quedan cubiertas (el
+      overlay `Floating` está desactivado) y kitty arranca desde el lanzador.
+
 ## Entregables de VM
 
 - [ ] `build-vm.sh --export` produce `.qcow2`, `.raw` y `.sha256`.

@@ -22,16 +22,22 @@ which already supports aarch64 (`grub_target=arm64-efi`, `BOOTAA64.EFI`,
 Do **not** build as root inside the VM for the repo step: `makepkg` refuses it.
 Use the normal user; only `build-iso.sh` needs root.
 
+Alternatively, the [Docker builder](docker.md) runs the same pipeline inside an
+Arch Linux ARM container on any Docker host (natively on Apple Silicon), so the
+host does not need an ALARM VM.
+
 ## 2. Inputs
 
 ```bash
 scripts/fetch-x.sh            # vendor/x at vendor/x.sha
 scripts/fetch-archiso.sh      # vendor/archiso at vendor/archiso.sha
-scripts/apply-overlay.sh      # reset + overlay + installer patch + checks
+scripts/apply-overlay.sh      # reset + overlay + patches + checks
 ```
 
-`apply-overlay.sh` resets `vendor/x` to its pinned commit first, so the result is
-reproducible and stale files cannot leak in.
+`apply-overlay.sh` resets `vendor/x` and `vendor/archiso` to their pinned
+commits first, so the result is reproducible and stale files cannot leak in. It
+then applies the overlay, the installer and `mkarchiso` aarch64 patches, and
+runs the static checks.
 
 `vendor/x.sha` is the contract with x86_64: bump it deliberately when you want
 new upstream changes, then re-run the overlay and the checks.
@@ -87,12 +93,16 @@ See [VM images](vm.md) for UTM/Parallels/VMware import and the no-3D caveat.
 ## 6. Publish
 
 ```bash
+X_REPO_SIGN_KEY=... scripts/publish-repo.sh --push
 X_REPO_SIGN_KEY=... scripts/publish-arm.sh --verify
 ```
 
-Uploads to SourceForge (`/home/frs/project/equislinux/arm/iso`) and updates
-`web/data/releases-arm.json` (added with the first ARM release), which is
-separate from the x86_64 index.
+`publish-repo.sh` publishes `out/repo/aarch64` to the `equislinux/x-arm-repo`
+GitHub Pages repository, served at
+`https://equislinux.github.io/x-arm-repo/repo/aarch64`; `x-repo` keeps serving
+x86_64 only. `publish-arm.sh` uploads the ISO to SourceForge
+(`/home/frs/project/equislinux/arm/iso`) and updates
+`web/data/releases-arm.json`, which is separate from the x86_64 index.
 
 ## Troubleshooting
 

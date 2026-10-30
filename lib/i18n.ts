@@ -23,6 +23,7 @@ export interface UIStrings {
   downloads: {
     title: string;
     iso: string;
+    isoArm: string;
     wsl: string;
     isoDetail: string;
     wslDetail: string;
@@ -165,6 +166,7 @@ export const UI: Record<Lang, UIStrings> = {
     downloads: {
       title: 'Downloads',
       iso: 'Download ISO',
+      isoArm: 'Download ISO · aarch64',
       wsl: 'Download for WSL',
       isoDetail: 'Live ISO · x86_64',
       wslDetail: 'WSL rootfs',
@@ -358,6 +360,7 @@ export const UI: Record<Lang, UIStrings> = {
     downloads: {
       title: 'Descargas',
       iso: 'Descargar ISO',
+      isoArm: 'Descargar ISO · aarch64',
       wsl: 'Descargar para WSL',
       isoDetail: 'ISO en vivo · x86_64',
       wslDetail: 'rootfs para WSL',

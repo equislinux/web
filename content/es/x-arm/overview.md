@@ -25,14 +25,48 @@ Es la primera iteración funcional. Mapa de paridad honesto:
 | Lanzador QEMU `virt` y export de imágenes de VM | hecho |
 | Paridad del instalador (`x-installer`) | parche incluido, falta probar en hardware |
 | `xgen`/`xkernel` (`Image`, sin `pkgbase`) | **pendiente** (el instalador degrada con aviso) |
-| Escritorio (Hyprland/niri) en VM | funciona con render software, sin 3D |
+| Escritorio (Hyprland/niri) en VM | Hyprland + shell de equisdots verificado en UTM (quickshell 0.3.2 desde ALARM); niri sin probar |
 | CI | solo checks estáticos; la ISO necesita un host aarch64 |
 | Secure Boot, Raspberry Pi, Asahi, ARMv7 | fuera de alcance |
+
+### Arreglos de escritorio ARM (Hyprland)
+
+El script compartido `scripts/tools/hyprland-install.sh` (x-scripts) está
+orientado a x86_64. El overlay añade un wrapper solo para ARM
+(`airootfs/usr/local/bin/x-hyprland-arm`) que el instalador invoca en su lugar;
+los repositorios compartidos no se tocan:
+
+- `quickshell` y `swayosd` vienen en `extra` de ALARM, así que el wrapper los
+  instala como paquetes oficiales y nunca compila las versiones `-git` de AUR
+  (yay + `quickshell-git` agota la memoria en una VM de 4 GiB). Si ya existen
+  proveedores `quickshell-git`/`swayosd-git`, se detectan y respetan, así que
+  el par oficial nunca entra en conflicto.
+- La lista `OFFICIAL` se filtra contra las bases de datos de ALARM antes de la
+  transacción (`rofi-emoji` no está en ALARM y abortaba toda la instalación);
+  `pacman -Sy` corre primero porque la base de datos del live envejece y los
+  mirrors eliminan versiones antiguas (404 en poppler/kirigami-addons).
+- El `pacman.conf` del live y del destino activa `DisableDownloadTimeout`, y el
+  mirrorlist solo lista hosts resolubles (`de.mirror` primero, geo como
+  fallback; los subdominios `us.`/`ca.` ya no existen).
+- El SDK de plugins de equisdots (`core/sdk/PluginHost.qml`) solo lo entrega el
+  payload online de equisdots; el snapshot offline vendorizado no lo incluye,
+  así que el modo online es la vía funcional del escritorio.
+- Hyprland 0.57 limita `decoration.shadow.render_power` a 4 mientras que los
+  ajustes de equisdots traen 5 (cada sesión muestra un banner de error de
+  configuración): el wrapper lo recorta a 4.
+- En una GPU virtual (virtio-gpu/virgl, p. ej. UTM/QEMU) el wrapper además
+  desactiva el overlay `Floating` de equisdots (se dibuja opaco y cubre todo el
+  escritorio) e instala un shim `~/.local/bin/kitty` que exporta
+  `LIBGL_ALWAYS_SOFTWARE=1` (virgl solo expone GLES y kitty necesita GL de
+  escritorio). Ambos ajustes se limitan a `virtio_gpu`; el hardware real
+  conserva el stack original.
 
 ## Requisitos
 
 Host de compilación: **Arch Linux ARM aarch64**, root, ~15 GiB libres. En un
-MacBook eso significa una VM Arch Linux ARM en UTM (ver [Build](build.md)).
+MacBook eso significa una VM Arch Linux ARM en UTM (ver [Build](build.md)). El
+builder Docker ejecuta el mismo pipeline dentro de un contenedor Arch Linux ARM
+en cualquier host Docker (ver [Builder Docker](docker.md)).
 
 ```bash
 pacman -S --needed base-devel git grub squashfs-tools libisoburn libarchive \
@@ -79,6 +113,8 @@ overlay/                delta solo ARM
   packages/             overrides aarch64 de paquetes [x]
 scripts/                fetch, overlay, build, VM, publish
 vm/                     notas UTM/QEMU y helpers de bundle
+docker/                 rootfs ALARM fijado y contenedor de build
+prepare/                parches candidatos para repositorios upstream
 docs/                   docs de build es/en y criterios de aceptación
 ```
 
@@ -91,5 +127,7 @@ docs/                   docs de build es/en y criterios de aceptación
 - No se commitean ISOs, `.qcow2`, `.raw` ni bundles `.utm`; van a SourceForge.
 - El comportamiento x86_64 no cambia por construcción.
 
-Ver [Build](build.md) para el flujo completo, [VM](vm.md) para UTM/QEMU y
-[Aceptación](acceptance.md) para los criterios de salida de una release.
+Ver [Build](build.md) para el flujo completo, [Builder Docker](docker.md) para
+builds en contenedor, [VM](vm.md) para UTM/QEMU, [Aceptación](acceptance.md)
+para los criterios de salida de una release y [Parches candidatos](prepare.md)
+para los borradores dirigidos a repositorios upstream.

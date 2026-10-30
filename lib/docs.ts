@@ -34,7 +34,7 @@ const SECTIONS: SectionManifest[] = [
   {
     id: 'x-arm',
     title: { en: 'x-arm — aarch64', es: 'x-arm — aarch64' },
-    files: ['overview', 'build', 'vm', 'acceptance'],
+    files: ['overview', 'build', 'docker', 'vm', 'acceptance', 'prepare'],
   },
   {
     id: 'wsl',

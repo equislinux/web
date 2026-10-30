@@ -41,7 +41,7 @@ export default function PackageChannels({ lang }: { lang: Lang }) {
         {channels.map((channel) => (
           <article
             key={channel.key}
-            className="rounded-2xl border border-zinc-200 p-5 dark:border-zinc-800"
+            className="min-w-0 rounded-2xl border border-zinc-200 p-5 dark:border-zinc-800"
           >
             <div
               className="x-pkg-scene"

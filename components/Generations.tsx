@@ -81,7 +81,7 @@ export default function Generations({ lang }: { lang: Lang }) {
             </span>
           </div>
 
-          <div className="mt-3 grid grid-cols-5 gap-2">
+          <div className="mt-3 grid grid-cols-3 gap-2 min-[480px]:grid-cols-5">
             {items.map((item, index) => (
               <div
                 key={item.id}

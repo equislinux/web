@@ -3,6 +3,19 @@
   "arch": "aarch64",
   "releases": [
     {
+      "version": "2026.10.30",
+      "date": "2026-10-30",
+      "arch": "aarch64",
+      "iso": {
+        "name": "x-2026.10.30-aarch64.iso",
+        "url": "https://sourceforge.net/projects/equislinux/files/arm/iso/x-2026.10.30-aarch64.iso/download",
+        "size": 1799632896,
+        "sha256": "88d31ba2b9fd2c2e73a67922c592a442e0cd913a9016486d4594f4982ee74705",
+        "sig": "https://sourceforge.net/projects/equislinux/files/arm/iso/x-2026.10.30-aarch64.iso.sig/download",
+        "checksums": "https://sourceforge.net/projects/equislinux/files/arm/iso/SHA256SUMS/download"
+      }
+    },
+    {
       "version": "2026.10.29",
       "date": "2026-10-29",
       "arch": "aarch64",

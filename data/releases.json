@@ -8,7 +8,7 @@
         "name": "x-2026.11.07-x86_64.iso",
         "url": "https://sourceforge.net/projects/equislinux/files/iso/x-2026.11.07-x86_64.iso/download",
         "size": 2338193408,
-        "sha256": "622a263302f55881e28b51aa393a70478dc7f39c61af941662de719c2591fd9d",
+        "sha256": "4d70c809da900f8cde5255c2846fc0a2075904f47bfd3bbeaec2a6917b9d97f8",
         "sig": "https://sourceforge.net/projects/equislinux/files/iso/x-2026.11.07-x86_64.iso.sig/download",
         "checksums": "https://sourceforge.net/projects/equislinux/files/iso/SHA256SUMS/download"
       },

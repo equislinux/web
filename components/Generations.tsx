@@ -1,31 +1,15 @@
 'use client';
 
 import Link from 'next/link';
-import { useRef, type CSSProperties, type PointerEvent as ReactPointerEvent } from 'react';
+import { useState } from 'react';
+import GenerationStackStage from './three/GenerationStackStage';
 import { UI, type Lang } from '@/lib/i18n';
 
 export default function Generations({ lang }: { lang: Lang }) {
   const t = UI[lang];
-  const sceneRef = useRef<HTMLDivElement>(null);
   const items = t.generations.items;
-
-  const move = (event: ReactPointerEvent<HTMLDivElement>) => {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    const scene = sceneRef.current;
-    if (!scene) return;
-    const rect = scene.getBoundingClientRect();
-    const nx = (event.clientX - rect.left) / rect.width - 0.5;
-    const ny = (event.clientY - rect.top) / rect.height - 0.5;
-    scene.style.setProperty('--gen-fx', `${(nx * 8).toFixed(2)}deg`);
-    scene.style.setProperty('--gen-fy', `${(-ny * 5).toFixed(2)}deg`);
-  };
-
-  const reset = () => {
-    const scene = sceneRef.current;
-    if (!scene) return;
-    scene.style.setProperty('--gen-fx', '0deg');
-    scene.style.setProperty('--gen-fy', '0deg');
-  };
+  const [active, setActive] = useState<number | null>(null);
+  const currentIndex = items.length - 1;
 
   return (
     <section className="mx-auto max-w-6xl border-t border-zinc-200 px-6 py-16 dark:border-zinc-800">
@@ -52,52 +36,52 @@ export default function Generations({ lang }: { lang: Lang }) {
         </div>
 
         <div className="lg:col-span-7">
-          <div
-            ref={sceneRef}
-            className="x-gen-scene"
-            onPointerMove={move}
-            onPointerLeave={reset}
-            role="img"
-            aria-label={t.generations.title}
-          >
-            <div className="x-gen-stack">
-              {items.map((item, index) => (
-                <div
-                  key={item.id}
-                  className="x-gen-card"
-                  data-current={index === items.length - 1}
-                  style={{ '--i': index } as CSSProperties}
-                >
-                  <span className="x-gen-index">{item.id}</span>
-                  <span className="x-gen-line" />
-                </div>
-              ))}
-            </div>
-            <span className="x-gen-meta absolute left-4 top-4 z-10 font-mono text-[10px] uppercase tracking-[0.16em]">
-              generation stack
-            </span>
-            <span className="x-gen-meta absolute right-4 top-4 z-10 font-mono text-[10px] uppercase tracking-[0.16em]">
-              {String(items.length).padStart(2, '0')} / {String(items.length).padStart(2, '0')}
-            </span>
-          </div>
+          <GenerationStackStage
+            items={items}
+            active={active}
+            onActive={setActive}
+            kicker={t.generations.sceneKicker}
+            hint={t.generations.sceneHint}
+            ariaLabel={t.generations.title}
+            idleTitle={t.generations.title}
+            idleMeta={t.generations.eyebrow}
+            idleDesc={t.generations.subtitle}
+            currentLabel={t.generations.sceneCurrent}
+            rollbackLabel={t.generations.sceneRollback}
+            note={t.generations.sceneNote}
+            docsHref={`/${lang}/docs/scripts/generations`}
+            docsLabel={t.generations.cta}
+          />
 
-          <div className="mt-3 grid grid-cols-3 gap-2 min-[480px]:grid-cols-5">
+          <div
+            role="group"
+            aria-label={t.generations.title}
+            className="mt-3 grid grid-cols-3 gap-2 min-[480px]:grid-cols-5"
+          >
             {items.map((item, index) => (
-              <div
+              <button
                 key={item.id}
-                className={`border-t pt-2 ${
-                  index === items.length - 1
+                type="button"
+                aria-pressed={active === index}
+                data-active={active === index}
+                className={`border-t pt-2 text-left transition-colors ${
+                  index === currentIndex
                     ? 'border-cyan-500/70 dark:border-cyan-400/70'
                     : 'border-zinc-200 dark:border-zinc-800'
+                } ${
+                  active === index
+                    ? 'text-zinc-900 dark:text-zinc-50'
+                    : 'text-zinc-500 dark:text-zinc-500'
                 }`}
+                onClick={() => setActive(index)}
+                onFocus={() => setActive(index)}
+                onBlur={() => setActive(null)}
+                onMouseEnter={() => setActive(index)}
+                onMouseLeave={() => setActive(null)}
               >
-                <p className="font-mono text-[10px] tracking-[0.1em] text-zinc-900 dark:text-zinc-100">
-                  {item.id}
-                </p>
-                <p className="mt-0.5 text-[10px] leading-4 text-zinc-500 dark:text-zinc-500">
-                  {item.label}
-                </p>
-              </div>
+                <p className="font-mono text-[10px] tracking-[0.1em]">{item.id}</p>
+                <p className="mt-0.5 text-[10px] leading-4">{item.label}</p>
+              </button>
             ))}
           </div>
         </div>

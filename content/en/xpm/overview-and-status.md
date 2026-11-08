@@ -50,7 +50,7 @@ Each component lives in its own GitHub repository under `equislinux`:
   transaction engine; `sync`/`search` read the local and sync databases.
 - The endpoint at `https://equislinux.github.io/x-repo/x/$arch` (built by `x-repo`'s
   `scripts/build-xp.sh`, separate from the pacman endpoint under `/repo/x86_64`) was validated
-  with `xpm sync/search/deps/install` against the published URL.
+  with `xpm sync`, `xpm search`, `xpm deptest` and `xpm install` against the published URL.
 - The installer offers **pacman** (stable, production) or **xpm** (native, experimental) as the
   base-system backend; the production default remains pacman + the signed `[x]` repository, and
   the live image falls back to pacman when its `xpm` lacks the post-parity flags.

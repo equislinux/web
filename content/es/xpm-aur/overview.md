@@ -13,10 +13,11 @@ metadatos de AUR viven en un fichero de estado explícito.
 
 ## Estado
 
-Los flujos diarios comunes están implementados y probados. Es un **MVP**: los
-builds nativos en chroot limpio, la política de firmas/attestation de AUR y una
-caché binaria pública son trabajo futuro. Revisa los PKGBUILD de AUR antes de
-compilarlos; las recetas de AUR son bash ejecutable no confiable.
+Los flujos diarios comunes están implementados y probados. Es un **MVP**: la
+política de firmas/attestation de AUR, una caché binaria pública y más
+endurecimiento del sandbox de build son trabajo futuro; los builds en chroot
+limpio están disponibles con `--chroot`/`--no-chroot`. Revisa los PKGBUILD de
+AUR antes de compilarlos; las recetas de AUR son bash ejecutable no confiable.
 
 ## Qué hace
 
@@ -81,8 +82,11 @@ xpm-aur remove -n foo                # purga ficheros de configuración
 
 xpm-aur query
 xpm-aur query --quiet
+xpm-aur query --foreign              # paquetes extranjeros, de xpm-aur o no
+xpm-aur sync                         # refresca las DBs oficiales mediante xpm
 xpm-aur adopt                        # importa paquetes de AUR instalados por yay
-xpm-aur clean --all
+xpm-aur getpkgbuild --print yay      # clona/actualiza PKGBUILD para inspección
+xpm-aur clean --all --keep-days 30   # conserva los últimos 30 días de caché
 ```
 
 También acepta formas de compatibilidad:
@@ -96,6 +100,42 @@ xpm-aur -Rns foo
 xpm-aur -Qm
 xpm-aur -Sc
 ```
+
+## Comandos
+
+| Comando | Qué hace |
+|---------|----------|
+| `xpm-aur sync` | Refresca las bases de datos oficiales mediante `xpm sync`. |
+| `xpm-aur search <query> [--by name-desc\|name\|provides]` | Busca en el AUR. |
+| `xpm-aur info <packages>...` | Muestra información (oficial + AUR salvo restricción). |
+| `xpm-aur install <packages>...` | Resuelve, compila e instala paquetes de AUR y sus dependencias. |
+| `xpm-aur upgrade` | Actualiza oficiales con xpm y AUR con xpm-aur. |
+| `xpm-aur remove <packages>... [-s] [-n]` | Elimina mediante xpm (recursivo / purga config). |
+| `xpm-aur query [--quiet] [--foreign]` | Lista paquetes de AUR rastreados o todos los extranjeros. |
+| `xpm-aur adopt` | Importa paquetes de AUR instalados por yay u otro helper. |
+| `xpm-aur getpkgbuild <packages>... [-p]` | Clona/actualiza PKGBUILD de AUR (`-p` imprime en vez de escribir). |
+| `xpm-aur clean [--all] [--keep-days N]` | Elimina árboles de build y artefactos cacheados. |
+
+### Flags globales
+
+| Flag | Descripción |
+|------|-------------|
+| `-v`, `--verbose` | Aumenta la verbosidad (`-v`, `-vv`). |
+| `--noconfirm` (alias `--no-confirm`) | No pide confirmación. |
+| `--needed` | Pasa `--needed` a xpm para paquetes oficiales. |
+| `--asdeps` | Marca los paquetes pedidos como dependencias. |
+| `--rebuild` | Reconstruye paquetes de AUR aunque la versión no cambie. |
+| `--aur` / `--repo` | Restringe la resolución a candidatos de AUR u oficiales. |
+| `--devel` | Comprueba `HEAD` de paquetes VCS durante el upgrade. |
+| `--print` | Imprime el plan y sale antes de compilar/instalar. |
+| `--remove-conflicts` | Elimina automáticamente paquetes en conflicto o reemplazados. |
+| `--nocheck` | Omite los checks del paquete fuente (`makepkg --nocheck`). |
+| `--no-chroot` | Desactiva el build en chroot limpio. |
+| `-j`, `--jobs N` | Máximo de package bases de AUR en paralelo (`0` = auto). |
+| `--config PATH` | Archivo de configuración. |
+| `--build-dir PATH` | Sobrescribe el directorio de build. |
+| `--cache-dir PATH` | Sobrescribe la raíz de caché (build, paquetes y fuentes). |
+| `--state PATH` | Sobrescribe el fichero de estado. |
 
 ## Cómo corre una transacción
 

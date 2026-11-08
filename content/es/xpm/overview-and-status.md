@@ -56,7 +56,7 @@ está vivo:
   transacciones; `sync`/`search` leen las bases local y de sync.
 - El endpoint en `https://equislinux.github.io/x-repo/x/$arch` (construido por
   `scripts/build-xp.sh` de `x-repo`, separado del endpoint pacman en
-  `/repo/x86_64`) se validó con `xpm sync/search/deps/install` contra la URL
+  `/repo/x86_64`) se validó con `xpm sync`, `xpm search`, `xpm deptest` y `xpm install` contra la URL
   publicada.
 - El instalador ofrece **pacman** (estable, producción) o **xpm** (nativo,
   experimental) como backend del sistema base; el default de producción sigue

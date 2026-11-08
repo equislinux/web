@@ -14,8 +14,9 @@ explicit sidecar state file.
 ## Status
 
 The common daily workflows are implemented and tested. This is an **MVP**:
-native clean-chroot builds, AUR signature/attestation policy and a public binary
-cache are future work. Review AUR PKGBUILDs before building them; AUR recipes
+AUR signature/attestation policy, a public binary cache and further hardening of
+the build sandbox are future work; clean chroot builds are available through
+`--chroot`/`--no-chroot`. Review AUR PKGBUILDs before building them; AUR recipes
 are untrusted executable bash.
 
 ## What it does
@@ -80,8 +81,11 @@ xpm-aur remove -n foo                # purge config files
 
 xpm-aur query
 xpm-aur query --quiet
+xpm-aur query --foreign              # foreign packages, xpm-aur or not
+xpm-aur sync                         # refresh official DBs through xpm
 xpm-aur adopt                        # import yay-installed AUR packages
-xpm-aur clean --all
+xpm-aur getpkgbuild --print yay      # clone/update PKGBUILDs for inspection
+xpm-aur clean --all --keep-days 30   # keep the last 30 days of cache
 ```
 
 Compatibility forms are accepted as well:
@@ -95,6 +99,42 @@ xpm-aur -Rns foo
 xpm-aur -Qm
 xpm-aur -Sc
 ```
+
+## Commands
+
+| Command | What it does |
+|---------|--------------|
+| `xpm-aur sync` | Refresh the official sync databases through `xpm sync`. |
+| `xpm-aur search <query> [--by name-desc\|name\|provides]` | Search the AUR. |
+| `xpm-aur info <packages>...` | Show package information (official + AUR unless restricted). |
+| `xpm-aur install <packages>...` | Resolve, build and install AUR packages and their dependencies. |
+| `xpm-aur upgrade` | Upgrade official packages with xpm and AUR packages with xpm-aur. |
+| `xpm-aur remove <packages>... [-s] [-n]` | Remove packages through xpm (recursive / purge config). |
+| `xpm-aur query [--quiet] [--foreign]` | List tracked AUR packages or all foreign packages. |
+| `xpm-aur adopt` | Import AUR packages installed by yay or another helper. |
+| `xpm-aur getpkgbuild <packages>... [-p]` | Clone/update AUR PKGBUILDs (`-p` prints instead of writing). |
+| `xpm-aur clean [--all] [--keep-days N]` | Remove cached build trees and artifacts. |
+
+### Global flags
+
+| Flag | Description |
+|------|-------------|
+| `-v`, `--verbose` | Increase verbosity (`-v`, `-vv`). |
+| `--noconfirm` (alias `--no-confirm`) | Do not ask for confirmation. |
+| `--needed` | Pass `--needed` to xpm for official packages. |
+| `--asdeps` | Mark requested packages as dependencies. |
+| `--rebuild` | Rebuild AUR packages even when the version is unchanged. |
+| `--aur` / `--repo` | Restrict resolution to AUR or official candidates. |
+| `--devel` | Check VCS package `HEAD`s during upgrade. |
+| `--print` | Print the transaction plan and exit before building/installing. |
+| `--remove-conflicts` | Remove conflicting or replaced packages automatically. |
+| `--nocheck` | Skip source package checks (`makepkg --nocheck`). |
+| `--no-chroot` | Disable the clean chroot build. |
+| `-j`, `--jobs N` | Maximum AUR package bases to build concurrently (`0` = auto). |
+| `--config PATH` | Configuration file. |
+| `--build-dir PATH` | Override the build directory. |
+| `--cache-dir PATH` | Override the cache root (build, packages and sources). |
+| `--state PATH` | Override the sidecar state file. |
 
 ## How a transaction runs
 

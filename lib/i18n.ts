@@ -130,6 +130,11 @@ export interface UIStrings {
     subtitle: string;
     body: string;
     cta: string;
+    sceneKicker: string;
+    sceneHint: string;
+    sceneCurrent: string;
+    sceneRollback: string;
+    sceneNote: string;
     items: { id: string; label: string }[];
   };
   install: {
@@ -404,6 +409,12 @@ export const UI: Record<Lang, UIStrings> = {
       body:
         'x gen records packages, services, the kernel and /etc as a generation. Boot it, diff it, pin it or restore a single path.',
       cta: 'Read the generations',
+      sceneKicker: 'X / GENERATIONS',
+      sceneHint: 'Drag to orbit · select a generation',
+      sceneCurrent: 'Current generation',
+      sceneRollback: 'Rollback target',
+      sceneNote:
+        'Newer generations stay in /.snapshots; boot or restore with x gen.',
       items: [
         { id: '0001', label: 'first install' },
         { id: '0002', label: 'pre-update' },
@@ -692,6 +703,12 @@ export const UI: Record<Lang, UIStrings> = {
       body:
         'x gen registra paquetes, servicios, kernel y /etc como una generación. Arráncala, compara, fíjala o restaura una sola ruta.',
       cta: 'Leer las generaciones',
+      sceneKicker: 'X / GENERACIONES',
+      sceneHint: 'Arrastra para orbitar · elige una generación',
+      sceneCurrent: 'Generación actual',
+      sceneRollback: 'Destino de rollback',
+      sceneNote:
+        'Las generaciones más nuevas se quedan en /.snapshots; arranca o restaura con x gen.',
       items: [
         { id: '0001', label: 'primera instalación' },
         { id: '0002', label: 'pre-update' },

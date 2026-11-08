@@ -17,7 +17,7 @@ estables.
   dependencias funcionan sobre el mismo motor de transacciones.
 - El endpoint nativo (`https://equislinux.github.io/x-repo/x/$arch`, separado
   del endpoint pacman en `/repo/x86_64`) está publicado y validado con
-  `xpm sync/search/deps/install`.
+  `xpm sync`, `xpm search`, `xpm deptest` y `xpm install`.
 - El sistema se sigue aprovisionando con **pacman + el repositorio firmado
   `[x]`**: `xpm` coexiste como canal nativo, no sustituye la vía de producción.
 

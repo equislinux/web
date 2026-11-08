@@ -1388,3 +1388,64 @@ body {
 .x-orbit-link:hover {
   text-decoration-color: var(--x-text);
 }
+
+/* --- Interactive desktop layer stack ------------------------------- */
+
+.x-orbit[data-variant="layers"] {
+  min-height: 560px;
+}
+
+.x-orbit[data-variant="layers"] .x-orbit-info {
+  top: 2.3rem;
+  bottom: auto;
+  max-width: 22rem;
+}
+
+.x-layer-static-fallback {
+  position: absolute;
+  inset: 0;
+  min-height: 0;
+  overflow: hidden;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.x-layer-static-fallback::before {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  .x-orbit[data-variant="layers"] {
+    min-height: 420px;
+  }
+}
+
+/* --- Interactive generation timeline -------------------------------- */
+
+.x-orbit[data-variant="generations"] {
+  min-height: 560px;
+}
+
+.x-orbit[data-variant="generations"] .x-orbit-info {
+  top: 2.3rem;
+  bottom: auto;
+  max-width: 23rem;
+}
+
+.x-gen-static-fallback {
+  position: absolute;
+  inset: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.x-gen-static-fallback::before {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  .x-orbit[data-variant="generations"] {
+    min-height: 430px;
+  }
+}

@@ -24,7 +24,7 @@ This is the first working iteration. Honest parity map:
 | `[x]` aarch64 repo (x-release, x-wallpapers, x-dev, xfetch, xtop) | done |
 | QEMU `virt` launcher and VM image export | done |
 | Installer parity (`x-installer`) | patch included, needs hardware test |
-| `xgen`/`xkernel` (`Image`, no `pkgbase`) | **not yet** (installer degrades gracefully) |
+| `xgen`/`xkernel` (`Image`, no `pkgbase`) | delta implemented in `scripts-arm` (`x-scripts-arm`); VM/hardware validation pending |
 | Desktop (Hyprland/niri) inside a VM | Hyprland + equisdots shell verified in UTM (quickshell 0.3.2 from ALARM); niri untested |
 | CI | static checks only; the ISO build needs an aarch64 host |
 | Secure Boot, Raspberry Pi, Asahi, ARMv7 | out of scope |

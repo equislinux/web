@@ -129,6 +129,9 @@ están.
      GRUB y `cryptsetup` para LUKS. `btrfs-progs` lo requiere el motor de
      generaciones; las herramientas de X (`xfetch`, `xtop`), `x-wallpapers` y
      `zsh` se instalan en todos los perfiles.
+   - El instalador también ofrece un backend para el sistema base: `pacman`
+     (estable, producción) o `xpm` (nativo, experimental). La imagen en vivo
+     recurre a pacman cuando su `xpm` no tiene los flags post-paridad.
    - Perfil `full`: añade todos los paquetes del manifiesto apuntado por
      `X_PKGLIST` (por defecto `/root/x-installer/packages.x86_64`).
    - Perfil `core`: añade solo `vim`.

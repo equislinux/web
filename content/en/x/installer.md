@@ -123,6 +123,9 @@ are required; the remaining keys have sensible defaults when absent.
      LUKS. `btrfs-progs` is required by the generations engine; the X tools
      (`xfetch`, `xtop`), `x-wallpapers` and `zsh` are installed in every
      profile.
+   - The installer also offers a base-system backend: `pacman` (stable,
+     production) or `xpm` (native, experimental). The live image falls back to
+     pacman when its `xpm` lacks the post-parity flags.
    - `full` profile: adds every package in the manifest pointed to by
      `X_PKGLIST` (default `/root/x-installer/packages.x86_64`).
    - `core` profile: adds only `vim`.

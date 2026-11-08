@@ -11,9 +11,11 @@ copia publicada. El repositorio privado `ops` queda excluido a propósito.
 ## Landing
 
 La landing (`/en`, `/es`) reúne las descargas (ISO y rootfs de WSL), una galería
-de capturas, la parrilla "Por qué X" y una guía de instalación en cuatro pasos —
-todo con el mismo sistema de diseño monocromo que los docs. Las capturas viven
-solo en `public/showcase/`.
+de capturas, un mapa interactivo del sistema en Three.js, la parrilla "Por qué
+X", las tres vías de empaquetado (pacman `[x]`, `xpm` nativo y el helper
+`xpm-aur`) y una guía de instalación en cuatro pasos — todo con el mismo sistema
+de diseño monocromo que los docs. Las capturas viven solo en
+`public/showcase/`.
 
 ## Stack
 
@@ -22,6 +24,9 @@ solo en `public/showcase/`.
   grises en el tema claro, blancos y grises en el oscuro.
 - **Geist** Sans y Mono, con conmutador claro/oscuro.
 - **react-markdown** + **remark-gfm** para renderizar el markdown de `content/`.
+- **Three.js** + React Three Fiber/Drei para los grafos interactivos de sistema
+  y paquetes (solo cliente, con fallback estático en DOM y ruta de movimiento
+  reducido).
 
 ## Añadir o actualizar una página
 

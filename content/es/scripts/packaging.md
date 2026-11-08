@@ -24,7 +24,7 @@ workspace, Fase 4.)
   snapshot se vende en el repo y nunca se descarga en el build.
 
 Metadatos de versión: `pkgver=0.1.0`, `pkgrel` se sube por iteración
-(actualmente 42 en el PKGBUILD). Puede quedar un artefacto de build antiguo
+(actualmente 47 en el PKGBUILD). Puede quedar un artefacto de build antiguo
 (`*.pkg.tar.zst`) en el directorio, pero es stale y está git-ignored; al
 reconstruir se produce el pkgrel actual.
 

@@ -26,7 +26,9 @@ puro para la distribución X. Está diseñado como reemplazo nativo en Rust de
 
 El proyecto pertenece a la organización `equislinux`. Los paquetes los
 construye la herramienta compañera `xpkg` (repo `equislinux/xpkg`); `xpm`
-consume lo que `xpkg` produce.
+consume lo que `xpkg` produce. El helper de AUR `xpm-aur` (repo
+`equislinux/xpm-aur`) resuelve y compila paquetes de AUR, y luego entrega cada
+instalación, borrado y upgrade a `xpm`.
 
 ## Dónde se sitúa xpm
 
@@ -38,6 +40,7 @@ Cada componente vive en su propio repositorio de GitHub bajo `equislinux`:
 | `scripts` | `equislinux/scripts`  | Payload de aprovisionamiento del sistema y CLI `x` |
 | `xpkg`    | `equislinux/xpkg`     | Herramienta de empaquetado Rust (builder) |
 | `xpm`     | `equislinux/xpm`      | Gestor de paquetes Rust (este repo) |
+| `xpm-aur` | `equislinux/xpm-aur`  | Helper de AUR en Rust; cada transacción pasa por xpm |
 | `x-repo`  | `equislinux/x-repo`   | Repositorios de paquetes (pacman `[x]` y `.xp` nativo) y portales |
 
 ## Estado actual
@@ -55,9 +58,10 @@ está vivo:
   `scripts/build-xp.sh` de `x-repo`, separado del endpoint pacman en
   `/repo/x86_64`) se validó con `xpm sync/search/deps/install` contra la URL
   publicada.
-- El sistema se sigue aprovisionando con **pacman + el repositorio firmado
-  `[x]`** — `xpm` coexiste como canal nativo en lugar de sustituir el flujo de
-  producción.
+- El instalador ofrece **pacman** (estable, producción) o **xpm** (nativo,
+  experimental) como backend del sistema base; el default de producción sigue
+  siendo pacman + el repositorio firmado `[x]`, y la imagen en vivo recurre a
+  pacman cuando su `xpm` no tiene los flags post-paridad.
 
 Problemas abiertos conocidos (seguimiento en este repo):
 

@@ -75,6 +75,30 @@ export const REPOS: RepoInfo[] = [
     },
   },
   {
+    name: 'equislinux/xpm-aur',
+    href: `${GITHUB_ORG}/xpm-aur`,
+    description: {
+      en: 'Rust AUR helper: resolves, builds with makepkg and installs through xpm.',
+      es: 'Helper de AUR en Rust: resuelve, compila con makepkg e instala mediante xpm.',
+    },
+  },
+  {
+    name: 'equislinux/scripts-arm',
+    href: `${GITHUB_ORG}/scripts-arm`,
+    description: {
+      en: 'aarch64 delta for the generations engine; builds x-scripts-arm.',
+      es: 'Delta aarch64 para el motor de generaciones; construye x-scripts-arm.',
+    },
+  },
+  {
+    name: 'equislinux/x-arm-repo',
+    href: `${GITHUB_ORG}/x-arm-repo`,
+    description: {
+      en: 'aarch64 [x] repository: ALPM database and signed artifacts.',
+      es: 'Repositorio [x] aarch64: base de datos ALPM y artefactos firmados.',
+    },
+  },
+  {
     name: 'equislinux/x-repo',
     href: `${GITHUB_ORG}/x-repo`,
     description: {

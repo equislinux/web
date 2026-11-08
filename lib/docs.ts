@@ -57,6 +57,11 @@ const SECTIONS: SectionManifest[] = [
     files: ['overview-and-status', 'usage', 'architecture', 'future-integration'],
   },
   {
+    id: 'xpm-aur',
+    title: { en: 'xpm-aur — AUR helper', es: 'xpm-aur — helper de AUR' },
+    files: ['overview'],
+  },
+  {
     id: 'xpkg',
     title: { en: 'xpkg — package builder', es: 'xpkg — builder de paquetes' },
     files: ['01-overview-and-status', '02-usage', '03-architecture', '04-future-integration'],

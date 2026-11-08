@@ -124,6 +124,11 @@ Implemented: profile, package set, `[x]` repo, ISO build, VM images, publishing,
 installer patch (UEFI layout, `arm64-efi`, `BOOTAA64`, `Image`, ALARM keyring,
 ALARM repos).
 
-Pending: `xgen`/`xkernel` support for `Image` and the missing `pkgbase` file;
-a fully unattended VM install; UTM `.utm` bundle generation; hardware tests on
-real aarch64 machines. None of these block booting and installing.
+Pending: validating the `x-scripts-arm` delta (`equislinux/scripts-arm`, which
+patches `Image`/`Image.gz` and the missing `pkgbase` into the generations
+engine) on a full unattended VM install; UTM `.utm` bundle generation; hardware
+tests on real aarch64 machines. None of these block booting and installing.
+
+The delta is built with `scripts-arm/build.sh` and produces `x-scripts-arm`,
+which `provides`/`conflicts`/`replaces` `x-scripts` on aarch64. It is not yet
+published in `[x]/aarch64`; install the built package with `pacman -U`.

@@ -4,6 +4,7 @@ import Footer from './Footer';
 import Hero from './Hero';
 import Downloads from './Downloads';
 import Showcase from './Showcase';
+import SystemMap from './SystemMap';
 import AsciiBand from './AsciiBand';
 import Foundation from './Foundation';
 import DesktopLayers from './DesktopLayers';
@@ -27,6 +28,7 @@ export default function Landing({ lang }: { lang: Lang }) {
         <Showcase lang={lang} />
         <AsciiBand lang={lang} />
         <Foundation lang={lang} />
+        <SystemMap lang={lang} />
         <DesktopLayers lang={lang} />
         <Generations lang={lang} />
         <Features lang={lang} />

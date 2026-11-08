@@ -29,10 +29,11 @@ the installed system, so X branding and tooling packages (`x-release`,
 
 The distribution is under active development. Signed ISOs are published on
 SourceForge; the stable portal link
-<https://equislinux.org/download/latest/> only redirects there. Both
-package channels — the pacman `[x]` repository and the native `.xp` endpoint —
-are live. The text installer offers Hyprland, niri, KDE Plasma or a console-only
-system. See `ROADMAP.md` and `docs/project-state.md`.
+<https://equislinux.org/download/latest/> only redirects there. The package
+channels — the pacman `[x]` repository, the native `.xp` endpoint and the AUR
+helper `xpm-aur` — are live. The text installer offers Hyprland, niri, KDE
+Plasma or a console-only system, with pacman (stable) or xpm (experimental) as
+the base-system backend. See `ROADMAP.md` and `docs/project-state.md`.
 
 ## How this repository maps to the organization
 
@@ -47,10 +48,11 @@ distro) or to an `x` scripts repo must be read with this mapping in mind:
 | `equislinux/scripts` | Provisioning payload and the `x` CLI (`x setup`, `x theme`, ...). Packaged as `x-scripts` and installed by the text installer. |
 | `equislinux/x-repo` | X binary package repository (hosted on GitHub Pages, `[x]` in `pacman.conf`) plus the package portal and ISO publishing. |
 | `equislinux/xpm` | X package manager (Rust). |
+| `equislinux/xpm-aur` | AUR helper (Rust); builds with makepkg and installs through xpm. |
 | `equislinux/xpkg` | X packaging tool for developers (Rust). |
 | `equislinux/wsl` / `equislinux/wsl-scripts` | WSL rootfs (published release `v0.1.0`) and its first-run setup. |
 | `equislinux/utils` | Operator utilities: workspace discovery, clone, sudo rules and signing keys. |
-| `equislinux/wiki` / `equislinux/web` | Documentation mirror (en/es) and the documentation portal. |
+| `equislinux/wiki` / `equislinux/web` | Documentation sources (en/es) and the documentation portal. |
 | `equisdots/*` | Org that owns the desktop stacks (Hyprland Lua config, niri config, Quickshell shell, palettes, engines, SDDM login) consumed read-only by the desktop setup tools in `scripts`. Official installers: `equisdots/dots` (Hyprland) and `equisdots/niri-meta` (niri). |
 
 Related documentation in this repository:

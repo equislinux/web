@@ -12,14 +12,16 @@ branding propios.
 | `equislinux/x` | La distro: perfil archiso, builds ISO/WSL y flujo de instalación. |
 | `equislinux/scripts` | **Este repo**: fases de aprovisionamiento, setup de usuario, CLI `x`, migraciones y temas, empaquetado como `x-scripts`. |
 | `equislinux/xpkg` / `equislinux/xpm` | Tooling Rust de empaquetado/gestión de paquetes. |
+| `equislinux/xpm-aur` | Helper de AUR; compila con makepkg e instala mediante xpm. |
 | `equislinux/x-repo` | Repo de paquetes + portal. |
 
 La distro (`x`) consume este repo empaquetado como el paquete `x-scripts`. El
 instalador de texto ejecuta ambas fases durante la instalación: las fases root
 (`x setup`) aprovisionan el sistema y la fase de usuario (`x setup --user`)
 siembra el home del usuario nuevo antes de desplegar el escritorio elegido. El
-tooling Rust (`xpkg`/`xpm`) construye y consume el endpoint nativo `.xp`; el
-sistema se aprovisiona con pacman + `[x]`.
+tooling Rust (`xpkg`/`xpm`) construye y consume el endpoint nativo `.xp`;
+`xpm-aur` añade la vía AUR sobre xpm. El sistema usa pacman + `[x]` por
+defecto, con xpm disponible como backend experimental del instalador.
 
 ## Qué aporta este repo
 
@@ -75,9 +77,9 @@ paquete `x-kde-settings` de `[x]`. Ver `hyprland.md`, `niri.md` y ADR-0005.
 
 ## Rama y estado
 
-Los entregables de este repo se trackean en **`main`**. La fuente del payload
-es `x-scripts` 0.1.0-42, incluida en el ISO 2026.10.27; el repositorio público
-`[x]` sirve actualmente 0.1.0-39. El paquete también incluye la herramienta no
+Los entregables de este repo se trackean en **`main`**. El payload se publica
+como `x-scripts` 0.1.0-47, va incluido en el ISO 2026.11.04 y el repositorio
+público `[x]` sirve la misma 0.1.0-47. El paquete también incluye la herramienta no
 interactiva `niri-install.sh` que usa el instalador de texto. Restos de
 auditoría pendientes: `x-base.packages` sin consumidor, pulido de CLI y más
 cobertura de los helpers/fases.

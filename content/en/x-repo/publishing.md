@@ -57,13 +57,13 @@ From the repository root run:
 
 The script:
 
-1. Rebuilds the configured PKGBUILD packages (`x-release`, `x-wallpapers`,
-   `x-dev`, `x-kde-settings`, `opencode-bin`, `xfetch`, `xtop`) with `makepkg`
-   unless `--index-only` is given.
+1. Rebuilds the configured PKGBUILD packages (`xpm`, `xpm-aur`, `x-release`,
+   `x-wallpapers`, `x-dev`, `x-kde-settings`, `opencode-bin`, `xfetch`, `xtop`)
+   with `makepkg` unless `--index-only` is given.
 2. Imports `../scripts/packaging/x-scripts-*.pkg.tar.zst` when present and copies the
    freshly built packages into `public/repo/x86_64/`, deleting only those build
-   artifacts. The committed leftovers under `packages/xpm`,
-   `packages/xpkg`, `packages/xfetch` and `packages/xtop` are not touched.
+   artifacts. The committed leftovers under `packages/xpkg`,
+   `packages/xfetch` and `packages/xtop` are not touched.
 3. Rebuilds the pacman database from scratch from every tarball in the directory
    (this also drops entries for packages that no longer exist):
 

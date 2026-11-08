@@ -11,6 +11,7 @@ const CROSS_SECTIONS = new Set([
   'wsl-scripts',
   'scripts',
   'xpm',
+  'xpm-aur',
   'xpkg',
   'x-repo',
   'utils',

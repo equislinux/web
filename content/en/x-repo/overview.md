@@ -27,12 +27,13 @@ Each repository has a single, clear role:
 | `equislinux/scripts` | Provisioning payload and user setup. Ships the `x` CLI and builds the `x-scripts` package. |
 | `equislinux/xpkg` | Rust package builder. Produces native `.xp` packages from `XBUILD` files. |
 | `equislinux/xpm` | Rust package manager, the native counterpart of pacman. |
+| `equislinux/xpm-aur` | Rust AUR helper: builds with makepkg and installs through xpm. |
 | `equislinux/x-repo` | **Binary package repository + web portal** (this repository). |
 | `equislinux/wsl` / `equislinux/wsl-scripts` | WSL rootfs and its first-run setup. |
 | `equislinux/utils` | Operator utilities: workspace, clone, sudo rules and signing keys. |
-| `equislinux/wiki` / `equislinux/web` | Documentation mirror and the public portal (equislinux.org). |
+| `equislinux/wiki` / `equislinux/web` | Documentation sources and the public portal (equislinux.org). |
 
-Two packaging paths coexist and are both live:
+Three entry points coexist and are all live:
 
 - **PKGBUILD + makepkg** — Arch-compatible packages (`.pkg.tar.zst`) consumable
   by pacman. This path populates the `[x]` pacman repository under
@@ -40,6 +41,9 @@ Two packaging paths coexist and are both live:
 - **XBUILD + xpkg** — native packages (`.xp`) consumable by `xpm`. `scripts/build-xp.sh`
   builds and signs the set, then regenerates the native endpoint under
   `public/x/x86_64/` (database, `history.json`, `SHA256SUMS`).
+- **AUR + xpm-aur** — source packages from the AUR are resolved and built with
+  makepkg, then installed, upgraded or removed through `xpm`; they do not use a
+  separate package database.
 
 The distro still installs from the pacman `[x]` channel; the native `.xp`
 endpoint is the xpm-facing channel and is regenerated alongside it on release.

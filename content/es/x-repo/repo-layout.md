@@ -47,6 +47,12 @@ El README señala que mientras `PKGBUILD` se mantiene para el tooling legacy de 
   `/usr/bin/x-dev-env` y helpers bajo `/usr/share/x-dev/` (aliases de shell, scripts
   de setup de NVIDIA/QEMU/Node). Depende de `zsh git base-devel curl wget`.
   `install=x-dev.install` ejecuta la lógica post-instalación.
+- **`xpm`** — el gestor de paquetes nativo en Rust (PKGBUILD `0.1.0-26`). Posee
+  las transacciones `.xp` y ALPM y lee el repositorio firmado `[x]`.
+- **`xpm-aur`** — el helper de AUR en Rust (PKGBUILD `0.1.3-8`). Resuelve y
+  compila paquetes de AUR y encamina instalaciones, borrados y upgrades por `xpm`.
+- **`xfetch-bin`** — herramienta de información del sistema `xfetch` precompilada
+  (`1.0.2-1`); `xtop` se publica como `xtop-git` (`r35.cb17bb7-1`).
 - **`opencode-bin`** — binario oficial precompilado del CLI opencode
   (`anomalyco/opencode`, `1.18.34`), redistribuido para que `agents=yes` y los
   usuarios de `x agent` tengan agente sin recurrir a AUR.
@@ -64,12 +70,12 @@ Los artefactos del repo pacman `[x]` se construyen con `build-packages.sh`
 hermano `equislinux/scripts` bajo `scripts/packaging/` y empaqueta todo el payload de
 aprovisionamiento (fases, CLI `x`, configs). El tarball resultante se construye allí y
 se **importa** a este repo, commiteado bajo `public/repo/x86_64/` (actualmente
-`x-scripts-0.1.0-39-any.pkg.tar.zst`).
+`x-scripts-0.1.0-47-any.pkg.tar.zst`).
 
 - No existe un directorio de fuente `packages/x-scripts/` aquí.
-- El último artefacto publicado es `0.1.0-39`; la fuente en `scripts/packaging/`
-  está en `0.1.0-42`, incluida en el ISO 2026.10.27. `build-packages.sh` importa
-  el build hermano; vuelve a ejecutarlo al publicar 42 en `[x]`.
+- El artefacto publicado y el `PKGBUILD` de `scripts/packaging/` están alineados
+  en `0.1.0-47`, el payload incluido en el ISO 2026.11.04. `build-packages.sh`
+  importa el build hermano automáticamente; vuelve a ejecutarlo al republicar.
 
 ### Solo recetas
 
@@ -85,7 +91,7 @@ Este directorio es el repositorio orientado a pacman. Archivos presentes:
 |---|---|
 | `x.db`, `x.db.tar.gz` | Base de datos de paquetes (`x.db` es la copia sin comprimir de `x.db.tar.gz`). |
 | `x.files`, `x.files.tar.gz` | Base de datos de listas de archivos para `pacman -F`. |
-| `*.pkg.tar.zst` | Los paquetes: `x-release-1.0-9`, `x-wallpapers-1.0-1`, `x-dev-1.0-2`, `x-scripts-0.1.0-39`, `x-kde-settings-1.0-1`, `xpm-0.1.0-3`, `xfetch-bin-1.0.0-1`, `xtop-git-r35.cb17bb7-1`, `opencode-bin-1.18.34-1`. |
+| `*.pkg.tar.zst` | Los paquetes: `x-release-1.0-9`, `x-wallpapers-1.0-1`, `x-dev-1.0-2`, `x-scripts-0.1.0-47`, `x-kde-settings-1.0-1`, `xpm-0.1.0-26`, `xpm-aur-0.1.3-8`, `xfetch-bin-1.0.2-1`, `xtop-git-r35.cb17bb7-1`, `opencode-bin-1.18.34-1`. |
 | `SHA256SUMS` | Checksums de todos los archivos del directorio. |
 | `signing.pub`, `trustedkeys.gpg` | Material de firma/confianza consumido por el endpoint nativo. |
 
@@ -136,9 +142,9 @@ repositorio documentada para `xpm` es `https://equislinux.github.io/x-repo/x/$ar
 Script local (se ejecuta desde la raíz del repo; requiere un entorno tipo Arch con
 `makepkg` y `repo-add`). El script:
 
-1. Construye en su sitio los paquetes PKGBUILD configurados (`x-release`,
-   `x-wallpapers`, `x-dev`, `x-kde-settings`, `opencode-bin`, `xfetch`, `xtop`)
-   con `makepkg -cf --noconfirm`. El helper `build_xbuild` para la vía nativa
+1. Construye en su sitio los paquetes PKGBUILD configurados (`xpm`, `xpm-aur`,
+   `x-release`, `x-wallpapers`, `x-dev`, `x-kde-settings`, `opencode-bin`,
+   `xfetch`, `xtop`) con `makepkg -cf --noconfirm`. El helper `build_xbuild` para la vía nativa
    existe pero está comentado.
 2. Importa `../scripts/packaging/x-scripts-*.pkg.tar.zst` cuando existe, copia los
    paquetes recién construidos a `public/repo/x86_64/` y

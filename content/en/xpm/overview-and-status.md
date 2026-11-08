@@ -23,7 +23,9 @@ It is designed as a native Rust replacement for `pacman` and `libalpm`:
   `/etc/xpm.d/`.
 
 The project belongs to the `equislinux` organization. Packages are built by the companion builder
-tool `xpkg` (repo `equislinux/xpkg`); `xpm` consumes what `xpkg` produces.
+tool `xpkg` (repo `equislinux/xpkg`); `xpm` consumes what `xpkg` produces. The companion AUR
+helper `xpm-aur` (repo `equislinux/xpm-aur`) resolves and builds AUR packages, then hands every
+install, removal and upgrade to `xpm`.
 
 ## Where xpm sits
 
@@ -35,6 +37,7 @@ Each component lives in its own GitHub repository under `equislinux`:
 | `scripts` | `equislinux/scripts`  | System provisioning payload and the `x` CLI |
 | `xpkg`    | `equislinux/xpkg`     | Rust packaging tool (builder) |
 | `xpm`     | `equislinux/xpm`      | Rust package manager (this repo) |
+| `xpm-aur` | `equislinux/xpm-aur`  | Rust AUR helper; every transaction goes through xpm |
 | `x-repo`  | `equislinux/x-repo`   | Package repositories (pacman `[x]` and native `.xp`) and portals |
 
 ## Current status
@@ -48,8 +51,9 @@ Each component lives in its own GitHub repository under `equislinux`:
 - The endpoint at `https://equislinux.github.io/x-repo/x/$arch` (built by `x-repo`'s
   `scripts/build-xp.sh`, separate from the pacman endpoint under `/repo/x86_64`) was validated
   with `xpm sync/search/deps/install` against the published URL.
-- The system itself is still provisioned with **pacman + the signed `[x]` repository** —
-  `xpm` coexists as the native channel rather than replacing the production flow.
+- The installer offers **pacman** (stable, production) or **xpm** (native, experimental) as the
+  base-system backend; the production default remains pacman + the signed `[x]` repository, and
+  the live image falls back to pacman when its `xpm` lacks the post-parity flags.
 
 Known open issues (tracked in this repo):
 

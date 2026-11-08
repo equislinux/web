@@ -22,7 +22,7 @@ currently out of scope for packaging; see the workspace ROADMAP, Phase 4.)
   `tools/hyprland-install.sh`). There are **no remote `source=()` entries**: the
   snapshot is vendored in-repo and never fetched at build time.
 
-Version metadata: `pkgver=0.1.0`, `pkgrel` bumped per iteration (currently 42
+Version metadata: `pkgver=0.1.0`, `pkgrel` bumped per iteration (currently 47
 in the PKGBUILD). A leftover build artifact (`*.pkg.tar.zst`) may sit in the
 directory but is stale and git-ignored; rebuild produces the current pkgrel.
 

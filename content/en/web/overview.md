@@ -11,9 +11,10 @@ published copy. The private `ops` repository is intentionally excluded.
 ## Landing
 
 The landing (`/en`, `/es`) gathers the downloads (ISO and the WSL rootfs), a
-screenshot showcase, the "Why X" feature grid and an install guide in four
-steps — all in the same monochrome design system as the docs. Screenshots live
-only in `public/showcase/`.
+screenshot showcase, an interactive Three.js system map, the "Why X" feature
+grid, the three packaging paths (pacman `[x]`, native `xpm` and the `xpm-aur`
+helper) and an install guide in four steps — all in the same monochrome design
+system as the docs. Screenshots live only in `public/showcase/`.
 
 ## Stack
 
@@ -22,6 +23,8 @@ only in `public/showcase/`.
   light theme, white and gray scales in the dark theme.
 - **Geist** Sans and Mono, with a light/dark toggle.
 - **react-markdown** + **remark-gfm** to render the markdown under `content/`.
+- **Three.js** + React Three Fiber/Drei for the interactive system and package
+  graphs (client-only, with a static DOM fallback and reduced-motion path).
 
 ## Adding or updating a page
 

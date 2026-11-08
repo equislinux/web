@@ -24,7 +24,7 @@ Es la primera iteración funcional. Mapa de paridad honesto:
 | Repo `[x]/aarch64` (x-release, x-wallpapers, x-dev, xfetch, xtop) | hecho |
 | Lanzador QEMU `virt` y export de imágenes de VM | hecho |
 | Paridad del instalador (`x-installer`) | parche incluido, falta probar en hardware |
-| `xgen`/`xkernel` (`Image`, sin `pkgbase`) | **pendiente** (el instalador degrada con aviso) |
+| `xgen`/`xkernel` (`Image`, sin `pkgbase`) | delta implementado en `scripts-arm` (`x-scripts-arm`); validación en VM/hardware pendiente |
 | Escritorio (Hyprland/niri) en VM | Hyprland + shell de equisdots verificado en UTM (quickshell 0.3.2 desde ALARM); niri sin probar |
 | CI | solo checks estáticos; la ISO necesita un host aarch64 |
 | Secure Boot, Raspberry Pi, Asahi, ARMv7 | fuera de alcance |

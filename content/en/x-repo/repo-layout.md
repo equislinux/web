@@ -52,7 +52,7 @@ The pacman `[x]` artifacts are built with `build-packages.sh` (`makepkg` +
 repo `equislinux/scripts` under `scripts/packaging/` and packages the whole provisioning
 payload (phases, CLI `x`, configs). The resulting tarball is built there and **imported**
 into this repo, committed under `public/repo/x86_64/` (currently
-`x-scripts-0.1.0-39-any.pkg.tar.zst`).
+`x-scripts-0.1.0-48-any.pkg.tar.zst`).
 
 - There is no `packages/x-scripts/` source directory here.
 - The latest published artifact is `0.1.0-39`; the `scripts/packaging/` source is
@@ -73,7 +73,7 @@ This directory is the pacman-facing repository. Files present:
 |---|---|
 | `x.db`, `x.db.tar.gz` | Package database (`x.db` is the uncompressed copy of `x.db.tar.gz`). |
 | `x.files`, `x.files.tar.gz` | File-list database for `pacman -F`. |
-| `*.pkg.tar.zst` | The packages: `x-release-1.0-8`, `x-dev-1.0-2`, `x-scripts-0.1.0-39`, `x-kde-settings-1.0-1`, `xpm-0.1.0-3`, `xfetch-bin-1.0.0-1`, `xtop-git-r35.cb17bb7-1`, `opencode-bin-1.18.34-1`. |
+| `*.pkg.tar.zst` | The packages: `xpm-0.1.0-27`, `xpm-aur-0.1.3-9`, `x-release-1.0-9`, `x-wallpapers-1.0-2`, `x-kde-settings-1.0-2`, `x-dev-1.0-2`, `x-scripts-0.1.0-48`, `opencode-bin-1.18.34-1`. |
 | `SHA256SUMS` | Checksums over every file in the directory. |
 | `signing.pub`, `trustedkeys.gpg` | Signing/trust material consumed by the native endpoint. |
 
@@ -113,7 +113,7 @@ sha256sum $(find . -maxdepth 1 -type f ! -name 'SHA256SUMS*' -printf '%P\n' | so
 ## public/x/x86_64/ — native .xp endpoint
 
 Companion endpoint for `xpm`. It holds `.xp` packages (xpm, xpkg, x-release, x-dev,
-xfetch-bin, xtop-git, opencode-bin, x-scripts), its own database (`x.db.tar.gz`,
+opencode-bin, x-scripts, xpm, xpkg, xpm-aur), its own database (`x.db.tar.gz`,
 `x.files.tar.gz` plus `x.db`/`x.files` copies), per-file signatures, `history.json`,
 `signing.pub`/`trustedkeys.gpg` and a `SHA256SUMS`. Regenerate it with
 `scripts/build-xp.sh`; it deploys with the same Pages workflow. Served at

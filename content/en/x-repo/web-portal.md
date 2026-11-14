@@ -1,6 +1,6 @@
 # Web Portal
 
-The portal is a **static Next.js page** with two blocks: links to every repository of
+The portal is a **static Next.js page** with two blocks: links to the main repositories of
 the `equislinux` organization (animated with `XDecryptedText`) and a short English
 explanation that this repository serves artifacts for X Linux. There is no navbar,
 theme or forms: the site is a single route (`/`) that is statically exported and

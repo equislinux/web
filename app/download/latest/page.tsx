@@ -4,7 +4,7 @@ export const dynamic = 'force-static';
 
 // Stable entry point: always redirects to the ISO of the newest release listed
 // in data/releases.json, so published links never need to change (the publish
-// script only updates the JSON and the site redeploys).
+// script updates the JSON; rebuild and upload out/ to Hostinger).
 export default function LatestDownload() {
   const data = releases as {
     releases?: { iso?: { url?: string; name?: string } }[];

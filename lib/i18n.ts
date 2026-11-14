@@ -6,6 +6,13 @@ export function isLang(value: string): value is Lang {
   return value === 'en' || value === 'es';
 }
 
+export interface SceneNode {
+  id: string;
+  label: string;
+  meta: string;
+  desc: string;
+}
+
 export interface UIStrings {
   nav: {
     home: string;
@@ -20,9 +27,28 @@ export interface UIStrings {
     ctaDocs: string;
     ctaGithub: string;
   };
+  scene: {
+    controlsLabel: string;
+    hero: {
+      kicker: string;
+      title: string;
+      subtitle: string;
+      body: string;
+      hint: string;
+      center: SceneNode;
+      nodes: SceneNode[];
+    };
+    pipeline: {
+      kicker: string;
+      hint: string;
+      center: SceneNode;
+      nodes: SceneNode[];
+    };
+  };
   downloads: {
     title: string;
     iso: string;
+    isoArm: string;
     wsl: string;
     isoDetail: string;
     wslDetail: string;
@@ -88,7 +114,7 @@ export interface UIStrings {
     layers: string;
     desktops: string;
     boot: string;
-    repo: string;
+    paths: string;
   };
   foundation: {
     eyebrow: string;
@@ -104,7 +130,36 @@ export interface UIStrings {
     subtitle: string;
     body: string;
     cta: string;
+    sceneKicker: string;
+    sceneHint: string;
+    sceneCurrent: string;
+    sceneRollback: string;
+    sceneNote: string;
     items: { id: string; label: string }[];
+  };
+  kernel: {
+    eyebrow: string;
+    title: string;
+    subtitle: string;
+    body: string;
+    note: string;
+    guideCta: string;
+    repoCta: string;
+    sceneKicker: string;
+    sceneHint: string;
+    sceneCaption: string;
+    layersLabel: string;
+    idleTitle: string;
+    idleMeta: string;
+    idleDesc: string;
+    channels: {
+      name: string;
+      version: string;
+      repo: string;
+      desc: string;
+      state: string;
+    }[];
+    layers: { name: string; desc: string }[];
   };
   install: {
     title: string;
@@ -128,6 +183,8 @@ export interface UIStrings {
     pacmanDescription: string;
     nativeTitle: string;
     nativeDescription: string;
+    aurTitle: string;
+    aurDescription: string;
     docsTitle: string;
     docsDescription: string;
     docsCta: string;
@@ -162,9 +219,100 @@ export const UI: Record<Lang, UIStrings> = {
       ctaDocs: 'Read the docs',
       ctaGithub: 'GitHub',
     },
+    scene: {
+      controlsLabel: 'System components',
+      hero: {
+        kicker: 'X / SYSTEM MAP',
+        title: 'The system, in one map',
+        subtitle: 'Packages, repository and delivery around one core.',
+        body: 'xpm, xpm-aur, xpkg and the signed [x] repository are one graph: build native or Arch-compatible packages, pull from the AUR and install everything through the same transaction model.',
+        hint: 'Drag to orbit · hover a node',
+        center: {
+          id: 'x',
+          label: 'X Linux',
+          meta: 'Arch-based · snapshot-first',
+          desc: 'A snapshot-first Arch base with its own installer, package tooling and signed delivery.',
+        },
+        nodes: [
+          {
+            id: 'xpkg',
+            label: 'xpkg',
+            meta: 'builder',
+            desc: 'Reads XBUILD or PKGBUILD recipes, builds in isolation and emits .xp packages.',
+          },
+          {
+            id: 'xpm',
+            label: 'xpm',
+            meta: 'manager',
+            desc: 'Native Rust package manager: SAT resolver, .xp and ALPM, signed repositories.',
+          },
+          {
+            id: 'xpm-aur',
+            label: 'xpm-aur',
+            meta: 'AUR',
+            desc: 'Resolves AUR dependencies, builds with makepkg and installs every transaction through xpm.',
+          },
+          {
+            id: 'repo',
+            label: '[x]',
+            meta: 'signed repo',
+            desc: 'Signed x86_64 and aarch64 packages, database and native .xp endpoint.',
+          },
+          {
+            id: 'pacman',
+            label: 'pacman',
+            meta: 'ALPM',
+            desc: 'Arch-compatible packages from [x]; the stable path used by the installer.',
+          },
+          {
+            id: 'iso',
+            label: 'ISO',
+            meta: 'installer',
+            desc: 'Text installer, btrfs generations, four desktop choices and signed artifacts.',
+          },
+        ],
+      },
+      pipeline: {
+        kicker: 'X / PACKAGE GRAPH',
+        hint: 'Drag to orbit · hover a stage',
+        center: {
+          id: 'packages',
+          label: 'X / packages',
+          meta: 'one graph · three entry points',
+          desc: 'AUR, native and Arch-compatible packages converge on the same signed repository and transaction model.',
+        },
+        nodes: [
+          {
+            id: 'xpkg',
+            label: 'xpkg',
+            meta: 'build',
+            desc: 'Turns XBUILD and PKGBUILD recipes into .xp packages; lint, sign and repo-add included.',
+          },
+          {
+            id: 'xpm',
+            label: 'xpm',
+            meta: 'install',
+            desc: 'Owns installs, removals, upgrades and the package database for native and ALPM packages.',
+          },
+          {
+            id: 'xpm-aur',
+            label: 'xpm-aur',
+            meta: 'AUR',
+            desc: 'Builds AUR packages with makepkg in clean chroots and hands the transaction to xpm.',
+          },
+          {
+            id: 'repo',
+            label: '[x]',
+            meta: 'publish',
+            desc: 'Signed ALPM database plus the native .xp endpoint, served from x-repo.',
+          },
+        ],
+      },
+    },
     downloads: {
       title: 'Downloads',
       iso: 'Download ISO',
+      isoArm: 'Download ISO · aarch64',
       wsl: 'Download for WSL',
       isoDetail: 'Live ISO · x86_64',
       wslDetail: 'WSL rootfs',
@@ -215,7 +363,7 @@ export const UI: Record<Lang, UIStrings> = {
         'Choose linux, linux-lts or linux-zen at install time or later with x kernel install and remove, protected by guard rails.',
       toolingTitle: 'Native tooling',
       toolingDesc:
-        'xpm (package manager) and xpkg (builder) drive the signed [x] repository through a native .xp endpoint — built in Rust.',
+        'xpm (manager), xpm-aur (AUR helper) and xpkg (builder) drive the signed [x] repository through native .xp and ALPM packages — built in Rust.',
       wslTitle: 'Runs on WSL',
       wslDesc:
         'An importable rootfs plus a friendly first-run setup for terminal-only use on Windows.',
@@ -262,7 +410,7 @@ export const UI: Record<Lang, UIStrings> = {
       layers: 'system layers',
       desktops: 'desktop choices',
       boot: 'boot modes',
-      repo: 'signed repository',
+      paths: 'package paths',
     },
     foundation: {
       eyebrow: 'Foundation',
@@ -285,12 +433,83 @@ export const UI: Record<Lang, UIStrings> = {
       body:
         'x gen records packages, services, the kernel and /etc as a generation. Boot it, diff it, pin it or restore a single path.',
       cta: 'Read the generations',
+      sceneKicker: 'X / GENERATIONS',
+      sceneHint: 'Drag to orbit · select a generation',
+      sceneCurrent: 'Current generation',
+      sceneRollback: 'Rollback target',
+      sceneNote:
+        'Newer generations stay in /.snapshots; boot or restore with x gen.',
       items: [
         { id: '0001', label: 'first install' },
         { id: '0002', label: 'pre-update' },
         { id: '0003', label: 'kernel change' },
         { id: '0004', label: 'desktop layer' },
         { id: '0005', label: 'current' },
+      ],
+    },
+    kernel: {
+      eyebrow: 'Kernel',
+      title: 'Upstream kernels with the X mark',
+      subtitle: 'linux-x and linux-x-mainline, built from the official recipes.',
+      body:
+        'X Kernel does not fork Linux. It reuses Arch’s packaging recipe for stable/testing and the AUR mainline recipe, changes only the package base and description, builds in a clean chroot and publishes signed packages to dedicated repositories.',
+      note:
+        'X kernels are additional, not replacements: Arch linux / linux-lts remain the default entries and the fallback.',
+      guideCta: 'Read the kernel manual',
+      repoCta: 'View x-kernel on GitHub',
+      sceneKicker: 'X / KERNEL PIPELINE',
+      sceneHint: 'Drag to orbit · select a stage',
+      sceneCaption:
+        'From the upstream recipe to the signed SourceForge repositories — builds and publication are manual.',
+      layersLabel: 'Kernel pipeline stages',
+      idleTitle: 'linux-x',
+      idleMeta: 'kernel pipeline',
+      idleDesc:
+        'A minimal delta over upstream packaging, built in a clean chroot and published to isolated signed repositories.',
+      channels: [
+        {
+          name: 'stable',
+          version: '7.3.4.arch1-1',
+          repo: '[x-kernel]',
+          desc: 'Arch core/linux recipe. Published and bundled in the 2026.11.14 ISO.',
+          state: 'published',
+        },
+        {
+          name: 'testing',
+          version: '7.3.4.arch1-2',
+          repo: 'local preview',
+          desc: 'Arch core-testing/linux recipe. Never published by the scripts.',
+          state: 'preview',
+        },
+        {
+          name: 'mainline',
+          version: '7.4rc1-1',
+          repo: '[x-kernel-mainline]',
+          desc: 'AUR linux-mainline recipe. Experimental moving line.',
+          state: 'experimental',
+        },
+      ],
+      layers: [
+        {
+          name: 'upstream',
+          desc: 'Arch core/linux tag for stable/testing or the AUR linux-mainline HEAD.',
+        },
+        {
+          name: 'delta',
+          desc: 'Only pkgbase and pkgdesc change; sources, config, patches and checksums stay upstream.',
+        },
+        {
+          name: 'chroot',
+          desc: 'Clean makechrootpkg build for the kernel, headers and docs packages.',
+        },
+        {
+          name: 'sign',
+          desc: 'Packages and the variant database are signed with the project key.',
+        },
+        {
+          name: 'publish',
+          desc: 'SourceForge FRS; stable and mainline stay isolated so one publish cannot remove the other.',
+        },
       ],
     },
     install: {
@@ -313,15 +532,18 @@ export const UI: Record<Lang, UIStrings> = {
       reposTitle: 'Repositories',
       reposSubtitle:
         'Every component of the X Linux project lives in the equislinux organization.',
-      pathsTitle: 'Two packaging paths',
+      pathsTitle: 'Three packaging paths',
       pathsSubtitle:
-        'X uses Arch-compatible packages for pacman and its own native format for xpm.',
+        'X combines Arch-compatible packages for pacman, its own native format for xpm, and an AUR helper that routes every transaction through xpm.',
       pacmanTitle: 'pacman · [x] repository',
       pacmanDescription:
         'Arch-compatible .pkg.tar.zst packages served from x-repo. Add the [x] repository to pacman.conf and install with pacman -S.',
       nativeTitle: 'xpm · native .xp',
       nativeDescription:
         'Native packages built by xpkg from XBUILD recipes and installed with xpm. The endpoint lives under x-repo/x/x86_64.',
+      aurTitle: 'xpm-aur · AUR',
+      aurDescription:
+        'A Rust AUR helper: resolves dependencies, builds with makepkg in clean chroots and installs or removes everything through xpm.',
       docsTitle: 'Documentation',
       docsDescription:
         'Guides for the distro, WSL, provisioning, packaging and the package repository — in English and Spanish.',
@@ -329,7 +551,7 @@ export const UI: Record<Lang, UIStrings> = {
     },
     docs: {
       title: 'Documentation',
-      subtitle: 'Guides for every repository of the X Linux project.',
+      subtitle: 'Guides for every published repository of the X Linux project.',
       overview: 'Overview',
       pages: 'pages',
       edit: 'Edit this page on GitHub',
@@ -355,9 +577,100 @@ export const UI: Record<Lang, UIStrings> = {
       ctaDocs: 'Leer la documentación',
       ctaGithub: 'GitHub',
     },
+    scene: {
+      controlsLabel: 'Componentes del sistema',
+      hero: {
+        kicker: 'X / MAPA DEL SISTEMA',
+        title: 'El sistema, en un solo mapa',
+        subtitle: 'Paquetes, repositorio y entrega alrededor de un núcleo.',
+        body: 'xpm, xpm-aur, xpkg y el repositorio firmado [x] forman un solo grafo: construye paquetes nativos o compatibles con Arch, tira del AUR e instala todo con el mismo modelo de transacción.',
+        hint: 'Arrastra para orbitar · pasa por un nodo',
+        center: {
+          id: 'x',
+          label: 'X Linux',
+          meta: 'base Arch · snapshots primero',
+          desc: 'Una base Arch centrada en snapshots, con instalador, tooling de paquetes y entrega firmada propios.',
+        },
+        nodes: [
+          {
+            id: 'xpkg',
+            label: 'xpkg',
+            meta: 'builder',
+            desc: 'Lee recetas XBUILD o PKGBUILD, compila aislado y produce paquetes .xp.',
+          },
+          {
+            id: 'xpm',
+            label: 'xpm',
+            meta: 'gestor',
+            desc: 'Gestor de paquetes en Rust: resolver SAT, .xp y ALPM, repositorios firmados.',
+          },
+          {
+            id: 'xpm-aur',
+            label: 'xpm-aur',
+            meta: 'AUR',
+            desc: 'Resuelve dependencias de AUR, compila con makepkg e instala cada transacción con xpm.',
+          },
+          {
+            id: 'repo',
+            label: '[x]',
+            meta: 'repo firmado',
+            desc: 'Paquetes x86_64 y aarch64 firmados, base de datos y endpoint nativo .xp.',
+          },
+          {
+            id: 'pacman',
+            label: 'pacman',
+            meta: 'ALPM',
+            desc: 'Paquetes compatibles con Arch desde [x]; la vía estable que usa el instalador.',
+          },
+          {
+            id: 'iso',
+            label: 'ISO',
+            meta: 'instalador',
+            desc: 'Instalador de texto, generaciones btrfs, cuatro escritorios y artefactos firmados.',
+          },
+        ],
+      },
+      pipeline: {
+        kicker: 'X / GRAFO DE PAQUETES',
+        hint: 'Arrastra para orbitar · pasa por una etapa',
+        center: {
+          id: 'packages',
+          label: 'X / paquetes',
+          meta: 'un grafo · tres entradas',
+          desc: 'Los paquetes de AUR, nativos y compatibles con Arch confluyen en el mismo repositorio firmado y modelo de transacción.',
+        },
+        nodes: [
+          {
+            id: 'xpkg',
+            label: 'xpkg',
+            meta: 'build',
+            desc: 'Convierte recetas XBUILD y PKGBUILD en paquetes .xp; lint, firma y repo-add incluidos.',
+          },
+          {
+            id: 'xpm',
+            label: 'xpm',
+            meta: 'install',
+            desc: 'Gestiona instalaciones, borrados, upgrades y la base de datos para paquetes nativos y ALPM.',
+          },
+          {
+            id: 'xpm-aur',
+            label: 'xpm-aur',
+            meta: 'AUR',
+            desc: 'Compila paquetes de AUR con makepkg en chroots limpios y entrega la transacción a xpm.',
+          },
+          {
+            id: 'repo',
+            label: '[x]',
+            meta: 'publish',
+            desc: 'Base de datos ALPM firmada más el endpoint nativo .xp, servidos desde x-repo.',
+          },
+        ],
+      },
+    },
     downloads: {
       title: 'Descargas',
       iso: 'Descargar ISO',
+      isoArm: 'Descargar ISO · aarch64',
       wsl: 'Descargar para WSL',
       isoDetail: 'ISO en vivo · x86_64',
       wslDetail: 'rootfs para WSL',
@@ -409,7 +722,7 @@ export const UI: Record<Lang, UIStrings> = {
         'Elige linux, linux-lts o linux-zen al instalar o después con x kernel install/remove, con protecciones.',
       toolingTitle: 'Tooling nativo',
       toolingDesc:
-        'xpm (gestor de paquetes) y xpkg (builder) mueven el repositorio firmado [x] a través de un endpoint .xp nativo — en Rust.',
+        'xpm (gestor), xpm-aur (helper de AUR) y xpkg (builder) mueven el repositorio firmado [x] con paquetes .xp nativos y ALPM — en Rust.',
       wslTitle: 'Corre en WSL',
       wslDesc:
         'Un rootfs importable y un primer arranque amigable para usar solo terminal en Windows.',
@@ -456,7 +769,7 @@ export const UI: Record<Lang, UIStrings> = {
       layers: 'capas del sistema',
       desktops: 'escritorios',
       boot: 'modos de arranque',
-      repo: 'repositorio firmado',
+      paths: 'vías de empaquetado',
     },
     foundation: {
       eyebrow: 'Fundamento',
@@ -479,12 +792,83 @@ export const UI: Record<Lang, UIStrings> = {
       body:
         'x gen registra paquetes, servicios, kernel y /etc como una generación. Arráncala, compara, fíjala o restaura una sola ruta.',
       cta: 'Leer las generaciones',
+      sceneKicker: 'X / GENERACIONES',
+      sceneHint: 'Arrastra para orbitar · elige una generación',
+      sceneCurrent: 'Generación actual',
+      sceneRollback: 'Destino de rollback',
+      sceneNote:
+        'Las generaciones más nuevas se quedan en /.snapshots; arranca o restaura con x gen.',
       items: [
         { id: '0001', label: 'primera instalación' },
         { id: '0002', label: 'pre-update' },
         { id: '0003', label: 'cambio de kernel' },
         { id: '0004', label: 'capa de escritorio' },
         { id: '0005', label: 'actual' },
+      ],
+    },
+    kernel: {
+      eyebrow: 'Kernel',
+      title: 'Kernels upstream con la marca X',
+      subtitle: 'linux-x y linux-x-mainline, construidos desde las recetas oficiales.',
+      body:
+        'X Kernel no bifurca Linux. Reutiliza la receta de empaquetado de Arch para stable/testing y la receta mainline de AUR, cambia solo el pkgbase y la descripción, compila en un chroot limpio y publica paquetes firmados en repositorios dedicados.',
+      note:
+        'Los kernels X son adicionales, no reemplazos: linux / linux-lts de Arch siguen siendo las entradas por defecto y el fallback.',
+      guideCta: 'Leer el manual del kernel',
+      repoCta: 'Ver x-kernel en GitHub',
+      sceneKicker: 'X / PIPELINE DEL KERNEL',
+      sceneHint: 'Arrastra para orbitar · elige una etapa',
+      sceneCaption:
+        'De la receta upstream a los repositorios firmados de SourceForge — los builds y la publicación son manuales.',
+      layersLabel: 'Etapas del pipeline del kernel',
+      idleTitle: 'linux-x',
+      idleMeta: 'pipeline del kernel',
+      idleDesc:
+        'Un delta mínimo sobre el empaquetado upstream, compilado en un chroot limpio y publicado en repositorios firmados aislados.',
+      channels: [
+        {
+          name: 'stable',
+          version: '7.3.4.arch1-1',
+          repo: '[x-kernel]',
+          desc: 'Receta core/linux de Arch. Publicado e incluido en el ISO 2026.11.14.',
+          state: 'publicado',
+        },
+        {
+          name: 'testing',
+          version: '7.3.4.arch1-2',
+          repo: 'preview local',
+          desc: 'Receta core-testing/linux de Arch. Los scripts nunca lo publican.',
+          state: 'preview',
+        },
+        {
+          name: 'mainline',
+          version: '7.4rc1-1',
+          repo: '[x-kernel-mainline]',
+          desc: 'Receta linux-mainline de AUR. Línea experimental en movimiento.',
+          state: 'experimental',
+        },
+      ],
+      layers: [
+        {
+          name: 'upstream',
+          desc: 'Tag core/linux de Arch para stable/testing o el HEAD de AUR linux-mainline.',
+        },
+        {
+          name: 'delta',
+          desc: 'Solo cambian pkgbase y pkgdesc; fuentes, config, parches y checksums quedan upstream.',
+        },
+        {
+          name: 'chroot',
+          desc: 'Build limpio con makechrootpkg para los paquetes kernel, headers y docs.',
+        },
+        {
+          name: 'sign',
+          desc: 'Los paquetes y la base de datos de la variante se firman con la clave del proyecto.',
+        },
+        {
+          name: 'publish',
+          desc: 'SourceForge FRS; stable y mainline quedan aislados para que publicar uno no borre el otro.',
+        },
       ],
     },
     install: {
@@ -507,15 +891,18 @@ export const UI: Record<Lang, UIStrings> = {
       reposTitle: 'Repositorios',
       reposSubtitle:
         'Cada componente del proyecto X Linux vive en la organización equislinux.',
-      pathsTitle: 'Dos vías de empaquetado',
+      pathsTitle: 'Tres vías de empaquetado',
       pathsSubtitle:
-        'X usa paquetes compatibles con Arch para pacman y su propio formato nativo para xpm.',
+        'X combina paquetes compatibles con Arch para pacman, su formato nativo para xpm y un helper de AUR que encamina cada transacción por xpm.',
       pacmanTitle: 'pacman · repositorio [x]',
       pacmanDescription:
         'Paquetes .pkg.tar.zst compatibles con Arch servidos desde x-repo. Agrega el repositorio [x] a pacman.conf e instala con pacman -S.',
       nativeTitle: 'xpm · .xp nativo',
       nativeDescription:
         'Paquetes nativos construidos por xpkg desde recetas XBUILD e instalados con xpm. El endpoint vive en x-repo/x/x86_64.',
+      aurTitle: 'xpm-aur · AUR',
+      aurDescription:
+        'Helper de AUR en Rust: resuelve dependencias, compila con makepkg en chroots limpios e instala o elimina todo mediante xpm.',
       docsTitle: 'Documentación',
       docsDescription:
         'Guías de la distro, WSL, aprovisionamiento, empaquetado y el repositorio de paquetes — en inglés y español.',
@@ -523,7 +910,7 @@ export const UI: Record<Lang, UIStrings> = {
     },
     docs: {
       title: 'Documentación',
-      subtitle: 'Guías de todos los repositorios del proyecto X Linux.',
+      subtitle: 'Guías de todos los repositorios publicados del proyecto X Linux.',
       overview: 'Resumen',
       pages: 'páginas',
       edit: 'Editar esta página en GitHub',

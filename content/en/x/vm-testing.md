@@ -6,7 +6,7 @@ Helper commands to run the X live ISO and to boot an installed disk with QEMU.
 Adjust the paths (`ISO`, `DISK`) to your machine.
 
 ```bash
-ISO="$HOME/Documents/repos/xlnux/x/out/x-<version>-x86_64.iso"
+ISO="$HOME/equislinux/x/out/x-<version>-x86_64.iso"
 DISK="$HOME/x-vm.qcow2"
 ```
 

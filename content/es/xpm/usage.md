@@ -13,11 +13,17 @@ Estas flags las acepta cualquier subcomando.
 |------|-------|-------|-------------|
 | `--config` | `-c` | `PATH` | Ruta del archivo de configuración (por defecto `/etc/xpm.conf`) |
 | `--verbose` | `-v` | contador | Aumenta la verbosidad (`-v`, `-vv`, `-vvv`) |
-| `--no-confirm` | | | Omite los prompts de confirmación |
-| `--root` | | `PATH` | Directorio raíz de instalación alternativo |
-| `--dbpath` | | `PATH` | Directorio de base de datos alternativo |
+| `--no-confirm` | | | Omite los prompts de confirmación (alias `--noconfirm`) |
+| `--root` | `-r` | `PATH` | Directorio raíz de instalación alternativo |
+| `--sysroot` | | `PATH` | Opera sobre un sistema invitado montado (root, base de datos y caché) |
+| `--dbpath` | `-b` | `PATH` | Directorio de base de datos alternativo |
 | `--cachedir` | | `PATH` | Directorio de caché alternativo |
 | `--no-color` | | | Desactiva la salida con color |
+| `--no-pacman-mirror` | | | No refleja las transacciones en la base local de pacman |
+| `--shell-integration` | | | Activa shims en `~/.local/bin` y edits de rc para instalaciones sin root |
+| `--no-shell-integration` | | | Desactiva la integración de shell (por defecto) |
+| `--scriptlets` | | `MODE` | Política de scriptlets: `auto`, `skip` o `require` |
+| `--noscriptlet` | | | Alias de `--scriptlets skip` |
 
 La CLI está definida con `clap` y exige un subcomando (`arg_required_else_help = true`).
 
@@ -57,6 +63,11 @@ xpm S <PACKAGES>... [OPTIONS]
 | `--as-deps` | | Marca el paquete como instalado como dependencia |
 | `--as-explicit` | | Marca el paquete como instalado explícitamente |
 | `--no-optional` | | Omite las dependencias opcionales |
+| `--needed` | | Omite paquetes ya instalados en la misma versión |
+| `--print` | `-p` | Imprime los paquetes resueltos sin descargar ni instalar |
+| `--overwrite` | | Sobrescribe archivos en conflicto que casen con `PATTERN` (repetible, `!` niega) |
+| `--ignoregroup` | | Ignora paquetes de `GROUP` (repetible) |
+| `--assume-installed` | | Asume `PKG=VER` instalado para resolver dependencias (repetible) |
 
 Comportamiento (de `main.rs`): se cargan todas las bases sincronizadas configuradas y los
 requisitos pedidos (`nombre` o `nombre=versión`) se resuelven con el solver SAT, que elige
@@ -84,6 +95,8 @@ xpm R <PACKAGES>... [OPTIONS]
 | `--recursive` | `-s` | Elimina también las dependencias no necesarias |
 | `--no-deps` | `-d` | Omite las comprobaciones de dependencias |
 | `--nosave` | `-n` | Elimina también los archivos de configuración (purga) |
+| `--cascade` | | Elimina también los paquetes que dependen de los objetivos (`pacman -Rc`) |
+| `--unneeded` | `-u` | Mantiene los objetivos que aún requiere otro paquete |
 
 El paquete debe estar registrado en la base de datos local (si no, xpm informa de que no está
 instalado). Se pide confirmación salvo `--no-confirm`.
@@ -101,6 +114,11 @@ xpm Su [OPTIONS]
 |------|-------|-------------|
 | `--force` | | Fuerza la reinstalación de paquetes ya al día |
 | `--ignore` | | Omite paquetes concretos (repetible, `--ignore <PKG>`) |
+| `--print` | `-p` | Imprime el plan de upgrade sin descargar ni instalar |
+| `--download-only` | `-w` | Descarga los paquetes sin commitear el upgrade |
+| `--overwrite` | | Sobrescribe archivos en conflicto que casen con `PATTERN` (repetible) |
+| `--ignoregroup` | | Ignora upgrades de paquetes de `GROUP` (repetible) |
+| `--assume-installed` | | Asume `PKG=VER` instalado para resolver dependencias (repetible) |
 
 `upgrade` refresca siempre primero las bases de datos (equivalente a `pacman -Syu`) y luego
 resuelve el cierre transitivo de los paquetes con versión más nueva, de modo que las dependencias
@@ -119,9 +137,18 @@ xpm Q [FILTER] [OPTIONS]
 
 | Argumento / Flag | Corta | Descripción |
 |------------------|-------|-------------|
-| `FILTER` | | Filtro opcional por nombre de paquete |
+| `FILTER` | | Nombre de paquete (exacto por defecto; subcadena con `--search`) |
+| `--format` | | Formato de salida: `plain` (por defecto) o `tsv` |
 | `--explicit` | `-e` | Solo paquetes instalados explícitamente |
 | `--deps` | `-d` | Solo paquetes instalados como dependencias |
+| `--search` | | Trata `FILTER` como subcadena en vez de nombre exacto |
+| `--quiet` | `-q` | Imprime solo nombres de paquete |
+| `--owner` | | Busca el paquete instalado que posee `PATH` |
+| `--foreign` | `-m` | Paquetes que no están en ninguna base sync configurada |
+| `--native` | `-n` | Paquetes presentes en alguna base sync configurada |
+| `--file` | | Consulta un archivo de paquete en vez de la base local |
+| `--changelog` | | Muestra el changelog guardado de un paquete instalado |
+| `--unrequired` | | Paquetes que ningún otro paquete instalado requiere directamente |
 | `--orphans` | `-t` | Paquetes huérfanos (ya no requeridos) |
 | `--upgrades` | `-u` | Paquetes con actualizaciones disponibles |
 
@@ -210,6 +237,48 @@ xpm repo add local file:///srv/packages/$arch
 `repo add` se niega a sobrescribir una entrada existente del mismo nombre. Tras añadir un
 repositorio, ejecuta `xpm sync` para traer su base de datos.
 
+### `build` — Construir un paquete fuente con makepkg
+
+Construye un directorio `PKGBUILD`/`XBUILD` con `makepkg` y recoge los paquetes
+resultantes. Es el backend que usa `xpm-aur` para los paquetes de AUR.
+
+```bash
+xpm build [DIR] [OPTIONS]
+xpm build path/to/pkg --pkgdest ./out --clean --install
+xpm build . --chroot --json build.json -- --nocheck
+```
+
+| Flag / Argumento | Descripción |
+|------------------|-------------|
+| `DIR` | Directorio con `PKGBUILD` (por defecto: `.`) |
+| `--pkgdest PATH` | Directorio de salida (por defecto: `<DIR>/.xpm-packages`) |
+| `--srcdest PATH` | Caché de fuentes de makepkg |
+| `--builddir PATH` | Directorio de build de makepkg |
+| `--nocheck` | Omite la función `check()` |
+| `--clean` | Elimina paquetes existentes de `--pkgdest` antes de construir |
+| `--chroot` | Construye en un chroot limpio de devtools (requiere `devtools` y sudo) |
+| `--chroot-dir PATH` | Directorio root/copia del chroot (por defecto `/var/lib/archbuild/xpm-aur`) |
+| `--install` | Instala los paquetes construidos con xpm tras un build correcto |
+| `--as-deps` / `--as-explicit` | Razón de instalación para `--install` |
+| `--preinstall PKG` | Instala un paquete local en el chroot limpio (repetible) |
+| `--json PATH` | Escribe el resultado del build como JSON |
+| `-- <args>` | Argumentos extra pasados a `makepkg` |
+
+### Otros comandos
+
+| Comando | Qué hace |
+|---------|----------|
+| `xpm bootstrap [PACKAGES]...` | Arranca un root vacío con xpm (filesystem + bash y luego `base-devel` por defecto). |
+| `xpm import-pacman [--from PATH] [--force]` | Importa paquetes instalados desde la base local de pacman. |
+| `xpm sync-pacman-db [--pacman-db PATH]` | Reescribe la base local de pacman desde la base de xpm. |
+| `xpm check [--full] [PACKAGES]...` (alias `Qk`) | Verifica archivos instalados; `--full` también comprueba hashes, modos y symlinks de `.MTREE`. |
+| `xpm mark (--as-deps\|--as-explicit) <PACKAGES>...` (alias `D`) | Cambia la razón de instalación de paquetes instalados. |
+| `xpm deptest <DEP>...` (alias `T`) | Prueba especificaciones de dependencia contra los paquetes instalados. |
+| `xpm groups [GROUP] [--local] [--names] [-q]` | Lista grupos de paquetes (sync o locales). |
+| `xpm list [REPO] [-q]` | Lista paquetes disponibles en los repos sync (forma `-Sl`). |
+| `xpm clean [--all]` | Elimina archivos de paquetes cacheados (formas `-Sc`/`-Scc`). |
+| `xpm file-db [-y] [-l] [-q] [--repo REPO] [TARGETS]...` | Consulta las bases `.files` de sync (forma `-F`). |
+
 ### `usage` — Ayuda integrada
 
 Muestra ayuda de uso detallada para toda la herramienta o para un tema/comando.
@@ -236,6 +305,9 @@ xpm usage <command>          # ayuda de un comando concreto (sync, install, remo
 | `Ss` | `search` | `pacman -Ss` |
 | `Si` | `info` | `pacman -Si` |
 | `Ql` | `files` | `pacman -Ql` |
+| `Qk` | `check` | `pacman -Qk` |
+| `D` | `mark` | `pacman -D` |
+| `T` | `deptest` | `pacman -T` |
 
 ## Flujo de trabajo típico
 

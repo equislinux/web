@@ -29,7 +29,7 @@ native path for `xpkg`/`xpm`.
 
 ### Buildable packages (PKGBUILD)
 
-- **`x-release`** — X Linux identity and branding (PKGBUILD `1.0-8`). Ships the
+- **`x-release`** — X Linux identity and branding (PKGBUILD `1.0-9`). Ships the
   `os-release` template, GRUB defaults, distributor logo, wallpapers and the
   `x-release-apply` tool, plus pacman hooks (`99-x-os-release.hook`,
   `99-x-grub.hook`) that re-apply branding after `filesystem`/`grub` upgrades.
@@ -52,12 +52,12 @@ The pacman `[x]` artifacts are built with `build-packages.sh` (`makepkg` +
 repo `equislinux/scripts` under `scripts/packaging/` and packages the whole provisioning
 payload (phases, CLI `x`, configs). The resulting tarball is built there and **imported**
 into this repo, committed under `public/repo/x86_64/` (currently
-`x-scripts-0.1.0-48-any.pkg.tar.zst`).
+`x-scripts-0.1.0-52-any.pkg.tar.zst`).
 
 - There is no `packages/x-scripts/` source directory here.
-- The latest published artifact is `0.1.0-39`; the `scripts/packaging/` source is
-  at `0.1.0-42`, bundled in the 2026.10.25 ISO. `build-packages.sh` imports the
-  sibling build; re-run it when publishing 42 to `[x]`.
+- The published artifact is `0.1.0-52`; the `scripts/packaging/` source is also
+  at `0.1.0-52`, bundled in the 2026.11.14 ISO. `build-packages.sh` imports the
+  sibling build; re-run it when publishing to `[x]`.
 
 ### Recipes only
 
@@ -73,7 +73,7 @@ This directory is the pacman-facing repository. Files present:
 |---|---|
 | `x.db`, `x.db.tar.gz` | Package database (`x.db` is the uncompressed copy of `x.db.tar.gz`). |
 | `x.files`, `x.files.tar.gz` | File-list database for `pacman -F`. |
-| `*.pkg.tar.zst` | The packages: `xpm-0.1.0-27`, `xpm-aur-0.1.3-9`, `x-release-1.0-9`, `x-wallpapers-1.0-2`, `x-kde-settings-1.0-2`, `x-dev-1.0-2`, `x-scripts-0.1.0-48`, `opencode-bin-1.18.34-1`. |
+| `*.pkg.tar.zst` | The packages: `xpm-0.1.0-36`, `xpm-aur-0.1.4-7`, `x-release-1.0-9`, `x-wallpapers-1.0-2`, `x-kde-settings-1.0-2`, `x-dev-1.0-2`, `x-scripts-0.1.0-52`, `opencode-bin-1.18.34-1`. |
 | `SHA256SUMS` | Checksums over every file in the directory. |
 | `signing.pub`, `trustedkeys.gpg` | Signing/trust material consumed by the native endpoint. |
 

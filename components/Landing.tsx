@@ -4,10 +4,12 @@ import Footer from './Footer';
 import Hero from './Hero';
 import Downloads from './Downloads';
 import Showcase from './Showcase';
+import SystemMap from './SystemMap';
 import AsciiBand from './AsciiBand';
 import Foundation from './Foundation';
 import DesktopLayers from './DesktopLayers';
 import Generations from './Generations';
+import Kernel from './Kernel';
 import Features from './Features';
 import StatsStrip from './StatsStrip';
 import Install from './Install';
@@ -27,8 +29,10 @@ export default function Landing({ lang }: { lang: Lang }) {
         <Showcase lang={lang} />
         <AsciiBand lang={lang} />
         <Foundation lang={lang} />
+        <SystemMap lang={lang} />
         <DesktopLayers lang={lang} />
         <Generations lang={lang} />
+        <Kernel lang={lang} />
         <Features lang={lang} />
         <StatsStrip lang={lang} />
         <Install lang={lang} />

@@ -15,7 +15,7 @@ the main install path, and which interfaces should stay stable.
   through the same transaction engine.
 - The native endpoint (`https://equislinux.github.io/x-repo/x/$arch`, separate
   from the pacman endpoint under `/repo/x86_64`) is published and validated
-  with `xpm sync/search/deps/install`.
+  with `xpm sync`, `xpm search`, `xpm deptest` and `xpm install`.
 - The system itself is still provisioned with **pacman + the signed `[x]`
   repository**: `xpm` coexists as the native channel rather than replacing the
   production flow.

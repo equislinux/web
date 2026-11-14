@@ -99,7 +99,9 @@ planifica:
    viejas siguen válidas, solo no podés firmar updates nuevos hasta
    distribuir la clave nueva.
 
-Como las firmas se publican pero `[x]` sigue en `Optional` durante el
-desarrollo, un cambio de clave no rompe a nadie. Pasá a `Required` recién
-cuando el camino de distribución del keyring (ISO + paquete `x-keyring`
-actualizable) esté listo.
+El repositorio y los sistemas instalados usan `SigLevel = Required`, así que un
+cambio de clave es una transición de confianza: distribuye el keyring nuevo
+(ISO, rootfs de WSL y, si existe, un paquete `x-keyring` actualizable) antes
+del primer paquete firmado con la clave nueva. Mantén la clave vieja en
+`trustedkeys.gpg` al menos un ciclo y no borres firmas antiguas hasta que los
+clientes tengan la nueva.

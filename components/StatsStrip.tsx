@@ -6,7 +6,7 @@ export default function StatsStrip({ lang }: { lang: Lang }) {
     { value: '06', label: t.stats.layers },
     { value: '04', label: t.stats.desktops },
     { value: '02', label: t.stats.boot },
-    { value: '01', label: t.stats.repo },
+    { value: '03', label: t.stats.paths },
   ];
 
   return (

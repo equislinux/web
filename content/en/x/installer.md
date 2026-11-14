@@ -69,7 +69,7 @@ to plain text prompts otherwise (`ui.sh`).
 | User password | free text (repeated) | `password` |
 | Package profile | `Full (all packages)` / `Core (minimal system)` | `profile` (`full`/`core`) |
 | Bootloader | `GRUB (BIOS + UEFI)` / `systemd-boot (UEFI only)` | `bootloader` (`grub`/`systemd-boot`) |
-| Kernel | `linux (stable)` / `linux-lts (longterm)` / `linux-zen (desktop)` | `kernel` (`linux`/`linux-lts`/`linux-zen`; `linux-hardened`, `linux-rt`, `linux-rt-lts` accepted via JSON) |
+| Kernel | `linux (stable)` / `linux-lts (longterm)` / `linux-zen (desktop)` / `linux-x (X stable)` / `linux-x-mainline (X mainline)` | `kernel` (`linux`/`linux-lts`/`linux-zen`/`linux-x`/`linux-x-mainline`; `linux-hardened`, `linux-rt`, `linux-rt-lts` accepted via JSON) |
 | Root encryption (LUKS) | yes/no | `encryption` (`yes`/`no`) |
 | LUKS passphrase | reuse user password or dedicated | `luks_password` |
 | Desktop environment | Hyprland (online) / Niri (online) / KDE Plasma (online) / None | `desktop` (`hyprland`/`niri`/`kde`/`none`); `hyprland` (`yes`/`online`/`no`) is the legacy key |

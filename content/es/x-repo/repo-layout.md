@@ -29,30 +29,15 @@ El README señala que mientras `PKGBUILD` se mantiene para el tooling legacy de 
 
 ### Paquetes construibles (PKGBUILD)
 
-- **`x-release`** — identidad y branding de X Linux (PKGBUILD `1.0-9`). Incluye la
-  plantilla `os-release`, defaults de GRUB, logo de distribución y la herramienta
-  `x-release-apply`, además de hooks de pacman (`99-x-os-release.hook`,
+- **`x-release`** — identidad y branding de X Linux (PKGBUILD `1.0-8`). Incluye la
+  plantilla `os-release`, defaults de GRUB, logo de distribución, fondos y la
+  herramienta `x-release-apply`, además de hooks de pacman (`99-x-os-release.hook`,
   `99-x-grub.hook`) que reaplican el branding tras actualizaciones de
-  `filesystem`/`grub`. El manejo de GRUB es opcional (guarda `/boot/grub`), así
-  que es seguro en sistemas headless como WSL; los fondos viven en
-  `x-wallpapers` (optdepends).
-- **`x-wallpapers`** — fondos de escritorio (PKGBUILD `1.0-1`). Instala
-  `/usr/share/backgrounds/x/x-wallpaper.{png,jpg}`. Se mantiene separado para que
-  las instalaciones headless no carguen las imágenes.
-- **`x-kde-settings`** — branding de X para Plasma (PKGBUILD `1.0-2`): colores
-  X Dark, look-and-feel, wallpaper y tema SDDM, además de defaults en `/etc/skel`
-  y el autostart del primer login. El repositorio `[x]` publica `1.0-1`; el build
-  `1.0-2` va dentro del ISO en vivo para las imágenes de prueba de escritorio.
+  `filesystem`/`grub`.
 - **`x-dev`** — paquete de entorno de desarrollo (PKGBUILD `1.0-2`). Instala
   `/usr/bin/x-dev-env` y helpers bajo `/usr/share/x-dev/` (aliases de shell, scripts
   de setup de NVIDIA/QEMU/Node). Depende de `zsh git base-devel curl wget`.
   `install=x-dev.install` ejecuta la lógica post-instalación.
-- **`xpm`** — el gestor de paquetes nativo en Rust (PKGBUILD `0.1.0-26`). Posee
-  las transacciones `.xp` y ALPM y lee el repositorio firmado `[x]`.
-- **`xpm-aur`** — el helper de AUR en Rust (PKGBUILD `0.1.3-8`). Resuelve y
-  compila paquetes de AUR y encamina instalaciones, borrados y upgrades por `xpm`.
-- **`xfetch-bin`** — herramienta de información del sistema `xfetch` precompilada
-  (`1.0.2-1`); `xtop` se publica como `xtop-git` (`r35.cb17bb7-1`).
 - **`opencode-bin`** — binario oficial precompilado del CLI opencode
   (`anomalyco/opencode`, `1.18.34`), redistribuido para que `agents=yes` y los
   usuarios de `x agent` tengan agente sin recurrir a AUR.
@@ -70,12 +55,12 @@ Los artefactos del repo pacman `[x]` se construyen con `build-packages.sh`
 hermano `equislinux/scripts` bajo `scripts/packaging/` y empaqueta todo el payload de
 aprovisionamiento (fases, CLI `x`, configs). El tarball resultante se construye allí y
 se **importa** a este repo, commiteado bajo `public/repo/x86_64/` (actualmente
-`x-scripts-0.1.0-47-any.pkg.tar.zst`).
+`x-scripts-0.1.0-48-any.pkg.tar.zst`).
 
 - No existe un directorio de fuente `packages/x-scripts/` aquí.
-- El artefacto publicado y el `PKGBUILD` de `scripts/packaging/` están alineados
-  en `0.1.0-47`, el payload incluido en el ISO 2026.11.04. `build-packages.sh`
-  importa el build hermano automáticamente; vuelve a ejecutarlo al republicar.
+- El último artefacto publicado es `0.1.0-39`; la fuente en `scripts/packaging/`
+  está en `0.1.0-42`, incluida en el ISO 2026.10.25. `build-packages.sh` importa
+  el build hermano; vuelve a ejecutarlo al publicar 42 en `[x]`.
 
 ### Solo recetas
 
@@ -91,7 +76,7 @@ Este directorio es el repositorio orientado a pacman. Archivos presentes:
 |---|---|
 | `x.db`, `x.db.tar.gz` | Base de datos de paquetes (`x.db` es la copia sin comprimir de `x.db.tar.gz`). |
 | `x.files`, `x.files.tar.gz` | Base de datos de listas de archivos para `pacman -F`. |
-| `*.pkg.tar.zst` | Los paquetes: `x-release-1.0-9`, `x-wallpapers-1.0-1`, `x-dev-1.0-2`, `x-scripts-0.1.0-47`, `x-kde-settings-1.0-1`, `xpm-0.1.0-26`, `xpm-aur-0.1.3-8`, `xfetch-bin-1.0.2-1`, `xtop-git-r35.cb17bb7-1`, `opencode-bin-1.18.34-1`. |
+| `*.pkg.tar.zst` | Los paquetes: `xpm-0.1.0-27`, `xpm-aur-0.1.3-9`, `x-release-1.0-9`, `x-wallpapers-1.0-2`, `x-kde-settings-1.0-2`, `x-dev-1.0-2`, `x-scripts-0.1.0-48`, `opencode-bin-1.18.34-1`. |
 | `SHA256SUMS` | Checksums de todos los archivos del directorio. |
 | `signing.pub`, `trustedkeys.gpg` | Material de firma/confianza consumido por el endpoint nativo. |
 
@@ -130,7 +115,7 @@ sha256sum $(find . -maxdepth 1 -type f ! -name 'SHA256SUMS*' -printf '%P\n' | so
 ## public/x/x86_64/ — endpoint nativo .xp
 
 Endpoint complementario para `xpm`. Contiene paquetes `.xp` (`xpkg`, `xpm`,
-`x-release`, `x-dev`, `xfetch-bin`, `xtop-git`, `opencode-bin`, `x-scripts`), su
+`x-release`, `x-dev`, `opencode-bin`, `x-scripts`, `xpm`, `xpkg`, `xpm-aur`), su
 propia base de datos (`x.db.tar.gz`, `x.files.tar.gz` + copias `x.db`/`x.files`),
 firmas por archivo, `history.json`, `signing.pub`/`trustedkeys.gpg` y un
 `SHA256SUMS`. Se regenera con `scripts/build-xp.sh` y se despliega con el mismo
@@ -142,12 +127,11 @@ repositorio documentada para `xpm` es `https://equislinux.github.io/x-repo/x/$ar
 Script local (se ejecuta desde la raíz del repo; requiere un entorno tipo Arch con
 `makepkg` y `repo-add`). El script:
 
-1. Construye en su sitio los paquetes PKGBUILD configurados (`xpm`, `xpm-aur`,
-   `x-release`, `x-wallpapers`, `x-dev`, `x-kde-settings`, `opencode-bin`,
-   `xfetch`, `xtop`) con `makepkg -cf --noconfirm`. El helper `build_xbuild` para la vía nativa
-   existe pero está comentado.
+1. Construye en su sitio los paquetes PKGBUILD configurados
+   (`build_pkgbuild x-release`, `build_pkgbuild x-dev`) con `makepkg -cf --noconfirm`.
+   El helper `build_xbuild` para la vía nativa existe pero está comentado.
 2. Importa `../scripts/packaging/x-scripts-*.pkg.tar.zst` cuando existe, copia los
-   paquetes recién construidos a `public/repo/x86_64/` y
+   tarballs recién construidos de `x-release`/`x-dev` a `public/repo/x86_64/` y
    elimina después esos artefactos de build (los binarios commiteados bajo los demás
    directorios `packages/*` no se tocan).
 3. Regenera la base de datos de pacman y `SHA256SUMS` como se muestra arriba.

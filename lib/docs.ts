@@ -37,6 +37,21 @@ const SECTIONS: SectionManifest[] = [
     files: ['overview', 'build', 'docker', 'vm', 'acceptance', 'prepare'],
   },
   {
+    id: 'scripts-arm',
+    title: { en: 'scripts-arm — aarch64 delta', es: 'scripts-arm — delta aarch64' },
+    files: ['overview'],
+  },
+  {
+    id: 'x-arm-repo',
+    title: { en: 'x-arm-repo — aarch64 repository', es: 'x-arm-repo — repositorio aarch64' },
+    files: ['overview'],
+  },
+  {
+    id: 'x-kernel',
+    title: { en: 'x-kernel — X kernels', es: 'x-kernel — kernels de X' },
+    files: ['overview', 'manual', 'publishing', 'testing'],
+  },
+  {
     id: 'wsl',
     title: { en: 'X for WSL', es: 'X para WSL' },
     files: ['architecture', 'import'],

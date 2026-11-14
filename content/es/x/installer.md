@@ -70,7 +70,7 @@ cae a prompts de texto plano en caso contrario (`ui.sh`).
 | Password del usuario | texto libre (repetido) | `password` |
 | Perfil de paquetes | `Full (all packages)` / `Core (minimal system)` | `profile` (`full`/`core`) |
 | Gestor de arranque | `GRUB (BIOS + UEFI)` / `systemd-boot (UEFI only)` | `bootloader` (`grub`/`systemd-boot`) |
-| Kernel | `linux (stable)` / `linux-lts (longterm)` / `linux-zen (desktop)` | `kernel` (`linux`/`linux-lts`/`linux-zen`; `linux-hardened`, `linux-rt`, `linux-rt-lts` aceptados vía JSON) |
+| Kernel | `linux (stable)` / `linux-lts (longterm)` / `linux-zen (desktop)` / `linux-x (X stable)` / `linux-x-mainline (X mainline)` | `kernel` (`linux`/`linux-lts`/`linux-zen`/`linux-x`/`linux-x-mainline`; `linux-hardened`, `linux-rt`, `linux-rt-lts` aceptados vía JSON) |
 | Cifrado de raíz (LUKS) | sí/no | `encryption` (`yes`/`no`) |
 | Passphrase LUKS | reutilizar la del usuario o una dedicada | `luks_password` |
 | Entorno de escritorio | Hyprland (online) / Niri (online) / KDE Plasma (online) / Ninguno | `desktop` (`hyprland`/`niri`/`kde`/`none`); `hyprland` (`yes`/`online`/`no`) es la clave legacy |

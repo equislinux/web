@@ -11,7 +11,8 @@ published copy. The private `ops` repository is intentionally excluded.
 ## Landing
 
 The landing (`/en`, `/es`) gathers the downloads (ISO and the WSL rootfs), a
-screenshot showcase, an interactive Three.js system map, the "Why X" feature
+screenshot showcase, an interactive Three.js system map, a generation stack, a
+desktop layer map, the kernel channel/pipeline section, the "Why X" feature
 grid, the three packaging paths (pacman `[x]`, native `xpm` and the `xpm-aur`
 helper) and an install guide in four steps — all in the same monochrome design
 system as the docs. Screenshots live only in `public/showcase/`.

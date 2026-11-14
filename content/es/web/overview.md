@@ -11,11 +11,12 @@ copia publicada. El repositorio privado `ops` queda excluido a propósito.
 ## Landing
 
 La landing (`/en`, `/es`) reúne las descargas (ISO y rootfs de WSL), una galería
-de capturas, un mapa interactivo del sistema en Three.js, la parrilla "Por qué
-X", las tres vías de empaquetado (pacman `[x]`, `xpm` nativo y el helper
-`xpm-aur`) y una guía de instalación en cuatro pasos — todo con el mismo sistema
-de diseño monocromo que los docs. Las capturas viven solo en
-`public/showcase/`.
+de capturas, un mapa interactivo del sistema en Three.js, un stack de
+generaciones, el mapa de capas del escritorio, la sección de canales y pipeline
+del kernel, la parrilla "Por qué X", las tres vías de empaquetado (pacman `[x]`,
+`xpm` nativo y el helper `xpm-aur`) y una guía de instalación en cuatro pasos —
+todo con el mismo sistema de diseño monocromo que los docs. Las capturas viven
+solo en `public/showcase/`.
 
 ## Stack
 

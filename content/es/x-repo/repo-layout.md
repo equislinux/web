@@ -29,7 +29,7 @@ El README señala que mientras `PKGBUILD` se mantiene para el tooling legacy de 
 
 ### Paquetes construibles (PKGBUILD)
 
-- **`x-release`** — identidad y branding de X Linux (PKGBUILD `1.0-8`). Incluye la
+- **`x-release`** — identidad y branding de X Linux (PKGBUILD `1.0-9`). Incluye la
   plantilla `os-release`, defaults de GRUB, logo de distribución, fondos y la
   herramienta `x-release-apply`, además de hooks de pacman (`99-x-os-release.hook`,
   `99-x-grub.hook`) que reaplican el branding tras actualizaciones de
@@ -55,12 +55,12 @@ Los artefactos del repo pacman `[x]` se construyen con `build-packages.sh`
 hermano `equislinux/scripts` bajo `scripts/packaging/` y empaqueta todo el payload de
 aprovisionamiento (fases, CLI `x`, configs). El tarball resultante se construye allí y
 se **importa** a este repo, commiteado bajo `public/repo/x86_64/` (actualmente
-`x-scripts-0.1.0-48-any.pkg.tar.zst`).
+`x-scripts-0.1.0-52-any.pkg.tar.zst`).
 
 - No existe un directorio de fuente `packages/x-scripts/` aquí.
-- El último artefacto publicado es `0.1.0-39`; la fuente en `scripts/packaging/`
-  está en `0.1.0-42`, incluida en el ISO 2026.10.25. `build-packages.sh` importa
-  el build hermano; vuelve a ejecutarlo al publicar 42 en `[x]`.
+- El artefacto publicado es `0.1.0-52`; la fuente en `scripts/packaging/` también
+  está en `0.1.0-52`, incluida en el ISO 2026.11.14. `build-packages.sh` importa
+  el build hermano; vuelve a ejecutarlo al publicar en `[x]`.
 
 ### Solo recetas
 
@@ -76,7 +76,7 @@ Este directorio es el repositorio orientado a pacman. Archivos presentes:
 |---|---|
 | `x.db`, `x.db.tar.gz` | Base de datos de paquetes (`x.db` es la copia sin comprimir de `x.db.tar.gz`). |
 | `x.files`, `x.files.tar.gz` | Base de datos de listas de archivos para `pacman -F`. |
-| `*.pkg.tar.zst` | Los paquetes: `xpm-0.1.0-27`, `xpm-aur-0.1.3-9`, `x-release-1.0-9`, `x-wallpapers-1.0-2`, `x-kde-settings-1.0-2`, `x-dev-1.0-2`, `x-scripts-0.1.0-48`, `opencode-bin-1.18.34-1`. |
+| `*.pkg.tar.zst` | Los paquetes: `xpm-0.1.0-36`, `xpm-aur-0.1.4-7`, `x-release-1.0-9`, `x-wallpapers-1.0-2`, `x-kde-settings-1.0-2`, `x-dev-1.0-2`, `x-scripts-0.1.0-52`, `opencode-bin-1.18.34-1`. |
 | `SHA256SUMS` | Checksums de todos los archivos del directorio. |
 | `signing.pub`, `trustedkeys.gpg` | Material de firma/confianza consumido por el endpoint nativo. |
 

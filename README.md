@@ -26,9 +26,10 @@
 - **Landing** — hero with the X mark and the ISO download, screenshot showcase
   (`public/showcase/`), a dedicated interactive Three.js system map, a "Why X"
   feature grid, install steps, the repository grid, the three packaging paths
-  (pacman `[x]`, native `.xp` for `xpm` and the `xpm-aur` AUR helper) and a
-  docs call to action. The system map is a client-only Three.js scene with a
-  static DOM fallback, keyboard-accessible controls and a reduced-motion path.
+  (pacman `[x]`, native `.xp` for `xpm` and the `xpm-aur` AUR helper), the
+  kernel channel/pipeline section and a docs call to action. The maps and
+  stacks are client-only Three.js scenes with static DOM fallbacks,
+  keyboard-accessible controls and a reduced-motion path.
 - **Docs** — every published repository of the organization documented in a
   browsable sidebar, rendered from markdown, with a language switch
   (English/Spanish).
@@ -47,8 +48,9 @@ must never be copied into `content/`.
   in dark) and a light/dark toggle.
 - **Geist** Sans and Mono via `next/font`.
 - **react-markdown** + **remark-gfm** for the docs.
-- **Three.js** + React Three Fiber/Drei for the interactive hero and package
-  graphs (`components/three/`), loaded client-side only.
+- **Three.js** + React Three Fiber/Drei for the interactive hero, system map,
+  generation stack, desktop layers and kernel pipeline (`components/three/`),
+  loaded client-side only.
 
 ## Structure
 
@@ -61,7 +63,7 @@ app/
   download/latest/page.tsx    # stable redirect to the newest ISO
 components/                   # Navbar, Footer, Hero, Downloads, Showcase,
                               # Features, Install, RepoGrid, DocsShell, Markdown
-components/three/             # SystemOrbit (Three.js) + dynamic client wrapper
+components/three/             # SystemOrbit, LayerStack, GenerationStack (Three.js)
 content/
   en/<section>/<page>.md      # published documentation (English)
   es/<section>/<page>.md      # published documentation (Spanish)

@@ -20,7 +20,7 @@ cd packages/x-release      # o packages/x-dev
 makepkg -cf --noconfirm
 ```
 
-Esto produce un `.pkg.tar.zst` (p. ej. `x-release-1.0-8-any.pkg.tar.zst`) dentro del
+Esto produce un `.pkg.tar.zst` (p. ej. `x-release-1.0-9-any.pkg.tar.zst`) dentro del
 directorio del paquete.
 
 ### Paquete externo (x-scripts)
@@ -97,7 +97,7 @@ Commitea los cambios del repositorio, por ejemplo:
 
 ```bash
 git add packages/x-release public/repo/x86_64
-git commit -m "publish x-release 1.0-8"
+git commit -m "publish x-release 1.0-9"
 ```
 
 ## 4. Pull request

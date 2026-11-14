@@ -137,6 +137,30 @@ export interface UIStrings {
     sceneNote: string;
     items: { id: string; label: string }[];
   };
+  kernel: {
+    eyebrow: string;
+    title: string;
+    subtitle: string;
+    body: string;
+    note: string;
+    guideCta: string;
+    repoCta: string;
+    sceneKicker: string;
+    sceneHint: string;
+    sceneCaption: string;
+    layersLabel: string;
+    idleTitle: string;
+    idleMeta: string;
+    idleDesc: string;
+    channels: {
+      name: string;
+      version: string;
+      repo: string;
+      desc: string;
+      state: string;
+    }[];
+    layers: { name: string; desc: string }[];
+  };
   install: {
     title: string;
     subtitle: string;
@@ -421,6 +445,71 @@ export const UI: Record<Lang, UIStrings> = {
         { id: '0003', label: 'kernel change' },
         { id: '0004', label: 'desktop layer' },
         { id: '0005', label: 'current' },
+      ],
+    },
+    kernel: {
+      eyebrow: 'Kernel',
+      title: 'Upstream kernels with the X mark',
+      subtitle: 'linux-x and linux-x-mainline, built from the official recipes.',
+      body:
+        'X Kernel does not fork Linux. It reuses Arch’s packaging recipe for stable/testing and the AUR mainline recipe, changes only the package base and description, builds in a clean chroot and publishes signed packages to dedicated repositories.',
+      note:
+        'X kernels are additional, not replacements: Arch linux / linux-lts remain the default entries and the fallback.',
+      guideCta: 'Read the kernel manual',
+      repoCta: 'View x-kernel on GitHub',
+      sceneKicker: 'X / KERNEL PIPELINE',
+      sceneHint: 'Drag to orbit · select a stage',
+      sceneCaption:
+        'From the upstream recipe to the signed SourceForge repositories — builds and publication are manual.',
+      layersLabel: 'Kernel pipeline stages',
+      idleTitle: 'linux-x',
+      idleMeta: 'kernel pipeline',
+      idleDesc:
+        'A minimal delta over upstream packaging, built in a clean chroot and published to isolated signed repositories.',
+      channels: [
+        {
+          name: 'stable',
+          version: '7.3.4.arch1-1',
+          repo: '[x-kernel]',
+          desc: 'Arch core/linux recipe. Published and bundled in the 2026.11.14 ISO.',
+          state: 'published',
+        },
+        {
+          name: 'testing',
+          version: '7.3.4.arch1-2',
+          repo: 'local preview',
+          desc: 'Arch core-testing/linux recipe. Never published by the scripts.',
+          state: 'preview',
+        },
+        {
+          name: 'mainline',
+          version: '7.4rc1-1',
+          repo: '[x-kernel-mainline]',
+          desc: 'AUR linux-mainline recipe. Experimental moving line.',
+          state: 'experimental',
+        },
+      ],
+      layers: [
+        {
+          name: 'upstream',
+          desc: 'Arch core/linux tag for stable/testing or the AUR linux-mainline HEAD.',
+        },
+        {
+          name: 'delta',
+          desc: 'Only pkgbase and pkgdesc change; sources, config, patches and checksums stay upstream.',
+        },
+        {
+          name: 'chroot',
+          desc: 'Clean makechrootpkg build for the kernel, headers and docs packages.',
+        },
+        {
+          name: 'sign',
+          desc: 'Packages and the variant database are signed with the project key.',
+        },
+        {
+          name: 'publish',
+          desc: 'SourceForge FRS; stable and mainline stay isolated so one publish cannot remove the other.',
+        },
       ],
     },
     install: {
@@ -715,6 +804,71 @@ export const UI: Record<Lang, UIStrings> = {
         { id: '0003', label: 'cambio de kernel' },
         { id: '0004', label: 'capa de escritorio' },
         { id: '0005', label: 'actual' },
+      ],
+    },
+    kernel: {
+      eyebrow: 'Kernel',
+      title: 'Kernels upstream con la marca X',
+      subtitle: 'linux-x y linux-x-mainline, construidos desde las recetas oficiales.',
+      body:
+        'X Kernel no bifurca Linux. Reutiliza la receta de empaquetado de Arch para stable/testing y la receta mainline de AUR, cambia solo el pkgbase y la descripción, compila en un chroot limpio y publica paquetes firmados en repositorios dedicados.',
+      note:
+        'Los kernels X son adicionales, no reemplazos: linux / linux-lts de Arch siguen siendo las entradas por defecto y el fallback.',
+      guideCta: 'Leer el manual del kernel',
+      repoCta: 'Ver x-kernel en GitHub',
+      sceneKicker: 'X / PIPELINE DEL KERNEL',
+      sceneHint: 'Arrastra para orbitar · elige una etapa',
+      sceneCaption:
+        'De la receta upstream a los repositorios firmados de SourceForge — los builds y la publicación son manuales.',
+      layersLabel: 'Etapas del pipeline del kernel',
+      idleTitle: 'linux-x',
+      idleMeta: 'pipeline del kernel',
+      idleDesc:
+        'Un delta mínimo sobre el empaquetado upstream, compilado en un chroot limpio y publicado en repositorios firmados aislados.',
+      channels: [
+        {
+          name: 'stable',
+          version: '7.3.4.arch1-1',
+          repo: '[x-kernel]',
+          desc: 'Receta core/linux de Arch. Publicado e incluido en el ISO 2026.11.14.',
+          state: 'publicado',
+        },
+        {
+          name: 'testing',
+          version: '7.3.4.arch1-2',
+          repo: 'preview local',
+          desc: 'Receta core-testing/linux de Arch. Los scripts nunca lo publican.',
+          state: 'preview',
+        },
+        {
+          name: 'mainline',
+          version: '7.4rc1-1',
+          repo: '[x-kernel-mainline]',
+          desc: 'Receta linux-mainline de AUR. Línea experimental en movimiento.',
+          state: 'experimental',
+        },
+      ],
+      layers: [
+        {
+          name: 'upstream',
+          desc: 'Tag core/linux de Arch para stable/testing o el HEAD de AUR linux-mainline.',
+        },
+        {
+          name: 'delta',
+          desc: 'Solo cambian pkgbase y pkgdesc; fuentes, config, parches y checksums quedan upstream.',
+        },
+        {
+          name: 'chroot',
+          desc: 'Build limpio con makechrootpkg para los paquetes kernel, headers y docs.',
+        },
+        {
+          name: 'sign',
+          desc: 'Los paquetes y la base de datos de la variante se firman con la clave del proyecto.',
+        },
+        {
+          name: 'publish',
+          desc: 'SourceForge FRS; stable y mainline quedan aislados para que publicar uno no borre el otro.',
+        },
       ],
     },
     install: {

@@ -24,11 +24,14 @@ Cada repositorio tiene un rol único y claro:
 |---|---|
 | `equislinux/x` | La distro. Perfil ArchISO, build del ISO/instalador y branding del sistema. |
 | `equislinux/x-arm` | Build overlay aarch64: ISO, repositorio `[x]/aarch64` e imágenes de VM. |
+| `equislinux/scripts-arm` | Delta aarch64 sobre el payload fijado; construye `x-scripts-arm`. |
+| `equislinux/x-arm-repo` | Repositorio `[x]/aarch64` estático y firmado. |
 | `equislinux/scripts` | Payload de aprovisionamiento y setup de usuario. Incluye la CLI `x` y construye el paquete `x-scripts`. |
 | `equislinux/xpkg` | Builder de paquetes en Rust. Produce paquetes nativos `.xp` desde recetas `XBUILD`. |
 | `equislinux/xpm` | Gestor de paquetes en Rust, la contraparte nativa de pacman. |
 | `equislinux/xpm-aur` | Helper de AUR en Rust: compila con makepkg e instala mediante xpm. |
 | `equislinux/x-repo` | **Repositorio binario + portal web** (este repositorio). |
+| `equislinux/x-kernel` | Kernels downstream de X y sus repositorios firmados en SourceForge. |
 | `equislinux/wsl` / `equislinux/wsl-scripts` | Rootfs de WSL y su setup de primer arranque. |
 | `equislinux/utils` | Utilidades de operador: workspace, clonado, reglas sudo y claves. |
 | `equislinux/wiki` / `equislinux/web` | Fuentes de documentación y portal público (equislinux.org). |

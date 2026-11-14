@@ -53,8 +53,11 @@ GitHub. Los nombres cambiaron con el tiempo, así que las referencias antiguas a
 |-------------|-----|
 | `equislinux/x` | **La distro (este repo).** Perfil archiso, ISO en vivo, instalador de texto, construcción de rootfs para WSL. |
 | `equislinux/x-arm` | Build overlay aarch64: ISO UEFI, repositorio `[x]/aarch64` e imágenes de VM. |
+| `equislinux/scripts-arm` | Delta aarch64 sobre el payload fijado; construye `x-scripts-arm`. |
+| `equislinux/x-arm-repo` | Repositorio `[x]/aarch64` estático y firmado servido por GitHub Pages. |
 | `equislinux/scripts` | *Payload* de aprovisionamiento y la CLI `x` (`x setup`, `x theme`, ...). Se empaqueta como `x-scripts` y lo instala el instalador de texto. |
 | `equislinux/x-repo` | Repositorio binario de paquetes de X (alojado en GitHub Pages, `[x]` en `pacman.conf`), portal de paquetes y publicación de ISOs. |
+| `equislinux/x-kernel` | Kernels downstream con marca X: `linux-x` (stable/testing, receta de Arch) y `linux-x-mainline` (receta de AUR), construidos y firmados en sus propios repositorios de SourceForge. |
 | `equislinux/xpm` | Gestor de paquetes de X (Rust). |
 | `equislinux/xpm-aur` | Helper de AUR (Rust); compila con makepkg e instala mediante xpm. |
 | `equislinux/xpkg` | Herramienta de empaquetado de X para desarrolladores (Rust). |

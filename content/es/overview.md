@@ -13,12 +13,16 @@ por componente o empieza por los temas de abajo.
 
 - **X Linux** — la distro: build del ISO, instalador, generaciones y pruebas en VM.
 - **x-arm** — build overlay para aarch64, ISO, repositorio e imágenes de VM.
+- **scripts-arm** — delta aarch64 para el motor de generaciones.
+- **x-arm-repo** — repositorio firmado `[x]/aarch64`.
 - **X para WSL** — rootfs importable y configuración de WSL.
 - **Scripts de WSL** — setup de usuario para WSL, simple y directo.
 - **Scripts y CLI** — payload de aprovisionamiento y el comando `x`.
 - **xpm** — gestor de paquetes en Rust.
+- **xpm-aur** — helper de AUR en Rust.
 - **xpkg** — builder de paquetes en Rust.
 - **x-repo** — repositorio binario de paquetes, publicación de releases y portal.
+- **x-kernel** — kernels downstream con marca X (`linux-x`, `linux-x-mainline`) con sus propios repositorios firmados.
 - **utils** — herramientas de operador: workspace, clonado, reglas sudo y claves de firma.
 - **web** — este portal de documentación.
 
@@ -28,12 +32,16 @@ por componente o empieza por los temas de abajo.
 |---|---|
 | [`equislinux/x`](https://github.com/equislinux/x) | Distribución: perfil archiso, instalador de texto y build del ISO. |
 | [`equislinux/x-arm`](https://github.com/equislinux/x-arm) | Build overlay aarch64: ISO, repositorio `[x]/aarch64` e imágenes de VM. |
+| [`equislinux/scripts-arm`](https://github.com/equislinux/scripts-arm) | Delta aarch64 sobre el payload fijado; construye `x-scripts-arm`. |
+| [`equislinux/x-arm-repo`](https://github.com/equislinux/x-arm-repo) | Repositorio pacman `[x]/aarch64` firmado e índice de paquetes. |
 | [`equislinux/wsl`](https://github.com/equislinux/wsl) | X Linux para WSL: rootfs importable y configuración. |
 | [`equislinux/wsl-scripts`](https://github.com/equislinux/wsl-scripts) | Setup de usuario para WSL. |
 | [`equislinux/scripts`](https://github.com/equislinux/scripts) | Payload de aprovisionamiento y CLI (`x`). |
 | [`equislinux/xpm`](https://github.com/equislinux/xpm) | Gestor de paquetes nativo (formato ALPM). |
+| [`equislinux/xpm-aur`](https://github.com/equislinux/xpm-aur) | Helper de AUR en Rust: resuelve, compila con makepkg e instala mediante xpm. |
 | [`equislinux/xpkg`](https://github.com/equislinux/xpkg) | Builder nativo de paquetes (recetas `XBUILD`). |
 | [`equislinux/x-repo`](https://github.com/equislinux/x-repo) | Repositorio binario (`[x]`), releases y portal de paquetes. |
+| [`equislinux/x-kernel`](https://github.com/equislinux/x-kernel) | Kernels downstream de X (`linux-x`, `linux-x-mainline`) y sus repositorios firmados. |
 | [`equislinux/utils`](https://github.com/equislinux/utils) | Utilidades de operador: workspace, clonado, reglas sudo y claves. |
 | [`equislinux/wiki`](https://github.com/equislinux/wiki) | Espejo de documentación (inglés/español). |
 | [`equislinux/web`](https://github.com/equislinux/web) | Este portal: landing y docs navegables. |

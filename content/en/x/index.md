@@ -45,8 +45,11 @@ distro) or to an `x` scripts repo must be read with this mapping in mind:
 |------------|------|
 | `equislinux/x` | **The distro (this repo).** archiso profile, live ISO, text installer, WSL rootfs builds. |
 | `equislinux/x-arm` | aarch64 overlay build: UEFI ISO, `[x]/aarch64` repository and VM images. |
+| `equislinux/scripts-arm` | aarch64 delta over the pinned payload; builds `x-scripts-arm`. |
+| `equislinux/x-arm-repo` | Static signed `[x]/aarch64` repository served by GitHub Pages. |
 | `equislinux/scripts` | Provisioning payload and the `x` CLI (`x setup`, `x theme`, ...). Packaged as `x-scripts` and installed by the text installer. |
 | `equislinux/x-repo` | X binary package repository (hosted on GitHub Pages, `[x]` in `pacman.conf`) plus the package portal and ISO publishing. |
+| `equislinux/x-kernel` | X-branded downstream kernels: `linux-x` (stable/testing, Arch recipe) and `linux-x-mainline` (AUR recipe), built and signed into their own SourceForge repositories. |
 | `equislinux/xpm` | X package manager (Rust). |
 | `equislinux/xpm-aur` | AUR helper (Rust); builds with makepkg and installs through xpm. |
 | `equislinux/xpkg` | X packaging tool for developers (Rust). |

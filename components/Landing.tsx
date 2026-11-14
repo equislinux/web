@@ -9,6 +9,7 @@ import AsciiBand from './AsciiBand';
 import Foundation from './Foundation';
 import DesktopLayers from './DesktopLayers';
 import Generations from './Generations';
+import Kernel from './Kernel';
 import Features from './Features';
 import StatsStrip from './StatsStrip';
 import Install from './Install';
@@ -31,6 +32,7 @@ export default function Landing({ lang }: { lang: Lang }) {
         <SystemMap lang={lang} />
         <DesktopLayers lang={lang} />
         <Generations lang={lang} />
+        <Kernel lang={lang} />
         <Features lang={lang} />
         <StatsStrip lang={lang} />
         <Install lang={lang} />

@@ -99,6 +99,14 @@ export const REPOS: RepoInfo[] = [
     },
   },
   {
+    name: 'equislinux/x-kernel',
+    href: `${GITHUB_ORG}/x-kernel`,
+    description: {
+      en: 'X-branded downstream kernels (linux-x, linux-x-mainline) with signed SourceForge repositories.',
+      es: 'Kernels downstream con marca X (linux-x, linux-x-mainline) con repositorios firmados en SourceForge.',
+    },
+  },
+  {
     name: 'equislinux/x-repo',
     href: `${GITHUB_ORG}/x-repo`,
     description: {

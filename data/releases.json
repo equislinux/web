@@ -2,14 +2,14 @@
   "schema": 1,
   "releases": [
     {
-      "version": "2026.11.14",
-      "date": "2026-11-14",
+      "version": "2026.11.15",
+      "date": "2026-11-15",
       "iso": {
-        "name": "x-2026.11.14-x86_64.iso",
-        "url": "https://sourceforge.net/projects/equislinux/files/iso/x-2026.11.14-x86_64.iso/download",
+        "name": "x-2026.11.15-x86_64.iso",
+        "url": "https://sourceforge.net/projects/equislinux/files/iso/x-2026.11.15-x86_64.iso/download",
         "size": 2642444288,
-        "sha256": "d54225ab548d2e5e868cf2cf64ef7c394e0b6f921e4a4101b6a39c7ab99357f4",
-        "sig": "https://sourceforge.net/projects/equislinux/files/iso/x-2026.11.14-x86_64.iso.sig/download",
+        "sha256": "b02af9a09d932928f3759f56a0cd52a9a60dcd68557c2d8ff7835cf5dee65703",
+        "sig": "https://sourceforge.net/projects/equislinux/files/iso/x-2026.11.15-x86_64.iso.sig/download",
         "checksums": "https://sourceforge.net/projects/equislinux/files/iso/SHA256SUMS/download"
       },
       "wsl": {

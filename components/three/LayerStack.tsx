@@ -1,10 +1,21 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Canvas, useFrame, useThree, type ThreeEvent } from '@react-three/fiber';
-import { OrbitControls, RoundedBox, Sparkles } from '@react-three/drei';
+import { Billboard, OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
-import { createLabelTexture } from './labelTexture';
+import {
+  BranchTube,
+  Crown,
+  Enso,
+  LamellarPlate,
+  Leader,
+  Plinth,
+  StaticTree,
+  Tag,
+  Trunk,
+} from './treeKit';
+import { samuraiAccent, samuraiPalette } from './samuraiTheme';
 import {
   SceneBoundary,
   useCoarsePointer,
@@ -31,75 +42,101 @@ export interface LayerStackProps {
   idleDesc: string;
 }
 
+type Vec3 = [number, number, number];
+
+interface LayerSlot {
+  position: Vec3;
+  branchStart: Vec3;
+  branchEnd: Vec3;
+  tag: Vec3;
+  accent: string;
+  width: number;
+}
+
+function layerLayout(count: number, dark: boolean): LayerSlot[] {
+  return Array.from({ length: count }, (_, index) => {
+    const t = count <= 1 ? 0.5 : index / (count - 1);
+    const y = -0.75 + t * 1.8;
+    const side = index % 2 === 0 ? 1 : -1;
+    const x = side * (1.02 + 0.08 * Math.sin(index * 1.7));
+    const z = 0.34;
+    const width = index === 1 || index === 2 ? 1.28 : 1.12;
+    const accent = samuraiAccent(index, dark);
+
+    let tag: Vec3;
+    if (side < 0 && y < 0.2) {
+      tag = [x - 0.05, y + 0.48, z + 0.12];
+    } else {
+      tag = [x + side * 1.16, y + 0.06, z + 0.12];
+    }
+
+    return {
+      position: [x, y, z],
+      branchStart: [0, y + 0.08, 0],
+      branchEnd: [x * 0.86, y, z * 0.95],
+      tag,
+      accent,
+      width,
+    };
+  });
+}
+
 function ResponsiveCamera() {
   const { camera, size } = useThree();
 
   useEffect(() => {
     const aspect = size.width / Math.max(size.height, 1);
-    const scale = aspect < 1.05 ? 1.65 : aspect < 1.35 ? 1.25 : 1;
-    camera.position.set(5.2 * scale, 4.4 * scale, 6.2 * scale);
-    camera.lookAt(0, 0, 0);
+    const scale = aspect < 1.05 ? 1.35 : aspect < 1.4 ? 1.12 : 1;
+    camera.position.set(5.0 * scale, 2.9 * scale, 7.6 * scale);
+    camera.lookAt(0, -0.02, 0.05);
     camera.updateProjectionMatrix();
   }, [camera, size.width, size.height]);
 
   return null;
 }
 
-function Plate({
+function LayerPlate({
   layer,
+  slot,
   index,
   active,
   dark,
   reduced,
+  compact,
   onOver,
   onOut,
   onSelect,
 }: {
   layer: LayerData;
+  slot: LayerSlot;
   index: number;
   active: boolean;
   dark: boolean;
   reduced: boolean;
+  compact: boolean;
   onOver: () => void;
   onOut: () => void;
   onSelect: () => void;
 }) {
   const group = useRef<THREE.Group>(null);
-  const baseY = index * 0.32 - 0.8;
-  const labelTexture = useMemo(
-    () =>
-      createLabelTexture(
-        `${String(index + 1).padStart(2, '0')} · ${layer.name}`,
-        dark,
-        layer.accent
-      ),
-    [dark, index, layer.accent, layer.name]
-  );
-  const labelSize = useMemo<[number, number, number]>(() => {
-    const image = labelTexture?.image as HTMLCanvasElement | undefined;
-    const ratio = image ? image.width / image.height : 3.2;
-    return [0.22 * ratio, 0.22, 1];
-  }, [labelTexture]);
-
-  useEffect(() => () => labelTexture?.dispose(), [labelTexture]);
 
   useFrame((_, delta) => {
-    const dt = Math.min(delta, 0.05);
     if (!group.current) return;
-    const targetY = baseY + (active ? 0.2 : 0);
-    const targetScale = active ? 1.04 : 1;
+    const targetScale = active ? 1.03 : 1;
+    const targetY = slot.position[1] + (active ? 0.03 : 0);
     if (reduced) {
-      group.current.position.y = targetY;
       group.current.scale.setScalar(targetScale);
+      group.current.position.y = targetY;
     } else {
+      const dt = Math.min(delta, 0.05);
+      group.current.scale.setScalar(
+        THREE.MathUtils.damp(group.current.scale.x, targetScale, 9, dt)
+      );
       group.current.position.y = THREE.MathUtils.damp(
         group.current.position.y,
         targetY,
-        8,
+        9,
         dt
-      );
-      group.current.scale.setScalar(
-        THREE.MathUtils.damp(group.current.scale.x, targetScale, 8, dt)
       );
     }
   });
@@ -118,60 +155,49 @@ function Plate({
   };
 
   return (
-    <group
-      ref={group}
-      position={[Math.sin(index * 1.4) * 0.06, baseY, Math.cos(index * 1.1) * 0.06]}
-    >
-      <RoundedBox
-        args={[3.4, 0.14, 2.1]}
-        radius={0.07}
-        smoothness={4}
-        onPointerOver={handleOver}
-        onPointerOut={handleOut}
-        onClick={handleClick}
-        castShadow
-      >
-        <meshStandardMaterial
-          color={dark ? '#24242b' : '#b4b4bc'}
-          metalness={0.3}
-          roughness={0.48}
-          emissive={layer.accent}
-          emissiveIntensity={active ? 0.8 : 0.16}
-        />
-      </RoundedBox>
-      <mesh position={[0, 0.078, 1.06]}>
-        <boxGeometry args={[3.2, 0.008, 0.018]} />
-        <meshBasicMaterial
-          color={layer.accent}
-          transparent
-          opacity={active ? 1 : 0.45}
-        />
-      </mesh>
-      <mesh position={[0, 0, 0]}>
-        <cylinderGeometry args={[0.012, 0.012, 2.2, 10]} />
-        <meshBasicMaterial
-          color={dark ? '#71717a' : '#a1a1aa'}
-          transparent
-          opacity={0.22}
-        />
-      </mesh>
-      {labelTexture ? (
-        <sprite position={[-2.02, 0.02, 1.18]} scale={labelSize} renderOrder={10}>
-          <spriteMaterial
-            map={labelTexture}
-            transparent
-            depthTest={false}
-            depthWrite={false}
-            toneMapped={false}
-            opacity={active ? 1 : 0.86}
+    <>
+      <group ref={group} position={slot.position}>
+        <Billboard>
+          <LamellarPlate
+            width={slot.width}
+            height={0.15}
+            depth={0.72}
+            accent={slot.accent}
+            dark={dark}
+            variant={index % 2 === 0 ? 'a' : 'b'}
+            lacingRows={2}
+            lacingCols={6}
+            seed={index}
+            active={active}
+            onPointerOver={handleOver}
+            onPointerOut={handleOut}
+            onClick={handleClick}
           />
-        </sprite>
+        </Billboard>
+      </group>
+      {!compact ? (
+        <>
+          <Tag
+            text={`${String(index + 1).padStart(2, '0')} · ${layer.name}`}
+            position={slot.tag}
+            accent={slot.accent}
+            dark={dark}
+            active={active}
+            scale={0.18}
+          />
+          <Leader
+            from={slot.branchEnd}
+            to={slot.tag}
+            color={slot.accent}
+            active={active}
+          />
+        </>
       ) : null}
-    </group>
+    </>
   );
 }
 
-function LayerScene({
+function CanopyScene({
   layers,
   active,
   onActive,
@@ -186,100 +212,90 @@ function LayerScene({
   dark: boolean;
   coarse: boolean;
 }) {
-  const spin = useRef<THREE.Group>(null);
-
-  useFrame((_, delta) => {
-    if (reduced || !coarse || !spin.current) return;
-    spin.current.rotation.y += Math.min(delta, 0.05) * 0.12;
-  });
+  const palette = samuraiPalette(dark);
+  const compact = useThree((state) => state.size.width < 640);
+  const layout = useMemo(
+    () => layerLayout(layers.length, dark),
+    [dark, layers.length]
+  );
 
   return (
     <>
-      <ambientLight intensity={dark ? 0.55 : 0.72} />
-      <directionalLight position={[5, 7, 5]} intensity={dark ? 1.6 : 1.45} />
-      <pointLight position={[-4, 3, 4]} intensity={dark ? 14 : 5} color="#5ad4e6" />
-      <pointLight position={[4, 1, -3]} intensity={dark ? 10 : 4} color="#948ae3" />
+      <hemisphereLight
+        args={[palette.bone, palette.inkDeep, dark ? 0.55 : 0.85]}
+      />
+      <directionalLight
+        position={[5, 7, 6]}
+        intensity={dark ? 2.4 : 2.7}
+        color={dark ? '#ffe8c8' : '#fff2dd'}
+      />
+      <directionalLight
+        position={[-6, 2, -4]}
+        intensity={dark ? 1.0 : 0.8}
+        color={palette.ai}
+      />
+      <pointLight
+        position={[0, 0.4, 4]}
+        intensity={dark ? 14 : 7}
+        distance={12}
+        decay={2}
+        color={palette.shu}
+      />
+      <directionalLight
+        position={[-3, 4, -2]}
+        intensity={dark ? 1.2 : 0.6}
+        color={palette.brass}
+      />
 
-      <group ref={spin} rotation={[0, -0.35, 0]}>
-        <mesh position={[0, -1.03, 0]} rotation={[Math.PI / 2, 0, 0]}>
-          <torusGeometry args={[2.7, 0.006, 8, 96]} />
-          <meshBasicMaterial
-            color={dark ? '#3f3f46' : '#d4d4d8'}
-            transparent
-            opacity={0.42}
+      <group>
+        <Trunk dark={dark} />
+        <Crown dark={dark} y={1.36} />
+        <Plinth dark={dark} />
+        <Enso dark={dark} />
+
+        {layout.map((slot, index) => (
+          <BranchTube
+            key={`branch-${layers[index].name}`}
+            from={slot.branchStart}
+            to={slot.branchEnd}
+            color={palette.brass}
+            lift={0.06}
           />
-        </mesh>
-        <mesh position={[0, 1.02, 0]} rotation={[Math.PI / 2, 0, 0]}>
-          <torusGeometry args={[2.1, 0.005, 8, 80]} />
-          <meshBasicMaterial
-            color={dark ? '#52525b' : '#a1a1aa'}
-            transparent
-            opacity={0.28}
-          />
-        </mesh>
+        ))}
 
         {layers.map((layer, index) => (
-          <Plate
+          <LayerPlate
             key={layer.name}
             layer={layer}
+            slot={layout[index]}
             index={index}
             active={active === index}
             dark={dark}
             reduced={reduced}
+            compact={compact}
             onOver={() => onActive(index)}
             onOut={() => onActive(null)}
             onSelect={() => onActive(index)}
           />
         ))}
-
-        <Sparkles
-          count={24}
-          scale={[7, 3.5, 7]}
-          size={1.2}
-          speed={reduced ? 0 : 0.22}
-          opacity={0.4}
-          color={dark ? '#a1a1aa' : '#71717a'}
-        />
       </group>
 
       {!coarse ? (
         <OrbitControls
           makeDefault
-          target={[0, 0, 0]}
+          target={[0, -0.02, 0.05]}
           enableZoom={false}
           enablePan={false}
           enableDamping
           dampingFactor={0.08}
-          rotateSpeed={0.6}
+          rotateSpeed={0.5}
           autoRotate={!reduced && active === null}
-          autoRotateSpeed={0.45}
-          minPolarAngle={Math.PI / 3.4}
-          maxPolarAngle={Math.PI / 2.15}
+          autoRotateSpeed={0.28}
+          minPolarAngle={Math.PI / 3.5}
+          maxPolarAngle={Math.PI / 2.1}
         />
       ) : null}
     </>
-  );
-}
-
-function StaticStack({ layers }: { layers: LayerData[] }) {
-  return (
-    <div className="x-anatomy x-layer-static-fallback" aria-hidden="true">
-      <div className="x-anatomy-stage">
-        <div className="x-anatomy-orbit">
-          <div className="x-anatomy-stack">
-            {layers.map((layer, index) => (
-              <div
-                key={layer.name}
-                className="x-anatomy-layer"
-                style={
-                  { '--i': index, '--accent': layer.accent } as CSSProperties
-                }
-              />
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
   );
 }
 
@@ -301,7 +317,7 @@ export default function LayerStack({
   const coarse = useCoarsePointer();
   const inView = useInView(containerRef);
   const current = active === null ? null : layers[active];
-  const staticStack = <StaticStack layers={layers} />;
+  const staticTree = <StaticTree count={layers.length} />;
 
   return (
     <div
@@ -312,13 +328,13 @@ export default function LayerStack({
       role="group"
       aria-label={ariaLabel}
     >
-      {!ready ? staticStack : null}
+      {!ready ? staticTree : null}
 
       <div className="x-orbit-canvas">
-        <SceneBoundary fallback={staticStack}>
+        <SceneBoundary fallback={staticTree}>
           <Canvas
             dpr={[1, 1.75]}
-            camera={{ position: [5.2, 4.4, 6.2], fov: 38 }}
+            camera={{ position: [5.0, 2.9, 7.6], fov: 31 }}
             gl={{ alpha: true, antialias: true, powerPreference: 'high-performance' }}
             frameloop={inView ? 'always' : 'demand'}
             style={{ touchAction: 'pan-y' }}
@@ -331,7 +347,7 @@ export default function LayerStack({
             }}
           >
             <ResponsiveCamera />
-            <LayerScene
+            <CanopyScene
               layers={layers}
               active={active}
               onActive={onActive}

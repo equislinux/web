@@ -21,7 +21,7 @@ The delta only changes the package base and description. The kernel source,
 
 ## Installing from the X ISO
 
-1. Boot the 2026.11.14 ISO and run `xinstall`.
+1. Boot the 2026.11.15 ISO and run `xinstall`.
 2. Choose the package backend (`xpm` is the native path; `pacman` is explicit).
 3. Choose `linux-x (X stable)` or `linux-x-mainline (X mainline)`.
 4. Complete the install, reboot and select the X entry in the boot menu.

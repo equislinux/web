@@ -7,7 +7,7 @@ de Arch para los canales stable y testing, y `linux-x-mainline` desde la receta
 
 Estado: **publicado como fuente y binarios; no es el kernel por defecto**.
 `linux-x 7.3.4.arch1-1` (stable) y `linux-x-mainline 7.4rc1-1` (mainline) están
-construidos, firmados y publicados en SourceForge. El ISO 2026.11.14 incluye
+construidos, firmados y publicados en SourceForge. El ISO 2026.11.15 incluye
 ambos y el instalador permite seleccionarlos. Los kernels `linux`, `linux-lts`
 y `linux-zen` de Arch siguen siendo los soportados por defecto.
 
@@ -47,6 +47,7 @@ pueden convivir; Arch sigue siendo la entrada de fallback.
 - Fuentes y guías: <https://github.com/equislinux/x-kernel>
 - Licencia: GPL-3.0-or-later para los scripts. Las recetas de kernel siguen el
   empaquetado de Arch/AUR y las licencias upstream de Linux.
+- Diseño y delta: [diseño](design.md)
 - Guía de build e instalación: [manual](manual.md)
 - Detalles de publicación: [publicación](publishing.md)
 - Validación: [pruebas](testing.md)

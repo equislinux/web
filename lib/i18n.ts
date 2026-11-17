@@ -384,9 +384,9 @@ export const UI: Record<Lang, UIStrings> = {
         'Choose the desktop in the text installer. The rest of the system stays the same.',
       guideCta: 'See the desktop guide',
       caption:
-        'The X layer stack — the desktop is a choice at install time, not a fork.',
+        'Root to canopy — the desktop is a choice at install time, not a fork.',
       layersAlt:
-        'Isometric illustration of the six X Linux layers: Arch base, X system, generations, desktop choices, shell and apps, and signed delivery.',
+        'Tree diagram of the six X Linux layers: Arch base at the roots, the X system as the trunk, and generations, desktop choices, shell and apps, and signed delivery along the branches.',
       hyprland: 'Hyprland',
       hyprlandDesc: 'equisdots · Lua · light/dark',
       niri: 'niri',
@@ -460,7 +460,7 @@ export const UI: Record<Lang, UIStrings> = {
       sceneKicker: 'X / KERNEL PIPELINE',
       sceneHint: 'Drag to orbit · select a stage',
       sceneCaption:
-        'From the upstream recipe to the signed SourceForge repositories — builds and publication are manual.',
+        'From the upstream recipe at the root to the signed SourceForge repositories in the canopy — builds and publication are manual.',
       layersLabel: 'Kernel pipeline stages',
       idleTitle: 'linux-x',
       idleMeta: 'kernel pipeline',
@@ -471,7 +471,7 @@ export const UI: Record<Lang, UIStrings> = {
           name: 'stable',
           version: '7.3.4.arch1-1',
           repo: '[x-kernel]',
-          desc: 'Arch core/linux recipe. Published and bundled in the 2026.11.14 ISO.',
+          desc: 'Arch core/linux recipe. Published and bundled in the 2026.11.15 ISO.',
           state: 'published',
         },
         {
@@ -743,9 +743,9 @@ export const UI: Record<Lang, UIStrings> = {
         'Elige el escritorio en el instalador de texto. El resto del sistema no cambia.',
       guideCta: 'Ver la guía de escritorios',
       caption:
-        'El stack de capas de X — el escritorio se elige al instalar, no es un fork.',
+        'De la raíz a la copa — el escritorio se elige al instalar, no es un fork.',
       layersAlt:
-        'Ilustración isométrica de las seis capas de X Linux: base Arch, sistema X, generaciones, escritorios, shell y apps, y entrega firmada.',
+        'Diagrama en forma de árbol de las seis capas de X Linux: base Arch en las raíces, sistema X como tronco y generaciones, escritorios, shell y apps y entrega firmada en las ramas.',
       hyprland: 'Hyprland',
       hyprlandDesc: 'equisdots · Lua · claro/oscuro',
       niri: 'niri',
@@ -819,7 +819,7 @@ export const UI: Record<Lang, UIStrings> = {
       sceneKicker: 'X / PIPELINE DEL KERNEL',
       sceneHint: 'Arrastra para orbitar · elige una etapa',
       sceneCaption:
-        'De la receta upstream a los repositorios firmados de SourceForge — los builds y la publicación son manuales.',
+        'De la receta upstream en la raíz a los repositorios firmados de SourceForge en la copa — los builds y la publicación son manuales.',
       layersLabel: 'Etapas del pipeline del kernel',
       idleTitle: 'linux-x',
       idleMeta: 'pipeline del kernel',
@@ -830,7 +830,7 @@ export const UI: Record<Lang, UIStrings> = {
           name: 'stable',
           version: '7.3.4.arch1-1',
           repo: '[x-kernel]',
-          desc: 'Receta core/linux de Arch. Publicado e incluido en el ISO 2026.11.14.',
+          desc: 'Receta core/linux de Arch. Publicado e incluido en el ISO 2026.11.15.',
           state: 'publicado',
         },
         {

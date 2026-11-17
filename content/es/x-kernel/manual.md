@@ -23,7 +23,7 @@ upstream.
 
 ## Instalar desde el ISO de X
 
-1. Arranca el ISO 2026.11.14 y ejecuta `xinstall`.
+1. Arranca el ISO 2026.11.15 y ejecuta `xinstall`.
 2. Elige el backend de paquetes (`xpm` es la vía nativa; `pacman` es explícito).
 3. Elige `linux-x (X stable)` o `linux-x-mainline (X mainline)`.
 4. Completa la instalación, reinicia y selecciona la entrada X en el menú de

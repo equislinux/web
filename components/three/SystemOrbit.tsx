@@ -2,11 +2,22 @@
 
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { Canvas, useFrame, useThree, type ThreeEvent } from '@react-three/fiber';
-import { Float, OrbitControls, Sparkles } from '@react-three/drei';
+import { Billboard, OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
 import Link from 'next/link';
 import type { Lang, SceneNode } from '@/lib/i18n';
-import { createLabelTexture } from './labelTexture';
+import {
+  BranchTube,
+  Crown,
+  Enso,
+  LamellarPlate,
+  Leader,
+  Plinth,
+  StaticTree,
+  Tag,
+  Trunk,
+} from './treeKit';
+import { samuraiAccent, samuraiPalette } from './samuraiTheme';
 import {
   SceneBoundary,
   useCoarsePointer,
@@ -27,8 +38,6 @@ export interface SystemOrbitProps {
   readMore: string;
 }
 
-const ACCENTS = ['#5ad4e6', '#948ae3', '#fc618d', '#fd9353', '#7bd88f', '#fce566'];
-
 const NODE_DOCS: Record<string, string> = {
   x: 'x',
   packages: 'x',
@@ -40,184 +49,94 @@ const NODE_DOCS: Record<string, string> = {
   iso: 'x/installer',
 };
 
-const STATIC_POSITIONS = [
-  { left: '77%', top: '22%' },
-  { left: '84%', top: '57%' },
-  { left: '64%', top: '81%' },
-  { left: '31%', top: '83%' },
-  { left: '15%', top: '53%' },
-  { left: '25%', top: '20%' },
-];
+type Vec3 = [number, number, number];
+
+interface BranchSlot {
+  start: Vec3;
+  end: Vec3;
+  tag: Vec3;
+  accent: string;
+}
+
+function branchLayout(count: number, dark: boolean): BranchSlot[] {
+  const span = count <= 1 ? 0 : Math.min(2.5, 1.2 + count * 0.22);
+  return Array.from({ length: count }, (_, index) => {
+    const t = count <= 1 ? 0.5 : index / (count - 1);
+    const angle = -span / 2 + t * span;
+    const y = 0.95 - t * 1.7;
+    const radius = 1.38 + 0.14 * Math.sin(index * 1.9);
+    const x = Math.sin(angle) * radius;
+    const z = Math.cos(angle) * radius;
+    const accent = samuraiAccent(index, dark);
+
+    let tag: Vec3;
+    if (x < 0 && y < 0.15) {
+      tag = [x - 0.05, y + 0.5, z + 0.15];
+    } else {
+      const side = x >= 0 ? 1 : -1;
+      tag = [x + side * 0.82, y + 0.26, z + 0.12];
+    }
+
+    return {
+      start: [0, y - 0.12, 0],
+      end: [x, y, z],
+      tag,
+      accent,
+    };
+  });
+}
 
 function ResponsiveCamera() {
   const { camera, size } = useThree();
 
   useEffect(() => {
     const aspect = size.width / Math.max(size.height, 1);
-    const distance = aspect < 1.05 ? 12.2 : aspect < 1.35 ? 8.2 : 6.4;
-    camera.position.set(0, 1.6, distance);
-    camera.lookAt(0, 0, 0);
+    const scale = aspect < 1.05 ? 1.4 : aspect < 1.4 ? 1.12 : 1;
+    camera.position.set(5.0 * scale, 2.7 * scale, 7.6 * scale);
+    camera.lookAt(0, 0, 0.1);
     camera.updateProjectionMatrix();
   }, [camera, size.width, size.height]);
 
   return null;
 }
 
-function Core({ dark, reduced }: { dark: boolean; reduced: boolean }) {
-  const shell = useRef<THREE.Mesh>(null);
-
-  useFrame((_, delta) => {
-    if (reduced || !shell.current) return;
-    shell.current.rotation.y += Math.min(delta, 0.05) * 0.1;
-  });
-
-  return (
-    <Float
-      speed={reduced ? 0 : 1.15}
-      rotationIntensity={reduced ? 0 : 0.22}
-      floatIntensity={reduced ? 0 : 0.35}
-    >
-      <group>
-        <mesh castShadow>
-          <icosahedronGeometry args={[0.62, 1]} />
-          <meshStandardMaterial
-            color={dark ? '#1f1f24' : '#d4d4d8'}
-            metalness={0.38}
-            roughness={0.55}
-            emissive={dark ? '#5ad4e6' : '#948ae3'}
-            emissiveIntensity={dark ? 0.2 : 0.08}
-          />
-        </mesh>
-        <mesh ref={shell} scale={1.32}>
-          <icosahedronGeometry args={[0.62, 1]} />
-          <meshBasicMaterial
-            color={dark ? '#5ad4e6' : '#52525b'}
-            wireframe
-            transparent
-            opacity={dark ? 0.34 : 0.22}
-          />
-        </mesh>
-        <mesh rotation={[Math.PI / 2, 0, 0]}>
-          <torusGeometry args={[1.34, 0.006, 8, 96]} />
-          <meshBasicMaterial
-            color={dark ? '#f4f4f5' : '#18181b'}
-            transparent
-            opacity={0.22}
-          />
-        </mesh>
-      </group>
-    </Float>
-  );
-}
-
-function OrbitRings({ dark, reduced }: { dark: boolean; reduced: boolean }) {
-  const group = useRef<THREE.Group>(null);
-
-  useFrame((_, delta) => {
-    if (reduced || !group.current) return;
-    group.current.rotation.z += Math.min(delta, 0.05) * 0.035;
-  });
-
-  return (
-    <group ref={group} rotation={[0.92, 0.18, 0.08]}>
-      {[2.05, 2.9, 3.6].map((radius, index) => (
-        <mesh key={radius} rotation={[0, 0, index * 0.42]}>
-          <torusGeometry args={[radius, 0.006, 6, 128]} />
-          <meshBasicMaterial
-            color={dark ? '#3f3f46' : '#d4d4d8'}
-            transparent
-            opacity={index === 0 ? 0.6 : 0.4}
-          />
-        </mesh>
-      ))}
-    </group>
-  );
-}
-
-function Connection({
-  from,
-  to,
-  color,
-  active,
-}: {
-  from: [number, number, number];
-  to: [number, number, number];
-  color: string;
-  active: boolean;
-}) {
-  const line = useMemo(() => {
-    const geometry = new THREE.BufferGeometry().setFromPoints([
-      new THREE.Vector3(...from),
-      new THREE.Vector3(...to),
-    ]);
-    const material = new THREE.LineBasicMaterial({
-      color,
-      transparent: true,
-      opacity: active ? 0.75 : 0.18,
-    });
-    return new THREE.Line(geometry, material);
-  }, [from, to, color, active]);
-
-  useEffect(
-    () => () => {
-      line.geometry.dispose();
-      line.material.dispose();
-    },
-    [line]
-  );
-
-  return <primitive object={line} />;
-}
-
-function Node({
+function NodePlate({
   node,
-  position,
-  accent,
+  slot,
   active,
-  reduced,
   dark,
+  reduced,
+  compact,
   onOver,
   onOut,
   onSelect,
 }: {
   node: SceneNode;
-  position: THREE.Vector3;
-  accent: string;
+  slot: BranchSlot;
   active: boolean;
-  reduced: boolean;
   dark: boolean;
+  reduced: boolean;
+  compact: boolean;
   onOver: () => void;
   onOut: () => void;
   onSelect: () => void;
 }) {
-  const mesh = useRef<THREE.Mesh>(null);
-  const halo = useRef<THREE.Mesh>(null);
-  const labelTexture = useMemo(
-    () => createLabelTexture(node.label, dark, accent),
-    [node.label, dark, accent]
-  );
-  const labelSize = useMemo<[number, number, number]>(() => {
-    const image = labelTexture?.image as HTMLCanvasElement | undefined;
-    const ratio = image ? image.width / image.height : 2.4;
-    return [0.29 * ratio, 0.29, 1];
-  }, [labelTexture]);
-
-  useEffect(() => () => labelTexture?.dispose(), [labelTexture]);
+  const group = useRef<THREE.Group>(null);
 
   useFrame((_, delta) => {
-    const dt = Math.min(delta, 0.05);
-    if (mesh.current) {
-      const target = active ? 1.28 : 1;
-      if (reduced) {
-        mesh.current.scale.setScalar(target);
-      } else {
-        mesh.current.scale.setScalar(
-          THREE.MathUtils.damp(mesh.current.scale.x, target, 9, dt)
-        );
-      }
-    }
-    if (halo.current && !reduced) {
-      halo.current.rotation.z += dt * (active ? 1.1 : 0.35);
+    if (!group.current) return;
+    const target = active ? 1.04 : 1;
+    if (reduced) {
+      group.current.scale.setScalar(target);
+    } else {
+      group.current.scale.setScalar(
+        THREE.MathUtils.damp(
+          group.current.scale.x,
+          target,
+          9,
+          Math.min(delta, 0.05)
+        )
+      );
     }
   });
 
@@ -235,48 +154,50 @@ function Node({
   };
 
   return (
-    <group position={position}>
-      <mesh
-        ref={mesh}
-        onPointerOver={handleOver}
-        onPointerOut={handleOut}
-        onClick={handleClick}
-      >
-        <octahedronGeometry args={[0.23, 0]} />
-        <meshStandardMaterial
-          color={accent}
-          emissive={accent}
-          emissiveIntensity={active ? 1.35 : 0.35}
-          metalness={0.55}
-          roughness={0.18}
-        />
-      </mesh>
-      <mesh ref={halo} rotation={[Math.PI / 2.4, 0.25, 0]}>
-        <torusGeometry args={[0.38, 0.008, 8, 48]} />
-        <meshBasicMaterial
-          color={accent}
-          transparent
-          opacity={active ? 0.95 : 0.34}
-        />
-      </mesh>
-      {labelTexture ? (
-        <sprite position={[0, -0.56, 0]} scale={labelSize} renderOrder={10}>
-          <spriteMaterial
-            map={labelTexture}
-            transparent
-            depthTest={false}
-            depthWrite={false}
-            toneMapped={false}
-            opacity={active ? 1 : 0.86}
+    <>
+      <group ref={group} position={slot.end}>
+        <Billboard>
+          <LamellarPlate
+            width={0.58}
+            height={0.32}
+            depth={0.07}
+            accent={slot.accent}
+            dark={dark}
+            lacingRows={2}
+            lacingCols={3}
+            seed={slot.end[1] > 0 ? 1 : 0}
+            active={active}
+            onPointerOver={handleOver}
+            onPointerOut={handleOut}
+            onClick={handleClick}
           />
-        </sprite>
+        </Billboard>
+      </group>
+      {!compact ? (
+        <>
+          <Tag
+            text={node.label}
+            position={slot.tag}
+            accent={slot.accent}
+            dark={dark}
+            active={active}
+            scale={0.18}
+          />
+          <Leader
+            from={slot.end}
+            to={slot.tag}
+            color={slot.accent}
+            active={active}
+          />
+        </>
       ) : null}
-    </group>
+    </>
   );
 }
 
-function OrbitContent({
+function BranchScene({
   nodes,
+  variant,
   hovered,
   selected,
   setHovered,
@@ -286,6 +207,7 @@ function OrbitContent({
   coarse,
 }: {
   nodes: SceneNode[];
+  variant: 'hero' | 'pipeline';
   hovered: number | null;
   selected: number | null;
   setHovered: (value: number | null | ((current: number | null) => number | null)) => void;
@@ -294,74 +216,70 @@ function OrbitContent({
   dark: boolean;
   coarse: boolean;
 }) {
-  const spin = useRef<THREE.Group>(null);
+  const palette = samuraiPalette(dark);
   const activeIndex = hovered ?? selected;
-
-  const positions = useMemo(() => {
-    const count = nodes.length;
-    return nodes.map((_, index) => {
-      const ring = index % 2;
-      const angle =
-        (index / count) * Math.PI * 2 + (ring ? Math.PI / count : 0);
-      const radius = ring ? 2.95 : 2.05;
-      const height = ring ? 0.55 : -0.42;
-      return new THREE.Vector3(
-        Math.cos(angle) * radius,
-        height,
-        Math.sin(angle) * radius
-      );
-    });
-  }, [nodes]);
-
-  useFrame((_, delta) => {
-    const dt = Math.min(delta, 0.05);
-    if (!reduced && coarse && spin.current) {
-      spin.current.rotation.y += dt * (selected === null ? 0.13 : 0.035);
-    }
-  });
+  const compact = useThree((state) => state.size.width < 640);
+  const layout = useMemo(
+    () => branchLayout(nodes.length, dark),
+    [nodes.length, dark]
+  );
 
   return (
     <>
-      <ambientLight intensity={dark ? 0.55 : 0.95} />
+      <hemisphereLight
+        args={[
+          palette.bone,
+          palette.inkDeep,
+          dark ? 0.55 : 0.85,
+        ]}
+      />
       <directionalLight
-        position={[4, 6, 5]}
-        intensity={dark ? 1.8 : 2.4}
-        color="#ffffff"
+        position={[5, 7, 6]}
+        intensity={dark ? 2.4 : 2.7}
+        color={dark ? '#ffe8c8' : '#fff2dd'}
+      />
+      <directionalLight
+        position={[-6, 2, -4]}
+        intensity={dark ? 1.0 : 0.8}
+        color={palette.ai}
       />
       <pointLight
-        position={[-4, -2, 3]}
-        intensity={dark ? 11 : 7}
-        color="#5ad4e6"
+        position={[0, 0.5, 4]}
+        intensity={dark ? 14 : 7}
+        distance={12}
+        decay={2}
+        color={palette.shu}
       />
-      <pointLight
-        position={[4, 2, -3]}
-        intensity={dark ? 9 : 6}
-        color="#948ae3"
+      <directionalLight
+        position={[-3, 4, -2]}
+        intensity={dark ? 1.2 : 0.6}
+        color={palette.brass}
       />
 
-      <group ref={spin} rotation={[0.12, 0, 0]}>
-        <Core dark={dark} reduced={reduced} />
-        <OrbitRings dark={dark} reduced={reduced} />
+      <group position={[0, variant === 'hero' ? 0.4 : 0.05, 0]}>
+        <Trunk dark={dark} />
+        <Crown dark={dark} y={1.28} />
+        <Plinth dark={dark} />
+        <Enso dark={dark} />
 
-        {positions.map((position, index) => (
-          <Connection
-            key={`edge-${nodes[index].id}`}
-            from={[0, 0, 0]}
-            to={[position.x, position.y, position.z]}
-            color={ACCENTS[index % ACCENTS.length]}
-            active={activeIndex === index}
+        {layout.map((slot, index) => (
+          <BranchTube
+            key={`branch-${nodes[index].id}`}
+            from={slot.start}
+            to={slot.end}
+            color={palette.brass}
           />
         ))}
 
         {nodes.map((node, index) => (
-          <Node
+          <NodePlate
             key={node.id}
             node={node}
-            position={positions[index]}
-            accent={ACCENTS[index % ACCENTS.length]}
+            slot={layout[index]}
             active={activeIndex === index}
-            reduced={reduced}
             dark={dark}
+            reduced={reduced}
+            compact={compact}
             onOver={() => setHovered(index)}
             onOut={() =>
               setHovered((current) => (current === index ? null : current))
@@ -371,66 +289,24 @@ function OrbitContent({
             }
           />
         ))}
-
-        <Sparkles
-          count={28}
-          scale={[8, 5, 8]}
-          size={1.5}
-          speed={reduced ? 0 : 0.25}
-          opacity={0.45}
-          color={dark ? '#a1a1aa' : '#71717a'}
-        />
       </group>
 
       {!coarse ? (
         <OrbitControls
           makeDefault
+          target={[0, variant === 'hero' ? 0.1 : 0.05, 0.1]}
           enableZoom={false}
           enablePan={false}
           enableDamping
           dampingFactor={0.08}
-          rotateSpeed={0.65}
+          rotateSpeed={0.5}
           autoRotate={!reduced && hovered === null && selected === null}
-          autoRotateSpeed={0.55}
+          autoRotateSpeed={0.28}
           minPolarAngle={Math.PI / 3.2}
-          maxPolarAngle={Math.PI / 1.75}
+          maxPolarAngle={Math.PI / 1.9}
         />
       ) : null}
     </>
-  );
-}
-
-function StaticDiagram({
-  nodes,
-  activeIndex,
-}: {
-  nodes: SceneNode[];
-  activeIndex: number | null;
-}) {
-  return (
-    <div className="x-orbit-static" aria-hidden="true">
-      <span className="x-orbit-static-ring" />
-      <span className="x-orbit-static-ring x-orbit-static-ring-inner" />
-      {nodes.map((node, index) => {
-        const position =
-          STATIC_POSITIONS[index % STATIC_POSITIONS.length] ??
-          STATIC_POSITIONS[0];
-        return (
-          <span
-            key={node.id}
-            className="x-orbit-static-node"
-            data-active={activeIndex === index}
-            style={
-              {
-                left: position.left,
-                top: position.top,
-                '--accent': ACCENTS[index % ACCENTS.length],
-              } as CSSProperties
-            }
-          />
-        );
-      })}
-    </div>
   );
 }
 
@@ -455,10 +331,7 @@ export default function SystemOrbit({
   const inView = useInView(containerRef);
   const activeIndex = hovered ?? selected;
   const active = activeIndex === null ? center : nodes[activeIndex];
-
-  const staticDiagram = (
-    <StaticDiagram nodes={nodes} activeIndex={activeIndex} />
-  );
+  const staticTree = <StaticTree count={nodes.length} />;
 
   return (
     <figure className="x-orbit-wrap" ref={containerRef}>
@@ -469,13 +342,13 @@ export default function SystemOrbit({
         role="group"
         aria-label={ariaLabel}
       >
-        {!ready ? staticDiagram : null}
+        {!ready ? staticTree : null}
 
         <div className="x-orbit-canvas">
-          <SceneBoundary fallback={staticDiagram}>
+          <SceneBoundary fallback={staticTree}>
             <Canvas
               dpr={[1, 1.75]}
-              camera={{ position: [0, 1.6, 6.4], fov: 38 }}
+              camera={{ position: [5.0, 2.7, 7.6], fov: 31 }}
               gl={{
                 alpha: true,
                 antialias: true,
@@ -492,8 +365,9 @@ export default function SystemOrbit({
               }}
             >
               <ResponsiveCamera />
-              <OrbitContent
+              <BranchScene
                 nodes={nodes}
+                variant={variant}
                 hovered={hovered}
                 selected={selected}
                 setHovered={setHovered}
@@ -535,7 +409,7 @@ export default function SystemOrbit({
             className="x-orbit-chip"
             data-active={activeIndex === index}
             aria-pressed={selected === index}
-            style={{ '--accent': ACCENTS[index % ACCENTS.length] } as CSSProperties}
+            style={{ '--accent': samuraiAccent(index, dark) } as CSSProperties}
             onMouseEnter={() => setHovered(index)}
             onMouseLeave={() =>
               setHovered((current) => (current === index ? null : current))

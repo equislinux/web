@@ -24,30 +24,47 @@ export function createLabelTexture(
   accent?: string
 ) {
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
-  const font = `600 ${13 * dpr}px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace`;
+  const font = `600 ${12 * dpr}px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace`;
   const label = text.toUpperCase();
   const measure = document.createElement('canvas').getContext('2d');
   if (!measure) return null;
   measure.font = font;
-  const padding = 9 * dpr;
-  const width = Math.ceil(measure.measureText(label).width + padding * 2);
-  const height = Math.ceil(24 * dpr);
+  const padding = 10 * dpr;
+  const barWidth = 3 * dpr;
+  const textWidth = measure.measureText(label).width;
+  const width = Math.ceil(textWidth + padding * 2 + barWidth);
+  const height = Math.ceil(26 * dpr);
   const canvas = document.createElement('canvas');
   canvas.width = width;
   canvas.height = height;
   const context = canvas.getContext('2d');
   if (!context) return null;
   context.font = font;
-  context.textAlign = 'center';
+  context.textAlign = 'left';
   context.textBaseline = 'middle';
-  roundedRect(context, 0.5 * dpr, 0.5 * dpr, width - dpr, height - dpr, height / 2);
-  context.fillStyle = dark ? 'rgba(9, 9, 11, 0.84)' : 'rgba(250, 250, 250, 0.9)';
+
+  roundedRect(
+    context,
+    0.5 * dpr,
+    0.5 * dpr,
+    width - dpr,
+    height - dpr,
+    3 * dpr
+  );
+  context.fillStyle = dark ? 'rgba(20, 17, 14, 0.92)' : 'rgba(242, 237, 226, 0.95)';
   context.fill();
-  context.strokeStyle = accent ?? (dark ? 'rgba(244, 244, 245, 0.24)' : 'rgba(24, 24, 27, 0.16)');
+  context.strokeStyle = dark
+    ? 'rgba(176, 138, 84, 0.42)'
+    : 'rgba(143, 111, 63, 0.5)';
   context.lineWidth = dpr;
   context.stroke();
-  context.fillStyle = dark ? '#f4f4f5' : '#18181b';
-  context.fillText(label, width / 2, height / 2 + 0.5 * dpr);
+
+  context.fillStyle = accent ?? '#a63b2a';
+  context.fillRect(0.5 * dpr, 4 * dpr, barWidth, height - 8 * dpr);
+
+  context.fillStyle = dark ? '#e7dfcf' : '#1c1a17';
+  context.fillText(label, padding + barWidth, height / 2 + 0.5 * dpr);
+
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
   texture.anisotropy = 4;

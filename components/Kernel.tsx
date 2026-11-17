@@ -3,10 +3,11 @@
 import Link from 'next/link';
 import { useState, type CSSProperties } from 'react';
 import LayerStackStage from './three/LayerStackStage';
+import { SAMURAI_ACCENTS } from './three/samuraiTheme';
 import { UI, type Lang } from '@/lib/i18n';
 
-const ACCENTS = ['#5ad4e6', '#7bd88f', '#fce566', '#fd9353', '#fc618d'];
-const CHANNEL_ACCENTS = ['#7bd88f', '#fce566', '#fc618d'];
+const ACCENTS = [...SAMURAI_ACCENTS];
+const CHANNEL_ACCENTS = [SAMURAI_ACCENTS[0], SAMURAI_ACCENTS[1], SAMURAI_ACCENTS[2]];
 
 export default function Kernel({ lang }: { lang: Lang }) {
   const t = UI[lang].kernel;
@@ -63,10 +64,10 @@ export default function Kernel({ lang }: { lang: Lang }) {
                 <div className="flex items-center gap-2">
                   <span
                     aria-hidden="true"
-                    className="h-1.5 w-1.5 rounded-full"
+                    className="h-1.5 w-1.5 rotate-45 rounded-[1px]"
                     style={{
                       background: CHANNEL_ACCENTS[index],
-                      boxShadow: `0 0 10px ${CHANNEL_ACCENTS[index]}66`,
+                      boxShadow: `0 0 0 3px ${CHANNEL_ACCENTS[index]}22`,
                     }}
                   />
                   <h3 className="text-xs font-medium text-zinc-900 dark:text-zinc-100">

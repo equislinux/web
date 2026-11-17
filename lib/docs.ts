@@ -49,7 +49,7 @@ const SECTIONS: SectionManifest[] = [
   {
     id: 'x-kernel',
     title: { en: 'x-kernel — X kernels', es: 'x-kernel — kernels de X' },
-    files: ['overview', 'manual', 'publishing', 'testing'],
+    files: ['overview', 'design', 'manual', 'publishing', 'testing'],
   },
   {
     id: 'wsl',

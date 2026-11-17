@@ -7,7 +7,7 @@ recipe. Only the package base and description change.
 
 Status: **published as source and binaries; not the default.** Stable
 `linux-x 7.3.4.arch1-1` and mainline `linux-x-mainline 7.4rc1-1` are built,
-signed and published to SourceForge. The 2026.11.14 X ISO bundles both, and the
+signed and published to SourceForge. The 2026.11.15 X ISO bundles both, and the
 installer can select them. Arch `linux`, `linux-lts` and `linux-zen` remain the
 default supported kernels.
 
@@ -44,6 +44,7 @@ Arch remains the fallback entry.
 - Source and guides: <https://github.com/equislinux/x-kernel>
 - License: GPL-3.0-or-later for the scripts. Kernel recipes follow Arch/AUR
   packaging and upstream Linux licenses.
+- Design and delta: [design](design.md)
 - Build and install guide: [manual](manual.md)
 - Publication details: [publishing](publishing.md)
 - Validation: [testing](testing.md)

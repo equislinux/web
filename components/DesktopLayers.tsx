@@ -3,9 +3,10 @@
 import Link from 'next/link';
 import { useState, type CSSProperties } from 'react';
 import LayerStackStage from './three/LayerStackStage';
+import { SAMURAI_ACCENTS } from './three/samuraiTheme';
 import { UI, type Lang } from '@/lib/i18n';
 
-const ACCENTS = ['#7bd88f', '#5ad4e6', '#fce566', '#fd9353', '#fc618d', '#948ae3'];
+const ACCENTS = [...SAMURAI_ACCENTS];
 
 export default function DesktopLayers({ lang }: { lang: Lang }) {
   const t = UI[lang];
@@ -15,10 +16,10 @@ export default function DesktopLayers({ lang }: { lang: Lang }) {
     accent: ACCENTS[index],
   }));
   const desktops = [
-    { label: t.desktops.hyprland, desc: t.desktops.hyprlandDesc, accent: '#fc618d' },
-    { label: t.desktops.niri, desc: t.desktops.niriDesc, accent: '#5ad4e6' },
-    { label: t.desktops.kde, desc: t.desktops.kdeDesc, accent: '#948ae3' },
-    { label: t.desktops.console, desc: t.desktops.consoleDesc, accent: '#a1a1aa' },
+    { label: t.desktops.hyprland, desc: t.desktops.hyprlandDesc, accent: SAMURAI_ACCENTS[2] },
+    { label: t.desktops.niri, desc: t.desktops.niriDesc, accent: SAMURAI_ACCENTS[1] },
+    { label: t.desktops.kde, desc: t.desktops.kdeDesc, accent: SAMURAI_ACCENTS[4] },
+    { label: t.desktops.console, desc: t.desktops.consoleDesc, accent: SAMURAI_ACCENTS[3] },
   ];
 
   return (
@@ -57,10 +58,10 @@ export default function DesktopLayers({ lang }: { lang: Lang }) {
               <div className="flex items-center gap-2">
                 <span
                   aria-hidden="true"
-                  className="h-1.5 w-1.5 rounded-full"
+                  className="h-1.5 w-1.5 rotate-45 rounded-[1px]"
                   style={{
                     background: desktop.accent,
-                    boxShadow: `0 0 10px ${desktop.accent}66`,
+                    boxShadow: `0 0 0 3px ${desktop.accent}22`,
                   }}
                 />
                 <h3 className="text-xs font-medium text-zinc-900 dark:text-zinc-100">

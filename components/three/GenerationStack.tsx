@@ -3,9 +3,14 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import Link from 'next/link';
 import { Canvas, useFrame, useThree, type ThreeEvent } from '@react-three/fiber';
-import { OrbitControls, RoundedBox, Sparkles } from '@react-three/drei';
+import { OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
-import { createLabelTexture } from './labelTexture';
+import {
+  Enso,
+  Leader,
+  Tag,
+} from './treeKit';
+import { samuraiAccent, samuraiPalette } from './samuraiTheme';
 import {
   SceneBoundary,
   useCoarsePointer,
@@ -36,15 +41,40 @@ export interface GenerationStackProps {
   docsLabel: string;
 }
 
-const ACCENTS = ['#5ad4e6', '#7bd88f', '#fce566', '#fd9353', '#fc618d'];
+type Vec3 = [number, number, number];
 
-function cardPosition(index: number, count: number): [number, number, number] {
-  const center = (count - 1) / 2;
-  return [
-    (index - center) * 0.17 + Math.sin(index * 1.25) * 0.12,
-    index * 0.36 - 0.88,
-    Math.cos(index * 1.1) * 0.12,
-  ];
+interface RingSlot {
+  radius: number;
+  tube: number;
+  y: number;
+  tag: Vec3;
+  anchor: Vec3;
+  accent: string;
+}
+
+function ringLayout(count: number, dark: boolean): RingSlot[] {
+  const inner = 0.55;
+  const outer = 2.0;
+  const leftCount = Math.floor(count / 2);
+  return Array.from({ length: count }, (_, index) => {
+    const t = count <= 1 ? 0 : index / (count - 1);
+    const radius = THREE.MathUtils.lerp(inner, outer, t);
+    const tube = THREE.MathUtils.lerp(0.021, 0.011, t);
+    const y = index * 0.045;
+    const accent = samuraiAccent(index, dark);
+    const left = index < leftCount;
+    const side = left ? -1 : 1;
+    const row = left ? index : index - leftCount;
+    const tagY = left ? 0.72 - row * 0.5 : 0.56 - row * 0.46;
+    const tag: Vec3 = [side * 2.32, tagY, 1.08];
+    const anchorAngle = left ? 2.5 : 0.4;
+    const anchor: Vec3 = [
+      Math.cos(anchorAngle) * radius,
+      y + 0.02,
+      Math.sin(anchorAngle) * radius,
+    ];
+    return { radius, tube, y, tag, anchor, accent };
+  });
 }
 
 function ResponsiveCamera() {
@@ -52,96 +82,100 @@ function ResponsiveCamera() {
 
   useEffect(() => {
     const aspect = size.width / Math.max(size.height, 1);
-    const scale = aspect < 1.05 ? 1.7 : aspect < 1.35 ? 1.28 : 1;
-    camera.position.set(4.9 * scale, 4.2 * scale, 6.5 * scale);
-    camera.lookAt(0, -0.05, 0);
+    const scale = aspect < 1.05 ? 1.35 : aspect < 1.4 ? 1.12 : 1;
+    camera.position.set(4.6 * scale, 4.0 * scale, 7.2 * scale);
+    camera.lookAt(0, 0, 0);
     camera.updateProjectionMatrix();
   }, [camera, size.width, size.height]);
 
   return null;
 }
 
-function Card({
-  item,
+function RollbackCord({
+  curve,
+  color,
+  dark,
+  reduced,
+}: {
+  curve: THREE.QuadraticBezierCurve3;
+  color: string;
+  dark: boolean;
+  reduced: boolean;
+}) {
+  const palette = samuraiPalette(dark);
+  const bead = useRef<THREE.Mesh>(null);
+  const point = useMemo(() => new THREE.Vector3(), []);
+
+  useFrame(() => {
+    if (!bead.current) return;
+    const t = reduced ? 0.55 : (performance.now() / 3000) % 1;
+    curve.getPoint(t, point);
+    bead.current.position.copy(point);
+  });
+
+  return (
+    <group>
+      <mesh>
+        <tubeGeometry args={[curve, 48, 0.011, 6, false]} />
+        <meshStandardMaterial color={color} metalness={0.1} roughness={0.75} />
+      </mesh>
+      <mesh
+        position={[curve.v2.x, curve.v2.y, curve.v2.z]}
+        rotation={[Math.PI / 2, 0, 0]}
+      >
+        <torusGeometry args={[0.045, 0.014, 8, 32]} />
+        <meshStandardMaterial color={color} metalness={0.1} roughness={0.75} />
+      </mesh>
+      <mesh ref={bead}>
+        <sphereGeometry args={[0.03, 16, 16]} />
+        <meshStandardMaterial
+          color={palette.brass}
+          metalness={0.85}
+          roughness={0.3}
+        />
+      </mesh>
+    </group>
+  );
+}
+
+function Ring({
+  slot,
   index,
-  count,
+  current,
   active,
-  future,
   dark,
   reduced,
   onOver,
   onOut,
   onSelect,
 }: {
-  item: GenerationItem;
+  slot: RingSlot;
   index: number;
-  count: number;
+  current: boolean;
   active: boolean;
-  future: boolean;
   dark: boolean;
   reduced: boolean;
   onOver: () => void;
   onOut: () => void;
   onSelect: () => void;
 }) {
+  const palette = samuraiPalette(dark);
   const group = useRef<THREE.Group>(null);
-  const material = useRef<THREE.MeshStandardMaterial>(null);
-  const spriteMaterial = useRef<THREE.SpriteMaterial>(null);
-  const accent = ACCENTS[index % ACCENTS.length];
-  const base = cardPosition(index, count);
-  const current = index === count - 1;
-  const targetY = base[1] + (active ? 0.17 : 0);
-  const targetScale = active ? 1.04 : future ? 0.97 : 1;
-  const targetOpacity = future ? 0.3 : 1;
-  const targetEmissive = active ? 0.78 : future ? 0.02 : 0.08;
-  const targetLabelOpacity = future ? 0.38 : active ? 1 : 0.88;
-
-  const labelTexture = useMemo(
-    () =>
-      createLabelTexture(`${item.id} · ${item.label}`, dark, accent),
-    [dark, item.id, item.label, accent]
-  );
-  const labelSize = useMemo<[number, number, number]>(() => {
-    const image = labelTexture?.image as HTMLCanvasElement | undefined;
-    const ratio = image ? image.width / image.height : 4;
-    return [0.2 * ratio, 0.2, 1];
-  }, [labelTexture]);
-
-  useEffect(() => () => labelTexture?.dispose(), [labelTexture]);
 
   useFrame((_, delta) => {
-    const dt = Math.min(delta, 0.05);
-    if (group.current) {
-      group.current.position.y = reduced
-        ? targetY
-        : THREE.MathUtils.damp(group.current.position.y, targetY, 8, dt);
-      const scale = reduced
-        ? targetScale
-        : THREE.MathUtils.damp(group.current.scale.x, targetScale, 8, dt);
-      group.current.scale.setScalar(scale);
-    }
-    if (material.current) {
-      material.current.opacity = reduced
-        ? targetOpacity
-        : THREE.MathUtils.damp(material.current.opacity, targetOpacity, 6, dt);
-      material.current.emissiveIntensity = reduced
-        ? targetEmissive
-        : THREE.MathUtils.damp(
-            material.current.emissiveIntensity,
-            targetEmissive,
-            6,
-            dt
-          );
-    }
-    if (spriteMaterial.current) {
-      spriteMaterial.current.opacity = reduced
-        ? targetLabelOpacity
-        : THREE.MathUtils.damp(
-            spriteMaterial.current.opacity,
-            targetLabelOpacity,
-            6,
-            dt
-          );
+    if (!group.current) return;
+    const target = active ? 1.018 : 1;
+    if (reduced) {
+      group.current.scale.setScalar(target);
+    } else {
+      group.current.scale.setScalar(
+        THREE.MathUtils.damp(
+          group.current.scale.x,
+          target,
+          8,
+          Math.min(delta, 0.05)
+        )
+      );
     }
   });
 
@@ -158,130 +192,75 @@ function Card({
     onSelect();
   };
 
+  const joints = useMemo(() => {
+    if (index === 0) return [];
+    return [index * 1.7, index * 1.7 + 2.2].map((angle) => ({
+      angle,
+      position: [
+        Math.cos(angle) * slot.radius,
+        0.012,
+        Math.sin(angle) * slot.radius,
+      ] as Vec3,
+    }));
+  }, [index, slot.radius]);
+
   return (
-    <group ref={group} position={base}>
-      <RoundedBox
-        args={[2.9, 0.12, 1.8]}
-        radius={0.07}
-        smoothness={4}
+    <group ref={group} position={[0, slot.y, 0]}>
+      <mesh rotation={[Math.PI / 2, 0, 0]}>
+        <torusGeometry args={[slot.radius, slot.tube, 8, 160]} />
+        <meshPhysicalMaterial
+          color={active ? slot.accent : palette.ring}
+          metalness={0.3}
+          roughness={0.32}
+          clearcoat={0.55}
+          clearcoatRoughness={0.28}
+          emissive={active ? slot.accent : palette.ring}
+          emissiveIntensity={active ? 0.25 : 0.06}
+        />
+      </mesh>
+
+      <mesh
+        rotation={[Math.PI / 2, 0, 0]}
         onPointerOver={handleOver}
         onPointerOut={handleOut}
         onClick={handleClick}
-        castShadow
       >
-        <meshStandardMaterial
-          ref={material}
-          color={dark ? '#24242b' : '#b4b4bc'}
-          metalness={0.3}
-          roughness={0.48}
-          emissive={accent}
-          emissiveIntensity={0.08}
-          transparent
-        />
-      </RoundedBox>
+        <torusGeometry args={[slot.radius, 0.09, 6, 128]} />
+        <meshBasicMaterial transparent opacity={0} depthWrite={false} />
+      </mesh>
 
-      {[-0.34, 0, 0.34].map((z) => (
-        <mesh key={z} position={[0, 0.068, z]}>
-          <boxGeometry args={[2.2, 0.004, 0.014]} />
-          <meshBasicMaterial
-            color={dark ? '#a1a1aa' : '#52525b'}
-            transparent
-            opacity={future ? 0.1 : 0.2}
+      {joints.map((joint) => (
+        <mesh key={joint.angle} position={joint.position}>
+          <sphereGeometry args={[slot.tube * 1.9, 12, 12]} />
+          <meshStandardMaterial
+            color={palette.brass}
+            metalness={0.88}
+            roughness={0.3}
           />
         </mesh>
       ))}
 
-      <mesh position={[0, 0.068, 0.92]}>
-        <boxGeometry args={[2.6, 0.01, 0.018]} />
-        <meshBasicMaterial
-          color={accent}
-          transparent
-          opacity={active ? 1 : current ? 0.75 : 0.4}
-        />
-      </mesh>
-
       {current ? (
-        <mesh position={[1.1, 0.078, 0.62]} rotation={[Math.PI / 2, 0, 0]}>
-          <torusGeometry args={[0.1, 0.006, 8, 28]} />
-          <meshBasicMaterial color={accent} transparent opacity={0.75} />
+        <mesh
+          position={[
+            Math.cos(-0.9) * slot.radius,
+            0.035,
+            Math.sin(-0.9) * slot.radius,
+          ]}
+        >
+          <sphereGeometry args={[0.045, 16, 16]} />
+          <meshStandardMaterial
+            color={palette.shu}
+            metalness={0.15}
+            roughness={0.55}
+          />
         </mesh>
       ) : null}
-
-      {labelTexture ? (
-        <sprite position={[-1.78, 0.02, 0.98]} scale={labelSize} renderOrder={10}>
-          <spriteMaterial
-            ref={spriteMaterial}
-            map={labelTexture}
-            transparent
-            depthTest={false}
-            depthWrite={false}
-            toneMapped={false}
-            opacity={0.88}
-          />
-        </sprite>
-      ) : null}
     </group>
   );
 }
 
-function RollbackCurve({
-  from,
-  to,
-  color,
-  reduced,
-}: {
-  from: [number, number, number];
-  to: [number, number, number];
-  color: string;
-  reduced: boolean;
-}) {
-  const curve = useMemo(() => {
-    const start = new THREE.Vector3(...from);
-    const end = new THREE.Vector3(...to);
-    const control = new THREE.Vector3(
-      (from[0] + to[0]) / 2 + 1.7,
-      (from[1] + to[1]) / 2 + 1.1,
-      (from[2] + to[2]) / 2 + 1.5
-    );
-    return new THREE.QuadraticBezierCurve3(start, control, end);
-  }, [from, to]);
-  const geometry = useMemo(
-    () => new THREE.TubeGeometry(curve, 40, 0.02, 6, false),
-    [curve]
-  );
-  const pulse = useRef<THREE.Mesh>(null);
-
-  useEffect(() => () => geometry.dispose(), [geometry]);
-
-  useFrame(() => {
-    if (!pulse.current) return;
-    const t = reduced ? 0.55 : (performance.now() / 2600) % 1;
-    pulse.current.position.copy(curve.getPoint(t));
-  });
-
-  return (
-    <group>
-      <mesh geometry={geometry}>
-        <meshBasicMaterial
-          color={color}
-          transparent
-          opacity={0.92}
-          depthWrite={false}
-        />
-      </mesh>
-      <mesh position={to}>
-        <sphereGeometry args={[0.055, 16, 16]} />
-        <meshBasicMaterial color={color} toneMapped={false} />
-      </mesh>
-      <mesh ref={pulse}>
-        <sphereGeometry args={[0.035, 12, 12]} />
-        <meshBasicMaterial color={color} toneMapped={false} />
-      </mesh>
-    </group>
-  );
-}
-
-function GenerationScene({
+function RingsScene({
   items,
   active,
   onActive,
@@ -296,68 +275,72 @@ function GenerationScene({
   dark: boolean;
   coarse: boolean;
 }) {
-  const spin = useRef<THREE.Group>(null);
+  const palette = samuraiPalette(dark);
+  const compact = useThree((state) => state.size.width < 640);
+  const layout = useMemo(() => ringLayout(items.length, dark), [dark, items.length]);
   const current = items.length - 1;
-  const positions = useMemo(
-    () => items.map((_, index) => cardPosition(index, items.length)),
-    [items]
-  );
 
-  useFrame((_, delta) => {
-    if (reduced || !coarse || !spin.current) return;
-    spin.current.rotation.y += Math.min(delta, 0.05) * 0.1;
-  });
+  const cord = useMemo(() => {
+    const startRing = layout[current];
+    const targetIndex = active !== null && active !== current ? active : 0;
+    const targetRing = layout[targetIndex];
+    const start = new THREE.Vector3(
+      Math.cos(-0.9) * startRing.radius,
+      startRing.y + 0.36,
+      Math.sin(-0.9) * startRing.radius
+    );
+    const end = new THREE.Vector3(
+      Math.cos(2.4) * targetRing.radius,
+      targetRing.y + 0.3,
+      Math.sin(2.4) * targetRing.radius
+    );
+    const mid = new THREE.Vector3(1.15, 1.15, -0.35);
+    return new THREE.QuadraticBezierCurve3(start, mid, end);
+  }, [active, current, layout]);
 
-  const rollback =
-    active !== null && active < current
-      ? ([
-          positions[current][0],
-          positions[current][1] + 0.1,
-          positions[current][2],
-        ] as [number, number, number])
-      : null;
-  const target =
-    active !== null
-      ? ([
-          positions[active][0],
-          positions[active][1] + 0.1,
-          positions[active][2],
-        ] as [number, number, number])
-      : null;
+  const cordColor =
+    active !== null && active !== current
+      ? layout[active].accent
+      : palette.shu;
 
   return (
     <>
-      <ambientLight intensity={dark ? 0.55 : 0.75} />
-      <directionalLight position={[5, 7, 5]} intensity={dark ? 1.6 : 1.5} />
-      <pointLight position={[-4, 3, 4]} intensity={dark ? 14 : 7} color="#5ad4e6" />
-      <pointLight position={[4, 1, -3]} intensity={dark ? 10 : 5} color="#948ae3" />
+      <hemisphereLight
+        args={[palette.bone, palette.inkDeep, dark ? 0.55 : 0.85]}
+      />
+      <directionalLight
+        position={[5, 7, 6]}
+        intensity={dark ? 2.4 : 2.7}
+        color={dark ? '#ffe8c8' : '#fff2dd'}
+      />
+      <directionalLight
+        position={[-6, 2, -4]}
+        intensity={dark ? 1.0 : 0.8}
+        color={palette.ai}
+      />
+      <pointLight
+        position={[0, 0.5, 4]}
+        intensity={dark ? 14 : 7}
+        distance={12}
+        decay={2}
+        color={palette.shu}
+      />
+      <directionalLight
+        position={[-3, 4, -2]}
+        intensity={dark ? 1.2 : 0.6}
+        color={palette.brass}
+      />
 
-      <group ref={spin} rotation={[0, -0.28, 0]}>
-        <mesh position={[0, -0.15, 0]}>
-          <cylinderGeometry args={[0.008, 0.008, 2.2, 8]} />
-          <meshBasicMaterial
-            color={dark ? '#71717a' : '#a1a1aa'}
-            transparent
-            opacity={0.22}
-          />
-        </mesh>
-        <mesh position={[0, -1.02, 0]} rotation={[Math.PI / 2, 0, 0]}>
-          <torusGeometry args={[2.4, 0.006, 8, 96]} />
-          <meshBasicMaterial
-            color={dark ? '#3f3f46' : '#d4d4d8'}
-            transparent
-            opacity={0.4}
-          />
-        </mesh>
+      <group>
+        <Enso dark={dark} radius={2.35} z={-1.15} />
 
-        {items.map((item, index) => (
-          <Card
-            key={item.id}
-            item={item}
+        {layout.map((slot, index) => (
+          <Ring
+            key={items[index].id}
+            slot={slot}
             index={index}
-            count={items.length}
+            current={index === current}
             active={active === index}
-            future={active !== null && index > active}
             dark={dark}
             reduced={reduced}
             onOver={() => onActive(index)}
@@ -366,60 +349,108 @@ function GenerationScene({
           />
         ))}
 
-        {rollback && target ? (
-          <RollbackCurve
-            from={rollback}
-            to={target}
-            color={ACCENTS[active! % ACCENTS.length]}
-            reduced={reduced}
+        <mesh position={[0, 0.02, 0]}>
+          <cylinderGeometry args={[0.27, 0.27, 0.07, 48]} />
+          <meshPhysicalMaterial
+            color={palette.inkDeep}
+            metalness={0.2}
+            roughness={0.4}
+            clearcoat={0.4}
           />
-        ) : null}
+        </mesh>
+        <mesh position={[0, 0.06, 0]} rotation={[Math.PI / 2, 0, 0]}>
+          <torusGeometry args={[0.27, 0.012, 8, 64]} />
+          <meshStandardMaterial
+            color={palette.brass}
+            metalness={0.9}
+            roughness={0.28}
+          />
+        </mesh>
+        <mesh position={[0, 0.078, 0]}>
+          <cylinderGeometry args={[0.16, 0.16, 0.014, 32]} />
+          <meshStandardMaterial color={palette.shu} roughness={0.55} />
+        </mesh>
+        <mesh position={[0, 0.09, 0]} rotation={[0, Math.PI / 4, 0]}>
+          <boxGeometry args={[0.03, 0.016, 0.32]} />
+          <meshStandardMaterial
+            color={palette.brass}
+            metalness={0.9}
+            roughness={0.28}
+          />
+        </mesh>
+        <mesh position={[0, 0.09, 0]} rotation={[0, -Math.PI / 4, 0]}>
+          <boxGeometry args={[0.03, 0.016, 0.32]} />
+          <meshStandardMaterial
+            color={palette.brass}
+            metalness={0.9}
+            roughness={0.28}
+          />
+        </mesh>
 
-        <Sparkles
-          count={24}
-          scale={[7, 3.8, 7]}
-          size={1.2}
-          speed={reduced ? 0 : 0.22}
-          opacity={0.4}
-          color={dark ? '#a1a1aa' : '#71717a'}
+        <RollbackCord
+          curve={cord}
+          color={cordColor}
+          dark={dark}
+          reduced={reduced}
         />
+
+        {!compact
+          ? layout.map((slot, index) => (
+              <Tag
+                key={`tag-${items[index].id}`}
+                text={`${items[index].id} · ${items[index].label}`}
+                position={slot.tag}
+                accent={slot.accent}
+                dark={dark}
+                active={active === index}
+                scale={0.19}
+              />
+            ))
+          : null}
+
+        {!compact
+          ? layout.map((slot, index) => (
+              <Leader
+                key={`leader-${items[index].id}`}
+                from={slot.anchor}
+                to={slot.tag}
+                color={slot.accent}
+                active={active === index}
+              />
+            ))
+          : null}
       </group>
 
       {!coarse ? (
         <OrbitControls
           makeDefault
-          target={[0, -0.05, 0]}
+          target={[0, 0, 0]}
           enableZoom={false}
           enablePan={false}
           enableDamping
           dampingFactor={0.08}
-          rotateSpeed={0.6}
+          rotateSpeed={0.5}
           autoRotate={!reduced && active === null}
-          autoRotateSpeed={0.42}
-          minPolarAngle={Math.PI / 3.4}
-          maxPolarAngle={Math.PI / 2.15}
+          autoRotateSpeed={0.3}
+          minPolarAngle={Math.PI / 3.5}
+          maxPolarAngle={Math.PI / 2.1}
         />
       ) : null}
     </>
   );
 }
 
-function StaticStack({ items }: { items: GenerationItem[] }) {
+function StaticRings({ count }: { count: number }) {
   return (
-    <div className="x-gen-scene x-gen-static-fallback" aria-hidden="true">
-      <div className="x-gen-stack">
-        {items.map((item, index) => (
-          <div
-            key={item.id}
-            className="x-gen-card"
-            data-current={index === items.length - 1}
-            style={{ '--i': index } as CSSProperties}
-          >
-            <span className="x-gen-index">{item.id}</span>
-            <span className="x-gen-line" />
-          </div>
-        ))}
-      </div>
+    <div className="x-rings-static" aria-hidden="true">
+      {Array.from({ length: count }, (_, index) => (
+        <span
+          key={index}
+          className="x-rings-static-ring"
+          style={{ '--i': index } as CSSProperties}
+        />
+      ))}
+      <span className="x-rings-static-core" />
     </div>
   );
 }
@@ -449,7 +480,7 @@ export default function GenerationStack({
   const currentIndex = items.length - 1;
   const current = active === null ? null : items[active];
   const isCurrent = active === currentIndex;
-  const staticStack = <StaticStack items={items} />;
+  const staticRings = <StaticRings count={items.length} />;
 
   const meta =
     current === null ? idleMeta : isCurrent ? currentLabel : rollbackLabel;
@@ -465,13 +496,13 @@ export default function GenerationStack({
       role="group"
       aria-label={ariaLabel}
     >
-      {!ready ? staticStack : null}
+      {!ready ? staticRings : null}
 
       <div className="x-orbit-canvas">
-        <SceneBoundary fallback={staticStack}>
+        <SceneBoundary fallback={staticRings}>
           <Canvas
             dpr={[1, 1.75]}
-            camera={{ position: [4.9, 4.2, 6.5], fov: 38 }}
+            camera={{ position: [4.6, 4.0, 7.2], fov: 32 }}
             gl={{ alpha: true, antialias: true, powerPreference: 'high-performance' }}
             frameloop={inView ? 'always' : 'demand'}
             style={{ touchAction: 'pan-y' }}
@@ -484,7 +515,7 @@ export default function GenerationStack({
             }}
           >
             <ResponsiveCamera />
-            <GenerationScene
+            <RingsScene
               items={items}
               active={active}
               onActive={onActive}
